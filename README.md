@@ -46,10 +46,12 @@ In case of systems incapable of communicating via FBP protocol but which can non
   - `id`: port name
   - `queue`: the message queue the process listens to
   - `type`: port datatype, for example `boolean`
+  - `options`: queue options as specified by the message queue implementation
 * `outports`: list of outports containing:
   - `id`: port name
   - `queue`: the message queue the process transmits to
   - `type`: port datatype, for example `boolean`
+  - `options`: queue options as specified by the message queue implementation
 
 ### Coordinator-Participant communications
 
