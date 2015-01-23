@@ -53,6 +53,8 @@ In case of systems incapable of communicating via FBP protocol but which can non
 
 ### Coordinator-Participant communications
 
+Most of the communications between the coordinator and the participants happens via the regular [FBP protocol](http://noflojs.org/documentation/protocol/). Here are listed some additional messages that are used for the MsgFlo environment.
+
 #### Heartbeat
 
 Since communications via a message queue are by nature asynchronous, it is often necessary for the coordinator to know when participants are or are not available. For this, coordinator may periodically send a `ping` message to the worker. The ping message contains:
@@ -62,3 +64,27 @@ Since communications via a message queue are by nature asynchronous, it is often
 The participant should as quickly as possible respond with a `pong` message containing the same payload.
 
 If the participant doesn't respond with a `pong` within a reasonable time, the coordinator should assume it to be inactive, and trigger a `processerror` on the processes that the participant is responsible of.
+
+#### Connecting ports to queues
+
+The coordinator can tell a participant to connect an inport of a running graph to a message queue with the `connectinport` message with the following payload:
+
+* `src`:
+  - `queue`: message queue name
+  - `options`: queue options as specified by the message queue implementation
+* `tgt`:
+  - `port`: port name
+  - `index`: connection index (optional, for addressable ports)
+* `metadata` (optional): structure of key-value pairs for edge metadata
+* `graph`: graph the action targets
+
+The coordinator can also tell a participant to connect an outport of a running graph to a message queue with the `connectoutport` message with the following payload:
+
+* `src`:
+  - `port`: port name
+  - `index`: connection index (optional, for addressable ports)
+* `tgt`:
+  - `queue`: message queue name
+  - `options`: queue options as specified by the message queue implementation
+* `metadata` (optional): structure of key-value pairs for edge metadata
+* `graph`: graph the action targets
