@@ -1,0 +1,33 @@
+{
+  "name": "msgflo",
+  "description": "Polyglot FBP runtime based on message queues",
+  "version": "0.1.4",
+  "author": {
+    "name": "Jon Nordby",
+    "email": "jononor@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/the-grid/msgflo.git"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "undefined/blob/master/LICENSE-MIT"
+    }
+  ],
+  "dependencies": {
+    "coffee-script": "^1.8.0"
+  },
+  "devDependencies": {
+    "chai": "~1.9.0",
+    "mocha": "~1.21.0",
+    "grunt": "~0.4.1",
+    "grunt-coffeelint": "~0.0.6",
+    "grunt-mocha-test": "^0.12.2"
+  },
+  "keywords": [],
+  "scripts": {
+    "test": "grunt test"
+  }
+}
