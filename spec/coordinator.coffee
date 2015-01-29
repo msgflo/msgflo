@@ -4,16 +4,17 @@ path = require 'path'
 
 Coordinator = require('../src/coordinator').Coordinator
 runtime = require '../src/fakeruntime'
-direct = require '../src/direct'
+transport = require '../src/transport'
 
-address = 'broker1'
+address = 'direct://broker1'
+#address = 'amqp://localhost'
 
 describe 'Coordinator', ->
   coordinator = null
   first = null
 
   beforeEach (done) ->
-    broker = new direct.MessageBroker address
+    broker = transport.getBroker address
     coordinator = new Coordinator broker
     done()
   afterEach (done) ->
@@ -23,8 +24,7 @@ describe 'Coordinator', ->
 
   describe 'creating participant', ->
     it 'should emit participant-added', (done) ->
-      client = new direct.Client address
-      first = runtime.HelloParticipant client
+      first = runtime.HelloParticipant transport.getClient address
       coordinator.on 'participant-added', (participant) ->
         chai.expect(participant).to.be.a 'object'
         chai.expect(participant.id).to.equal first.definition.id
@@ -33,8 +33,7 @@ describe 'Coordinator', ->
 
   describe 'sending data into participant input queue', ->
     it 'should receive results on output queue', (done) ->
-      client = new direct.Client address
-      first = runtime.HelloParticipant client
+      first = runtime.HelloParticipant transport.getClient address
       coordinator.on 'participant-added', (participant) ->
         id = first.definition.id
         coordinator.subscribeTo id, 'out', (data) ->
@@ -45,8 +44,8 @@ describe 'Coordinator', ->
 
   describe 'sending data to participant connected to another', ->
     it 'should receive results at end of flow', (done) ->
-      first = runtime.HelloParticipant new direct.Client address
-      second = runtime.HelloParticipant new direct.Client address
+      first = runtime.HelloParticipant transport.getClient address
+      second = runtime.HelloParticipant transport.getClient address
       participants = 0
       coordinator.on 'participant-added', (participant) ->
         participants = participants+1
