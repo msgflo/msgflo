@@ -1,7 +1,14 @@
 MsgFlo - Flow-Based Programming with Message Queues
 ===================================================
 
-This is an implementation of the [Flow-Based Programming](http://en.wikipedia.org/wiki/Flow-based_programming) paradigm using message queues (initially, [AMQP](http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)) as the communications layer between different processes. It is intended for building robust polyglot FBP systems.
+This is an implementation of the
+[Flow-Based Programming](http://en.wikipedia.org/wiki/Flow-based_programming) paradigm using message queues
+as the communications layer between different processes. Initial message queue transports targeted are
+[AMQP](http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
+and [MQTT](http://mqtt.org).
+It is intended for building robust polyglot FBP systems.
+
+## Status
 
 Currently MsgFlo should be considered to be just an experiment.
 
