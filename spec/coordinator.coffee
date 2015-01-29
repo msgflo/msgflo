@@ -42,3 +42,19 @@ describe 'Coordinator', ->
           done()
         coordinator.sendTo id, 'name', 'Jon'
       first.start()
+
+  describe 'sending data to participant connected to another', ->
+    it 'should receive results at end of flow', (done) ->
+      first = runtime.HelloParticipant new direct.Client address
+      second = runtime.HelloParticipant new direct.Client address
+      participants = 0
+      coordinator.on 'participant-added', (participant) ->
+        participants = participants+1
+        return if participants != 2
+        coordinator.connect first.definition.id, 'out', second.definition.id, 'name'
+        coordinator.subscribeTo second.definition.id, 'out', (data) ->
+          chai.expect(data).to.equal 'Hello Hello Johnny'
+          done()
+        coordinator.sendTo first.definition.id, 'name', 'Johnny'
+      first.start()
+      second.start()

@@ -7,12 +7,16 @@ findPort = (def, type, portName) ->
     return port if port.id == portName
   return null
 
+connId = (fromId, fromPort, toId, toPort) ->
+  return "#{fromId} #{fromPort} -> #{toPort} #{toId}"
+
 class Coordinator extends EventEmitter
   constructor: (@broker) ->
 
     @broker.subscribeToQueue 'fbp', (msg) =>
       @handleFbpMessage msg
     @participants = {}
+    @connections = {}
   
   handleFbpMessage: (msg) ->
     if msg.protocol == 'discovery' and msg.command == 'participant'
@@ -35,8 +39,19 @@ class Coordinator extends EventEmitter
 
   subscribeTo: (participantId, outport, handler) ->
     part = @participants[participantId]
+#   console.log participantId, @participants, part, port
     port = findPort part, 'outport', outport
-#    console.log participantId, @participants, part, port
     @broker.subscribeToQueue port.queue, handler, (err) ->
+
+  unsubscribeFrom: () -> # FIXME: implement
+
+  connect: (fromId, fromPort, toId, toName) ->
+    handler = (msg) =>
+      @sendTo toId, toName, msg
+    @subscribeTo fromId, fromPort, handler
+    id = connId fromId, fromPort, toId, toName
+    @connections[id] = handler
+
+  disconnect: (fromId, fromPortId, toId, toPortId) -> # FIXME: implement
 
 exports.Coordinator = Coordinator

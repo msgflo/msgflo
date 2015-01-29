@@ -11,12 +11,11 @@ class Client extends interfaces.MessagingClient
   
   ## Manipulating queues
   createQueue: (queueName, callback) ->
-    # just call broker directly
-    return callback null
+#    console.log 'client create queue', queueName
+    @broker.createQueue queueName, callback
 
   removeQueue: (queueName, callback) ->
-    # just call broker directly
-    return callback null
+    @broker.removeQueue queueName, callback
 
   ## Sending/Receiving messages
   sendToQueue: (queueName, message, callback) ->
@@ -52,7 +51,7 @@ class MessageBroker extends interfaces.MessageBroker
 
   ## Sending/Receiving messages
   sendToQueue: (queueName, message, callback) ->
-#    console.log 'broker sendToQueue', queueName, @queues[queueName].send
+#    console.log 'broker sendToQueue', queueName, Object.keys(@queues), @queues[queueName]
     @queues[queueName].send message
     return callback null
 

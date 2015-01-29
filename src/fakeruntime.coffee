@@ -13,14 +13,21 @@ class Participant
   constructor: (@messaging, @definition, @func) ->
 
   start: (callback) ->
+    @setupPorts (err) =>
+      return callback err if err
+      @register callback
+
+  stop: (callback) ->
+    @messaging.removeQueue 'fbp', callback
+
+  setupPorts: (callback) ->
+    setupPort = (def, callback) =>
+      @messaging.createQueue def.queue, callback
 
     sendFunc = (output) =>
       port = findPort @definition, 'outport', output[0]
       @messaging.sendToQueue port.queue, output[1], (err) ->
 
-    # Set up inports
-    setupPort = (def, callback) =>
-      @messaging.createQueue def.queue, callback
     subscribePort = (def, callback) =>
       callFunc = (msg) =>
         output = @func def.id, msg
@@ -29,29 +36,29 @@ class Participant
       @messaging.subscribeToQueue def.queue, callFunc
       return callback()
 
-#    console.log 'start participant'
-    async.map @definition.inports, setupPort, (err, results) =>
-#      console.log 'setup ports'
+    allports = @definition.outports.concat @definition.inports
 
+    async.map allports, setupPort, (err) =>
       return callback err if err
-      async.map @definition.inports, subscribePort, (err, results) =>
-#       console.log 'subscribed ports'
+      async.map @definition.inports, subscribePort, (err) =>
+        return callback err if err
+        return callback null
+  
+
+  register: () ->
+    # Send discovery package to broker on 'fbp' queue
+    @messaging.createQueue 'fbp', (err) =>
+      # console.log 'fbp queue created'
+      return callback err if err
+      # TODO: be able to define in/outports and metadata
+      msg =
+        protocol: 'discovery'
+        command: 'participant'
+        payload: @definition
+      @messaging.sendToQueue 'fbp', msg, (err) ->
         return callback err if err
 
-        # Send discovery package to broker on 'fbp' queue
-        @messaging.createQueue 'fbp', (err) =>
-#          console.log 'fbp queue created'
-          return callback err if err
-          # TODO: be able to define in/outports and metadata
-          msg =
-            protocol: 'discovery'
-            command: 'participant'
-            payload: @definition
-          @messaging.sendToQueue 'fbp', msg, (err) ->
-            return callback err if err
 
-  stop: (callback) ->
-    @messaging.removeQueue 'fbp', callback
 
 
 HelloParticipant = (client) ->
