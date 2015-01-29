@@ -21,13 +21,24 @@ describe 'Coordinator', ->
     coordinator = null
     done()
 
-  describe 'participant registration', ->
+  describe 'creating participant', ->
     it 'should emit participant-added', (done) ->
       client = new direct.Client address
       first = runtime.HelloParticipant client
       coordinator.on 'participant-added', (participant) ->
         chai.expect(participant).to.be.a 'object'
+        chai.expect(participant.id).to.equal first.definition.id
         done()
       first.start()
 
-
+  describe 'sending data into participant input queue', ->
+    it 'should receive results on output queue', (done) ->
+      client = new direct.Client address
+      first = runtime.HelloParticipant client
+      coordinator.on 'participant-added', (participant) ->
+        id = first.definition.id
+        coordinator.subscribeTo id, 'out', (data) ->
+          chai.expect(data).to.equal 'Hello Jon'
+          done()
+        coordinator.sendTo id, 'name', 'Jon'
+      first.start()

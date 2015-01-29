@@ -2,18 +2,30 @@
 randomstring = require 'randomstring'
 async = require 'async'
 
+findPort = (def, type, portName) ->
+  ports = if type == 'inport' then def.inports else def.outports
+  for port in ports
+    return port if port.id == portName
+  return null
+
 class Participant
   # @func gets called with inport, , and should return outport, outdata
   constructor: (@messaging, @definition, @func) ->
 
   start: (callback) ->
 
+    sendFunc = (output) =>
+      port = findPort @definition, 'outport', output[0]
+      @messaging.sendToQueue port.queue, output[1], (err) ->
+
     # Set up inports
     setupPort = (def, callback) =>
       @messaging.createQueue def.queue, callback
     subscribePort = (def, callback) =>
       callFunc = (msg) =>
-        @func @def.id, msg
+        output = @func def.id, msg
+        return sendFunc output if output
+
       @messaging.subscribeToQueue def.queue, callFunc
       return callback()
 
@@ -47,16 +59,16 @@ HelloParticipant = (client) ->
 
   definition =
     id: id
-    icon: 'file-word-o '
+    icon: 'file-word-o'
     label: 'Prepends "Hello" to any input'
     inports: [
       id: 'name'
-      queue: 'inputq'
+      queue: id+'-inputq'
       type: 'string'
     ]
     outports: [
       id: 'out'
-      queue: 'outputq'
+      queue: id+'-outputq'
       type: 'string'
     ]
   process = (inport, indata) ->
