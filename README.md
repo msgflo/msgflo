@@ -28,13 +28,28 @@ MsgFlo Network Participant is a software process that makes itself available to 
 
 ## Communications
 
-All communications between the coordinator and the participants happens using the message queue. The network coordinator and the participants have channels to communicate, and when different processes provided by participants are connected with each other, these also pass through a queue.
+All communications between the coordinator and the participants happens using the message queue.
+The network coordinator and the participants have channels to communicate,
+and when different processes provided by participants are connected with each other,
+these also pass through a queue.
+
+
+### Message format
+
+Each message sent between Participants and Coordinator has the following format:
+
+* `protocol`: Which sub-protocol is used
+* `command`: The command this message is on the given sub-protocol
+* `payload`: The message payload
 
 ### Participant discovery
 
-The network coordinator subscribes to a queue named `fbp`. Once a participant becomes available, it announces its availability by sending a message to this queue.
+The network coordinator subscribes to a queue named `fbp`.
 
-In case of fully FBP protocol capable participants, the message contains the following information:
+Once a participant becomes available, it announces its availability by sending a message to this queue
+with `protocol`: 'discovery' and `command`: 'participant'.
+
+In case of fully FBP protocol capable participants, the `payload` contains the following information:
 
 * `id`: short unique name for the system
 * `label`: (optional) human-readable description of the system
@@ -44,7 +59,8 @@ In case of fully FBP protocol capable participants, the message contains the fol
 * `inqueue`:  name of the message queue the participant listens for FBP protocol messages
 * `outqueue`:  name of the message queue the participant sends FBP protocol messages
 
-In case of systems incapable of communicating via FBP protocol but which can nonetheless be connected to a network, the message contains the following information:
+In case of systems incapable of communicating via FBP protocol but which can nonetheless be connected to a network,
+the message `payload` contains the following information:
 
 * `id`: short unique name for the system
 * `label`: (optional) human-readable description of the system
