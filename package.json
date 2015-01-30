@@ -17,6 +17,7 @@
     }
   ],
   "dependencies": {
+    "amqplib": "^0.3.0",
     "async": "^0.9.0",
     "coffee-script": "^1.8.0",
     "randomstring": "^1.0.3"

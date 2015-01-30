@@ -12,18 +12,23 @@ connId = (fromId, fromPort, toId, toPort) ->
 
 class Coordinator extends EventEmitter
   constructor: (@broker) ->
-
-    @broker.subscribeToQueue 'fbp', (msg) =>
-      @handleFbpMessage msg
     @participants = {}
     @connections = {}
   
   start: (callback) ->
-    @broker.connect callback
+    @broker.connect (err) =>
+      console.log 'coordinator connected', err
+      return callback err if err
+      @broker.createQueue 'fbp', (err) =>
+        console.log 'fbp queue created', err
+        return callback err if err
+        @broker.subscribeToQueue 'fbp', (msg) =>
+          @handleFbpMessage msg
+        console.log 'coordinator started'
+        return callback null
 
   stop: (callback) ->
-    # FIXME: implement
-    return callback null
+    @broker.disconnect callback
 
   handleFbpMessage: (msg) ->
     if msg.protocol == 'discovery' and msg.command == 'participant'
@@ -32,21 +37,24 @@ class Coordinator extends EventEmitter
       throw new Error 'Unknown FBP message'
 
   addParticipant: (definition) ->
+    console.log 'addParticipant', definition.id
     @participants[definition.id] = definition
     @emit 'participant-added', definition
+    console.log 'addParticipant DONE', definition.id
 
   removeParticipant: (id) ->
     definition = @participants[id]
     @emit 'participant-removed', definition
 
   sendTo: (participantId, inport, message) ->
+    console.log 'cordinator sendTo', participantId, inport
     part = @participants[participantId]
     port = findPort part, 'inport', inport
     @broker.sendToQueue port.queue, message, (err) ->
 
   subscribeTo: (participantId, outport, handler) ->
     part = @participants[participantId]
-#   console.log participantId, @participants, part, port
+    console.log 'cordinator subscribeTo', participantId, outport
     port = findPort part, 'outport', outport
     @broker.subscribeToQueue port.queue, handler, (err) ->
 

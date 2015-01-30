@@ -14,13 +14,15 @@ class Participant
 
   start: (callback) ->
     @messaging.connect (err) =>
+      console.log 'participant connected', err
       return callback err if err
       @setupPorts (err) =>
         return callback err if err
         @register callback
 
   stop: (callback) ->
-    @messaging.removeQueue 'fbp', callback
+    @messaging.removeQueue 'fbp', (err) =>
+      @messaging.disconnect callback
 
   setupPorts: (callback) ->
     setupPort = (def, callback) =>
