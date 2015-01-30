@@ -2,8 +2,7 @@
 Immediate
 ----------
 
-* Protocol: support sending initial graph in live mode
-* Protocol: allow adding/removeding edges between participants
+* Support loading initial graph from JSON
 * Protocol: allow inspecting data on edges
 
 * Create reusable NoFlo AMQP in noflo-runtime-msgflo

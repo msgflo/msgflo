@@ -12,11 +12,17 @@ connId = (fromId, fromPort, toId, toPort) ->
 fromConnId = (id) ->
   t = id.split ' '
   return [ t[0], t[1], t[4], t[3] ]
+iipId = (part, port) ->
+  return "#{part} #{port}"
+fromIipId = (id) ->
+  return id.split ' '
+
 
 class Coordinator extends EventEmitter
   constructor: (@broker) ->
     @participants = {}
     @connections = {}
+    @iips = {}
   
   start: (callback) ->
     @broker.connect (err) =>
@@ -72,6 +78,16 @@ class Coordinator extends EventEmitter
     @connections[id] = handler
 
   disconnect: (fromId, fromPortId, toId, toPortId) -> # FIXME: implement
+
+
+  addInitial: (partId, portId, data) ->
+    id = iipId partId, portId
+    @iips[id] = data
+    running = true
+    @sendTo partId, portId, data if running
+
+  removeInitial: (partId, portId) -> # FIXME: implement
+    # Do we need to remove it from the queue??
 
   serializeGraph: (name) ->
     graph =

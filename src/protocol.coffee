@@ -62,10 +62,33 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
     setTimeout sendSource, 0
 
+  else if sub == 'graph'
+    handleGraphMessage proto, cmd, payload, ctx
 
   else
     console.log 'Unhandled FBP protocol message: ', sub, cmd
 
+
+handleGraphMessage = (proto, cmd, payload, ctx) ->
+  graph = payload.graph
+
+  if cmd == 'addedge'
+    console.log 'add', payload
+    p = payload
+    proto.coordinator.connect p.src.node, p.src.port, p.tgt.node, p.tgt.port
+    proto.transport.sendAll 'graph', 'addedge', payload
+  else if cmd == 'removeedge'
+    p = payload
+    proto.coordinator.disconnect p.src.node, p.src.port, p.tgt.node, p.tgt.port
+    proto.transport.sendAll 'graph', 'removeedge', payload
+  else if cmd == 'addinitial'
+    proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data
+    proto.transport.sendAll 'graph', 'addinitial', payload
+  else if cmd == 'removeinitial'
+    proto.coordinator.removeInitial payload.tgt.node, payload.tgt.port
+    proto.transport.sendAll 'graph', 'removeinitial', payload
+  else
+    console.log 'Unhandled FBP protocol message: ', 'graph', cmd
 
 class Protocol
   constructor: (@transport, @coordinator) ->
