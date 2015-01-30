@@ -52,7 +52,8 @@ class Client
       console.log 'amqp receive on queue', queueName, msg
       @channel.ack message # FIXME: add proper ACK/NACK api
       return handler msg if msg
-    @channel.consume queueName, deserialize, callback
+    @channel.consume queueName, deserialize
+    return callback null
 
 
 exports.Client = Client
