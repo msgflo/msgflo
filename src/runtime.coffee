@@ -31,7 +31,7 @@ class WebSocketTransport extends EventEmitter
 
       connection.on 'message', (message) ->
         handleMessage message, connection
-      connection.on 'close', () ->
+      connection.on 'close', () =>
         connIndex = @connections.indexOf connection
         return if connIndex == -1
         runtime.connections.splice connIndex, 1

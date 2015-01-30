@@ -9,6 +9,9 @@ findPort = (def, type, portName) ->
 
 connId = (fromId, fromPort, toId, toPort) ->
   return "#{fromId} #{fromPort} -> #{toPort} #{toId}"
+fromConnId = (id) ->
+  t = id.split ' '
+  return [ t[0], t[1], t[4], t[3] ]
 
 class Coordinator extends EventEmitter
   constructor: (@broker) ->
@@ -69,5 +72,32 @@ class Coordinator extends EventEmitter
     @connections[id] = handler
 
   disconnect: (fromId, fromPortId, toId, toPortId) -> # FIXME: implement
+
+
+  serializeGraph: (name) ->
+    graph =
+      properties:
+        name: name
+      processes: []
+      connections: []
+      inports: []
+      outports: []
+
+    for id, part in @participants
+      graph.processes[id] =
+        component: part['class']
+
+    for id, conn of @connections
+      parts = fromConnId id
+      edge =
+        src:
+          process: parts[0]
+          port: parts[1]
+        tgt:
+          process: parts[2]
+          port: parts[3]
+      graph.connections.push edge
+
+    return graph
 
 exports.Coordinator = Coordinator

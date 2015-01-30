@@ -7,7 +7,7 @@ EventEmitter = require('events').EventEmitter
 handleMessage = (proto, sub, cmd, payload, ctx) ->
   console.log 'FBP RECV:', sub, cmd, payload
 
-  defaultGraph = 'default'
+  defaultGraph = 'default/main'
 
   if sub == 'runtime' and cmd == 'getruntime'
     runtime =
@@ -16,6 +16,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       capabilities: [
         'protocol:component'
         'protocol:graph'
+        'component:getsource'
       ]
       graph: defaultGraph
     proto.transport.send 'runtime', 'runtime', runtime, ctx
@@ -48,7 +49,15 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       proto.transport.send 'component', 'component', component, ctx
 
   else if sub == 'component' and cmd == 'getsource'
-    return if payload.name != defaultGraph
+    return console.log 'ERROR: cannot get source for #{payload.name}' if payload.name != defaultGraph
+
+    graph = proto.coordinator.serializeGraph 'main'
+    resp =
+      code: JSON.stringify graph
+      name: 'main'
+      library: 'default'
+      language: 'json'
+    proto.transport.send 'component', 'source', resp, ctx
 
   else
     console.log 'Unhandled FBP protocol message: ', sub, cmd
