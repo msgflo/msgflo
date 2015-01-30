@@ -1,5 +1,7 @@
 
 protocol = require './protocol'
+transport = require './transport'
+coordinator = require './coordinator'
 
 http = require 'http'
 EventEmitter = require('events').EventEmitter
@@ -39,6 +41,7 @@ class WebSocketTransport extends EventEmitter
       protocol: protocol
       command: command
       payload: payload
+    console.log 'FBP SEND', msg
     send connection, msg
 
   sendAll: (protocol, command, payload) ->
@@ -52,23 +55,41 @@ class WebSocketTransport extends EventEmitter
   emitMessage: (msg, ctx) ->
     @emit 'message', msg.protocol, msg.command, msg.payload, ctx
 
+startTestParty = (address, callback=->) ->
+  runtime = require '../src/fakeruntime'
+  participants =
+    helloA: runtime.HelloParticipant transport.getClient address
+    helloB: runtime.HelloParticipant transport.getClient address
+    helloC: runtime.HelloParticipant transport.getClient address
+
+  Object.keys(participants).forEach (name) ->
+    part = participants[name]
+    part.start () ->
+      console.log 'started', part.definition.id
+
+  return callback participants
 
 class Runtime
   constructor: (@options) ->
     @server = null
     @transport = null
     @protocol = null
+    @broker = transport.getBroker @options.broker
+    @coordinator = new coordinator.Coordinator @broker
 
   start: (callback) ->
     @server = http.createServer()
     @transport = new WebSocketTransport @server
-    @protocol = protocol.Protocol @transport
+    @protocol = protocol.Protocol @transport, @coordinator
 
     @server.listen @options.port, (err) =>
       return callback err if err
       scheme = 'ws://'
       address = scheme + @options.host + ':' + @options.port
-      return callback null, address
+      @coordinator.start (err) =>
+        return callback err if err
+        startTestParty @options.broker
+        return callback null, address
 
   stop: (callback) ->
     @server.close callback

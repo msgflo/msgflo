@@ -22,7 +22,6 @@ class Coordinator extends EventEmitter
       @broker.createQueue 'fbp', (err) =>
         console.log 'fbp queue created', err
         return callback err if err
-
         @broker.subscribeToQueue 'fbp', (msg) =>
           @handleFbpMessage msg
         , (err) ->

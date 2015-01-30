@@ -71,7 +71,8 @@ In case of systems incapable of communicating via FBP protocol
 but which can nonetheless be connected to a network,
 the message `payload` contains the following information:
 
-* `id`: short unique name for the system
+* `class`: the class of the participant. For instance MeasurementWorker
+* `id`: short unique name for the participant. Ex: measure1
 * `label`: (optional) human-readable description of the system
 * `icon`: (optional) icon to use to describe the system, using [Font Awesome](http://fontawesome.io/icons/) semantics
 * `inports`: list of inports containing:
@@ -102,9 +103,9 @@ one should first send a `participant` message for the data.
 
 ### Coordinator-Participant communications
 
-Most of the communications between the coordinator and the participants happens via the regular [FBP protocol](http://noflojs.org/documentation/protocol/). Here are listed some additional messages that are used for the MsgFlo environment.
-
-
+Most of the communications between the coordinator and the participants happens
+via the regular [FBP protocol](http://noflojs.org/documentation/protocol/).
+Here are listed some additional messages that are used for the MsgFlo environment.
 
 #### Connecting ports to queues
 

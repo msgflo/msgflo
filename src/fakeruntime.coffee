@@ -69,6 +69,7 @@ HelloParticipant = (client) ->
 
   definition =
     id: id
+    'class': 'Hello'
     icon: 'file-word-o'
     label: 'Prepends "Hello" to any input'
     inports: [
