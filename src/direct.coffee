@@ -28,8 +28,8 @@ class Client extends interfaces.MessagingClient
   sendToQueue: (queueName, message, callback) ->
     @broker.sendToQueue queueName, message, callback
 
-  subscribeToQueue: (queueName, handler) ->
-    @broker.subscribeToQueue queueName, handler
+  subscribeToQueue: (queueName, handler, callback) ->
+    @broker.subscribeToQueue queueName, handler, callback
 
 
 class Queue extends EventEmitter
@@ -68,9 +68,10 @@ class MessageBroker extends interfaces.MessageBroker
     @queues[queueName].send message
     return callback null
 
-  subscribeToQueue: (queueName, handler) ->
+  subscribeToQueue: (queueName, handler, callback) ->
     @queues[queueName] = new Queue if not @queues[queueName]?
     @queues[queueName].on 'message', handler
+    return callback null
 
 exports.MessageBroker = MessageBroker
 exports.Client = Client
