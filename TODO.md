@@ -18,4 +18,6 @@ Soon
 Later
 -----
 
+* Handle disconnects/errors in MQTT and AMQP
 * Add ability to directly ruote between queues for AMQP
+* Move queue abstraction to separate library, for reuse in noflo-runtime etc

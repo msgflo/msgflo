@@ -10,8 +10,9 @@ class Client
   ## Broker connection management
   connect: (callback) ->
     @client = mqtt.connect @address
-    console.log 'mqtt connected'
-    return callback null
+    @client.once 'connect', (err) ->
+      console.log 'mqtt connected'
+      return callback null
 
   disconnect: (callback) ->
     @client.end callback
