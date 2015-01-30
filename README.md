@@ -1,4 +1,4 @@
-MsgFlo - Flow-Based Programming with Message Queues
+MsgFlo - Flow-Based Programming with Message Queues [![Build Status](https://travis-ci.org/the-grid/msgflo.svg?branch=master)](https://travis-ci.org/the-grid/msgflo)
 ===================================================
 
 This is an implementation of the
