@@ -67,7 +67,8 @@ In case of fully FBP protocol capable participants, the `payload` contains the f
 * `inqueue`:  name of the message queue the participant listens for FBP protocol messages
 * `outqueue`:  name of the message queue the participant sends FBP protocol messages
 
-In case of systems incapable of communicating via FBP protocol but which can nonetheless be connected to a network,
+In case of systems incapable of communicating via FBP protocol
+but which can nonetheless be connected to a network,
 the message `payload` contains the following information:
 
 * `id`: short unique name for the system
@@ -84,19 +85,26 @@ the message `payload` contains the following information:
   - `type`: port datatype, for example `boolean`
   - `options`: queue options as specified by the message queue implementation
 
+#### Participant changes
+
+When changes are made in the participant,
+the `participant` message should be resent with the updated data.
+
+#### Heartbeat
+
+The `participant` message should be re-sent periodically.
+If no message is received within seconds,
+the participant will be assumed to have stopped.
+The default limit is 600 seconds.
+
+Note: if sending data on ports on a sporadic connection,
+one should first send a `participant` message for the data.
+
 ### Coordinator-Participant communications
 
 Most of the communications between the coordinator and the participants happens via the regular [FBP protocol](http://noflojs.org/documentation/protocol/). Here are listed some additional messages that are used for the MsgFlo environment.
 
-#### Heartbeat
 
-Since communications via a message queue are by nature asynchronous, it is often necessary for the coordinator to know when participants are or are not available. For this, coordinator may periodically send a `ping` message to the worker. The ping message contains:
-
-* `sequence`: sequence number for the ping
-
-The participant should as quickly as possible respond with a `pong` message containing the same payload.
-
-If the participant doesn't respond with a `pong` within a reasonable time, the coordinator should assume it to be inactive, and trigger a `processerror` on the processes that the participant is responsible of.
 
 #### Connecting ports to queues
 
