@@ -21,7 +21,6 @@ describe 'Coordinator', ->
       done()
 
   afterEach (done) ->
-    @timeout 200
     coordinator.stop () ->
       coordinator = null
       done()
