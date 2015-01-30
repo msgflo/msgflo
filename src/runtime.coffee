@@ -2,6 +2,7 @@
 protocol = require './protocol'
 transport = require './transport'
 coordinator = require './coordinator'
+querystring = require 'querystring'
 
 http = require 'http'
 EventEmitter = require('events').EventEmitter
@@ -69,6 +70,8 @@ startTestParty = (address, callback=->) ->
 
   return callback participants
 
+
+
 class Runtime
   constructor: (@options) ->
     @server = null
@@ -82,18 +85,43 @@ class Runtime
     @transport = new WebSocketTransport @server
     @protocol = protocol.Protocol @transport, @coordinator
 
+    @server.on 'request', (request, response) =>
+      @serveFrontpage request, response
+
     @server.listen @options.port, (err) =>
       return callback err if err
-      scheme = 'ws://'
-      address = scheme + @options.host + ':' + @options.port
       @coordinator.start (err) =>
         return callback err if err
         startTestParty @options.broker
-        return callback null, address
+        return callback null, @address(), @liveUrl()
 
   stop: (callback) ->
     @server.close callback
 
+  address: () ->
+    scheme = 'ws://'
+    address = scheme + @options.host + ':' + @options.port
+
+  liveUrl: () ->
+    params = querystring.escape "protocol=websocket&address=#{@address()}"
+    url = "#{@options.ide}#runtime/endpoint?#{params}"
+
+  serveFrontpage: (req, res) ->
+    html = """
+    <a id="flowhub_url">Open in Flowhub</a>
+    <script>
+      var addr = window.location.origin.replace("http://", "ws://");
+      addr = addr.replace("https://", "ws://");
+      var ide = "#{@options.ide}";
+      var url = ide+"/#runtime/endpoint?protocol=websocket&address="+encodeURIComponent(addr);
+      var a = document.getElementById("flowhub_url");
+      a.href = url;
+    </script>
+    """
+    res.statusCode = 200
+    res.setHeader "Content-Type", "text/html"
+    res.write html
+    res.end()
 
 exports.Runtime = Runtime
 
