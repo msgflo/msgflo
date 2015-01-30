@@ -37,8 +37,7 @@ class Participant
         output = @func def.id, msg
         return sendFunc output if output
 
-      @messaging.subscribeToQueue def.queue, callFunc
-      return callback()
+      @messaging.subscribeToQueue def.queue, callFunc, callback
 
     allports = @definition.outports.concat @definition.inports
 

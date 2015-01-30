@@ -2,9 +2,7 @@
 Immediate
 ----------
 
-* Implement AMQP transport
 * Make tests run on all enabled transports
-* Implement MQTT transport
 * Use setTimeout to make direct transport "async"
 
 * Implement basic FBP protocol in msg

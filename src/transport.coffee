@@ -1,6 +1,7 @@
 
 transports =
   amqp: require './amqp'
+  mqtt: require './mqtt'
   direct: require './direct'
 
 supportsScheme = (scheme) ->

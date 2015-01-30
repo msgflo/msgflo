@@ -8,6 +8,7 @@ transport = require '../src/transport'
 
 address = 'direct://broker1'
 address = 'amqp://localhost'
+address = 'mqtt://localhost'
 
 describe 'Coordinator', ->
   coordinator = null
