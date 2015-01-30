@@ -7,7 +7,7 @@ runtime = require '../src/fakeruntime'
 transport = require '../src/transport'
 
 address = 'direct://broker1'
-#address = 'amqp://localhost'
+address = 'amqp://localhost'
 
 describe 'Coordinator', ->
   coordinator = null
@@ -16,11 +16,14 @@ describe 'Coordinator', ->
   beforeEach (done) ->
     broker = transport.getBroker address
     coordinator = new Coordinator broker
-    done()
+    coordinator.start () ->
+      done()
+
   afterEach (done) ->
     @timeout 200
-    coordinator = null
-    done()
+    coordinator.stop () ->
+      coordinator = null
+      done()
 
   describe 'creating participant', ->
     it 'should emit participant-added', (done) ->

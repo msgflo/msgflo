@@ -13,9 +13,11 @@ class Participant
   constructor: (@messaging, @definition, @func) ->
 
   start: (callback) ->
-    @setupPorts (err) =>
+    @messaging.connect (err) =>
       return callback err if err
-      @register callback
+      @setupPorts (err) =>
+        return callback err if err
+        @register callback
 
   stop: (callback) ->
     @messaging.removeQueue 'fbp', callback

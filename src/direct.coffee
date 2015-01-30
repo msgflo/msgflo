@@ -4,11 +4,18 @@ EventEmitter = require('events').EventEmitter
 
 brokers = {}
 
+
 class Client extends interfaces.MessagingClient
   constructor: (@address) ->
 #    console.log 'client', @address
     @broker = brokers[@address]
   
+  ## Broker connection management
+  connect: (callback) ->
+    return callback null
+  disconnect: (callback) ->
+    return callback null
+
   ## Manipulating queues
   createQueue: (queueName, callback) ->
 #    console.log 'client create queue', queueName
@@ -39,6 +46,12 @@ class MessageBroker extends interfaces.MessageBroker
     @queues = {}
 #    console.log 'broker', @address
     brokers[@address] = this
+
+  ## Broker connection management
+  connect: (callback) ->
+    return callback null
+  disconnect: (callback) ->
+    return callback null
 
   ## Manipulating queues
   createQueue: (queueName, callback) ->

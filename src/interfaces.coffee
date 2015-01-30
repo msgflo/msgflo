@@ -4,6 +4,12 @@
 class MessagingSystem
   constructor: (address) ->
 
+  ## Broker connection management
+  connect: (callback) ->
+    throw new Error 'Not Implemented'
+  disconnect: (callback) ->
+    throw new Error 'Not Implemented'
+
   ## Manipulating queues
   createQueue: (queueName, callback) ->
     throw new Error 'Not Implemented'

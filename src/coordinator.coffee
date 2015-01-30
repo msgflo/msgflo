@@ -18,6 +18,13 @@ class Coordinator extends EventEmitter
     @participants = {}
     @connections = {}
   
+  start: (callback) ->
+    @broker.connect callback
+
+  stop: (callback) ->
+    # FIXME: implement
+    return callback null
+
   handleFbpMessage: (msg) ->
     if msg.protocol == 'discovery' and msg.command == 'participant'
       @addParticipant msg.payload
