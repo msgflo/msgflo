@@ -60,6 +60,7 @@ describe 'Coordinator', ->
 
       describe 'sending data to participant connected to another', ->
         it 'should receive results at end of flow', (done) ->
+          @timeout 4000
           first = runtime.HelloParticipant transport.getClient address
           second = runtime.HelloParticipant transport.getClient address
           participants = 0
