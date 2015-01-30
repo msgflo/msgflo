@@ -73,17 +73,16 @@ class Coordinator extends EventEmitter
 
   disconnect: (fromId, fromPortId, toId, toPortId) -> # FIXME: implement
 
-
   serializeGraph: (name) ->
     graph =
       properties:
         name: name
-      processes: []
+      processes: {}
       connections: []
       inports: []
       outports: []
 
-    for id, part in @participants
+    for id, part of @participants
       graph.processes[id] =
         component: part['class']
 

@@ -2,7 +2,6 @@
 Immediate
 ----------
 
-* Protocol: print live-mode url on startup, and put in HTTP webinterface
 * Protocol: support sending initial graph in live mode
 * Protocol: allow adding/removeding edges between participants
 * Protocol: allow inspecting data on edges

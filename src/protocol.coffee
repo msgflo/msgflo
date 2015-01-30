@@ -51,13 +51,17 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
   else if sub == 'component' and cmd == 'getsource'
     return console.log 'ERROR: cannot get source for #{payload.name}' if payload.name != defaultGraph
 
-    graph = proto.coordinator.serializeGraph 'main'
-    resp =
-      code: JSON.stringify graph
-      name: 'main'
-      library: 'default'
-      language: 'json'
-    proto.transport.send 'component', 'source', resp, ctx
+    sendSource = () ->
+      graph = proto.coordinator.serializeGraph 'main'
+      resp =
+        code: JSON.stringify graph
+        name: 'main'
+        library: 'default'
+        language: 'json'
+      proto.transport.send 'component', 'source', resp, ctx
+
+    setTimeout sendSource, 0
+
 
   else
     console.log 'Unhandled FBP protocol message: ', sub, cmd
