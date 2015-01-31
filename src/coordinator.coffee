@@ -152,7 +152,8 @@ class Coordinator extends EventEmitter
 
     async.map Object.keys(graph.processes), waitForParticipant, (err) =>
       @started = err != null
-      return callback err
+      return callback err if err
+      return callback null
 
     # Loading fake participants, mostly for testing
     # TODO: make participant starting into a general interface?

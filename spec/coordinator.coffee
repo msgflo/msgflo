@@ -75,3 +75,20 @@ describe 'Coordinator', ->
             console.log 'SPEC sent'
           first.start (err) -> chai.expect(err).to.be.a 'null'
           second.start (err) -> chai.expect(err).to.be.a 'null'
+
+      describe 'loading graph as json', ->
+        it 'should not return error', (done) ->
+          coordinator.loadGraphFile 'graphs/hello.json', (err) ->
+            chai.expect(err).to.be.a 'null'
+            done()
+
+      describe 'loading graph as json', ->
+        it 'should set up participants', (done) ->
+          participants = 0
+          coordinator.on 'participant-added', (participant) ->
+            participants = participants+1
+            return if participants != 3
+            done()
+          coordinator.loadGraphFile 'graphs/hello.json', (err) ->
+            chai.expect(err).to.be.a 'null'
+

@@ -17,7 +17,21 @@
   },
   "connections": [
     {
-      "data": "World"
+      "data": "World",
+      "tgt": {
+        "process": "helloA",
+        "port": "name"
+      }
+    },
+    {
+      "src": {
+        "process": "helloA",
+        "port": "out"
+      },
+      "tgt": {
+        "process": "helloB",
+        "port": "name"
+      }
     },
     {
       "tgt": {
