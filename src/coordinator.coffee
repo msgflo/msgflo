@@ -21,8 +21,8 @@ fromIipId = (id) ->
 class Coordinator extends EventEmitter
   constructor: (@broker) ->
     @participants = {}
-    @connections = {}
-    @iips = {}
+    @connections = {} # connId -> function
+    @iips = {} # iipId -> value
   
   start: (callback) ->
     @broker.connect (err) =>
@@ -71,8 +71,11 @@ class Coordinator extends EventEmitter
   unsubscribeFrom: () -> # FIXME: implement
 
   connect: (fromId, fromPort, toId, toName) ->
+    emitEdgeData = (msg) =>
+      @emit 'data', fromId, fromPort, toId, toName, msg
     handler = (msg) =>
       @sendTo toId, toName, msg
+      emitEdgeData msg # NOTE: should respect "edges" message. Requires fixing Flowhub
     @subscribeTo fromId, fromPort, handler
     id = connId fromId, fromPort, toId, toName
     @connections[id] = handler

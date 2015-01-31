@@ -16,6 +16,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       capabilities: [
         'protocol:component'
         'protocol:graph'
+        'protocol:network'
         'component:getsource'
       ]
       graph: defaultGraph
@@ -96,5 +97,21 @@ class Protocol
 
     @transport.on 'message', (protocol, command, payload, ctx) =>
       handleMessage @, protocol, command, payload, ctx
+
+    @coordinator.on 'data', (from, fromPort, to, toPort, data) =>
+      console.log 'Proocol on data', from, fromPort, data
+
+      id = "#{from}() #{fromPort.toUpperCase()} -> #{toPort.toUpperCase()} #{to}()"
+      msg =
+        id: id # FIXME: https://github.com/noflo/noflo-ui/issues/293
+        graph: 'default/main' # FIXME: unhardcode
+        src:
+          node: from
+          port: fromPort
+        tgt:
+          node: to
+          port: toPort
+        data: data
+      @transport.sendAll 'network', 'data', msg
 
 exports.Protocol = Protocol

@@ -24,7 +24,7 @@ class WebSocketTransport extends EventEmitter
         return null
       @emitMessage msg, connection
 
-    ws.on 'request', (request) ->
+    ws.on 'request', (request) =>
       subProtocol = if request.requestedProtocols.indexOf("noflo") != -1 then "noflo" else null
       connection = request.accept subProtocol, request.origin
       @connections.push connection
@@ -50,6 +50,7 @@ class WebSocketTransport extends EventEmitter
       protocol: protocol
       command: command
       payload: payload
+    console.log 'FBP SENDALL', @connections.length, msg
     for connection in @connections
       send connection, msg
 
