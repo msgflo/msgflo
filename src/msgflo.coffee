@@ -20,3 +20,6 @@ main = () ->
     console.log 'Open in Flowhub: ' + liveUrl
 
 exports.main = main
+exports.transport = require '../src/transport'
+exports.coordinator = require '../src/coordinator'
+exports.runtime = require '../src/runtime'

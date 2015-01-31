@@ -19,7 +19,7 @@ class MessagingSystem
   ## Sending/Receiving messages
   sendToQueue: (queueName, message, callback) ->
     throw new Error 'Not Implemented'
-  subscribeToQueue: (queueName, handler) ->
+  subscribeToQueue: (queueName, handler, callback) ->
     throw new Error 'Not Implemented'
 
 exports.MessageBroker = MessagingSystem
