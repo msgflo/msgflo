@@ -62,7 +62,15 @@ class Participant
         return callback err if err
 
 
-
+# TODO: consider making component api a bit more like NoFlo.WirePattern
+#
+# inputs = { portA: { data: dataA1, groups: ['A', '1'] }, portB: { data: B1 } }
+# outfunc = (type, outputs) -> # type can be 'data', 'end'
+# process(inputs, outfunc)
+#
+# Core ideas:
+# groups attached to the packet, avoids separate lifetime handling, but still allows modification
+# should one enforce use of promises? calling process returns a promise?
 
 HelloParticipant = (client) ->
   id = 'hello-' + randomstring.generate 6

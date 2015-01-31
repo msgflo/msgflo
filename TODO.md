@@ -1,20 +1,28 @@
 
-Immediate
-----------
+0.0.1
+-------
 
 * Support loading initial graph from JSON
-* Protocol: allow inspecting data on edges
+
+0.0.2
+------
 
 * Create reusable NoFlo AMQP in noflo-runtime-msgflo
 * TEST: attempt to run The Grid
-
-* Use setTimeout to make direct transport "async"
 * Add collision detection for queue names,
 at least warning. Mismatching datatypes on same names
+
+0.1.0
+-------
+
+* Fix removeEdge
+* Fix removeInitial
+* Make fbp-test pass all cases
 
 Soon
 -----
 
+* Use setTimeout to make direct transport "async"
 * Support for FBP components which we can only have one of in FBP protocol
 * Ability to spawn participants from cordinator
 
