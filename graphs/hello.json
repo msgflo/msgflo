@@ -1,0 +1,29 @@
+{
+  "properties": {
+    "environment": {
+       "runtime": "fakemsgflo"
+    }
+  },
+  "processes": {
+    "helloA": {
+      "component": "Hello"
+    },
+    "helloB": {
+      "component": "Hello"
+    },
+    "helloC": {
+      "component": "Hello"
+    }
+  },
+  "connections": [
+    {
+      "data": "World"
+    },
+    {
+      "tgt": {
+        "process": "helloC",
+        "port": "name"
+      }
+    }
+  ]
+}

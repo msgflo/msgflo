@@ -1,0 +1,3 @@
+# @runtime fakemsgflo
+
+'World' -> helloA(Hello) OUT -> NAME helloB(Hello) -> NAME helloC(Hello)

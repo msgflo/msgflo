@@ -72,8 +72,9 @@ class Participant
 # groups attached to the packet, avoids separate lifetime handling, but still allows modification
 # should one enforce use of promises? calling process returns a promise?
 
-HelloParticipant = (client) ->
+HelloParticipant = (client, customId) ->
   id = 'hello-' + randomstring.generate 6
+  id = customId if customId
 
   definition =
     id: id
@@ -94,7 +95,15 @@ HelloParticipant = (client) ->
     return ['out', "Hello " + indata]
   return new Participant client, definition, process
 
+startParticipant = (client, componentName, id, callback) ->
+  library =
+    'Hello': HelloParticipant
+  console.log 'starting', componentName, id
+
+  component = library[componentName]
+  part = component client, id
+  part.start callback
 
 exports.HelloParticipant = HelloParticipant
 exports.Participant = Participant
-
+exports.startParticipant = startParticipant

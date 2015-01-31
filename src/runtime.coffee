@@ -57,22 +57,6 @@ class WebSocketTransport extends EventEmitter
   emitMessage: (msg, ctx) ->
     @emit 'message', msg.protocol, msg.command, msg.payload, ctx
 
-startTestParty = (address, callback=->) ->
-  runtime = require '../src/fakeruntime'
-  participants =
-    helloA: runtime.HelloParticipant transport.getClient address
-    helloB: runtime.HelloParticipant transport.getClient address
-    helloC: runtime.HelloParticipant transport.getClient address
-
-  Object.keys(participants).forEach (name) ->
-    part = participants[name]
-    part.start () ->
-      console.log 'started', part.definition.id
-
-  return callback participants
-
-
-
 class Runtime
   constructor: (@options) ->
     @server = null
@@ -93,8 +77,12 @@ class Runtime
       return callback err if err
       @coordinator.start (err) =>
         return callback err if err
-        startTestParty @options.broker
-        return callback null, @address(), @liveUrl()
+        onLoaded = (err) =>
+          return callback err, @address(), @liveUrl()
+        if @options.graph
+          @coordinator.loadGraphFile @options.graph, onLoaded
+        else
+          onLoaded null
 
   stop: (callback) ->
     @server.close callback

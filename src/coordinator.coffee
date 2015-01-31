@@ -1,5 +1,9 @@
 
 EventEmitter = require('events').EventEmitter
+fs = require 'fs'
+
+async = require 'async'
+
 
 findPort = (def, type, portName) ->
   ports = if type == 'inport' then def.inports else def.outports
@@ -19,10 +23,11 @@ fromIipId = (id) ->
 
 
 class Coordinator extends EventEmitter
-  constructor: (@broker) ->
+  constructor: (@broker, @initialGraph) ->
     @participants = {}
     @connections = {} # connId -> function
     @iips = {} # iipId -> value
+    @started = false
   
   start: (callback) ->
     @broker.connect (err) =>
@@ -86,8 +91,7 @@ class Coordinator extends EventEmitter
   addInitial: (partId, portId, data) ->
     id = iipId partId, portId
     @iips[id] = data
-    running = true
-    @sendTo partId, portId, data if running
+    @sendTo partId, portId, data if @started
 
   removeInitial: (partId, portId) -> # FIXME: implement
     # Do we need to remove it from the queue??
@@ -117,5 +121,55 @@ class Coordinator extends EventEmitter
       graph.connections.push edge
 
     return graph
+
+  loadGraphFile: (path, callback) ->
+    fs.readFile path, {encoding:'utf-8'}, (err, contents) =>
+      return callback err if err
+      try
+        graph = JSON.parse contents
+      catch e
+        return callback e if e
+      @loadGraph graph, callback
+
+  loadGraph: (graph, callback) ->
+    # TODO: clear existing state?
+
+    # Wait until all participants have registerd
+    waitForParticipant = (processId, callback) =>
+      return callback null, @participants[processId] if @participants[processId]
+
+      onTimeout = () =>
+        return callback err
+      timeout = setTimeout onTimeout, 10000
+
+      onParticipantAdded = (part) =>
+        console.log 'onParticipant', part.id
+        if part.id == processId
+          clearTimeout timeout
+          @removeListener 'participant-added', onParticipantAdded
+          return callback null
+      @on 'participant-added', onParticipantAdded
+
+    async.map Object.keys(graph.processes), waitForParticipant, (err) =>
+      @started = err != null
+      return callback err
+
+    # Loading fake participants, mostly for testing
+    # TODO: make participant starting into a general interface?
+    # one type could allow definiton a component library (in JSON),
+    # where each component has a command for starting an executable
+    # taking the broker address and participant identifier
+    runtime = graph.properties?.environment?.runtime
+    if runtime == 'fakemsgflo'
+      fakeruntime = require './fakeruntime'
+      transport = require './transport'
+      start = (processId, callback) =>
+        component = graph.processes[processId].component
+        client = transport.getClient @broker.address
+        fakeruntime.startParticipant client, component, processId, callback
+      console.log 'starting fake participants', graph.processes
+      async.map Object.keys(graph.processes), start, (err) ->
+        console.log 'fake participants started', err
+
 
 exports.Coordinator = Coordinator
