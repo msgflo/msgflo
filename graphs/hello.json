@@ -34,6 +34,10 @@
       }
     },
     {
+      "src": {
+        "process": "helloB",
+        "port": "out"
+      },
       "tgt": {
         "process": "helloC",
         "port": "name"

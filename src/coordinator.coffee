@@ -4,7 +4,6 @@ fs = require 'fs'
 
 async = require 'async'
 
-
 findPort = (def, type, portName) ->
   ports = if type == 'inport' then def.inports else def.outports
   for port in ports
@@ -134,7 +133,7 @@ class Coordinator extends EventEmitter
   loadGraph: (graph, callback) ->
     # TODO: clear existing state?
 
-    # Wait until all participants have registerd
+    # Waiting until all participants have registerd
     waitForParticipant = (processId, callback) =>
       return callback null, @participants[processId] if @participants[processId]
 
@@ -150,10 +149,38 @@ class Coordinator extends EventEmitter
           return callback null
       @on 'participant-added', onParticipantAdded
 
+    # Connecting edges
+    connectEdge = (edge, callback) =>
+      console.log 'CONNECT EDGE', edge
+      @connect edge.src.process, edge.src.port, edge.tgt.process, edge.tgt.port
+      return callback null
+
+    # Sending IIPs
+    sendInitial = (iip, callback) =>
+      @addInitial iip.tgt.process, iip.tgt.port, iip.data
+      return callback null
+
     async.map Object.keys(graph.processes), waitForParticipant, (err) =>
       @started = err != null
+      console.log 'loaded participants', err
       return callback err if err
-      return callback null
+
+      edges = []
+      iips = []
+      for conn in graph.connections
+        target = if conn.src then edges else iips
+        target.push conn
+      console.log edges
+
+      async.map edges, connectEdge, (err) =>
+        console.log 'edges connected', err
+        return callback err if err
+
+        async.map iips, sendInitial, (err) =>
+          console.log 'IIPs sent'
+          @started = (err != null)
+          return callback err if err
+          return callback null
 
     # Loading fake participants, mostly for testing
     # TODO: make participant starting into a general interface?
