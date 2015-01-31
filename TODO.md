@@ -1,16 +1,9 @@
 
-
-0.0.2
-------
-
-* Create reusable NoFlo AMQP in noflo-runtime-msgflo
-* TEST: attempt to run The Grid
-* Add collision detection for queue names,
-at least warning. Mismatching datatypes on same names
-
 0.1.0
 -------
 
+* TEST: attempt to run The Grid
+* Add warning on duplicate queue names/mismatching datatypes
 * Fix removeEdge
 * Fix removeInitial
 * Make fbp-test pass all cases
