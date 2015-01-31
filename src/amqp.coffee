@@ -39,7 +39,8 @@ class Client
     # queue must exists
     console.log 'amqp send to queue', queueName, message
     data = new Buffer JSON.stringify message
-    @channel.sendToQueue queueName, data, callback
+    @channel.sendToQueue queueName, data
+    return callback null
 
   subscribeToQueue: (queueName, handler, callback) ->
     # queue must exists
