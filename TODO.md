@@ -1,8 +1,4 @@
 
-0.0.1
--------
-
-* Support loading initial graph from JSON
 
 0.0.2
 ------
