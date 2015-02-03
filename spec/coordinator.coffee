@@ -51,8 +51,8 @@ describe 'Coordinator', ->
 
             console.log 'SPECT participant added'
             id = first.definition.id
-            coordinator.subscribeTo id, 'out', (data) ->
-              chai.expect(data).to.equal 'Hello Jon'
+            coordinator.subscribeTo id, 'out', (msg) ->
+              chai.expect(msg.data).to.equal 'Hello Jon'
               done()
             coordinator.sendTo id, 'name', 'Jon'
             console.log 'SPEC sent'
@@ -68,8 +68,8 @@ describe 'Coordinator', ->
             participants = participants+1
             return if participants != 2
             coordinator.connect first.definition.id, 'out', second.definition.id, 'name'
-            coordinator.subscribeTo second.definition.id, 'out', (data) ->
-              chai.expect(data).to.equal 'Hello Hello Johnny'
+            coordinator.subscribeTo second.definition.id, 'out', (msg) ->
+              chai.expect(msg.data).to.equal 'Hello Hello Johnny'
               done()
             coordinator.sendTo first.definition.id, 'name', 'Johnny'
             console.log 'SPEC sent'
@@ -96,9 +96,9 @@ describe 'Coordinator', ->
           participants = 0
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
             chai.expect(err).to.be.a 'null'
-            coordinator.subscribeTo 'helloC', 'out', (data) ->
-              return if data == "Hello Hello Hello World"
-              chai.expect(data).to.equal 'Hello Hello Hello JSON'
+            coordinator.subscribeTo 'helloC', 'out', (msg) ->
+              return if msg.data == 'Hello Hello Hello World' # IIP
+              chai.expect(msg.data).to.equal 'Hello Hello Hello JSON'
               done()
             coordinator.sendTo 'helloA', 'name', 'JSON'
 

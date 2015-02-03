@@ -39,10 +39,12 @@ class Participant
 
     subscribePort = (def, callback) =>
       callFunc = (msg) =>
-        return if not @running
-        output = @func def.id, msg
+        console.log 'fake runtime got msg', msg.data
+#        @messaging.ackMessage msg
+        output = @func def.id, msg.data
         return sendFunc output if output
 
+      console.log 'fake runtime subscribed to', def.queue
       @messaging.subscribeToQueue def.queue, callFunc, callback
 
     allports = @definition.outports.concat @definition.inports
@@ -56,6 +58,7 @@ class Participant
 
   register: (callback) ->
     # Send discovery package to broker on 'fbp' queue
+    console.log 'participant registering'
     @messaging.createQueue 'fbp', (err) =>
       # console.log 'fbp queue created'
       return callback err if err
@@ -65,6 +68,7 @@ class Participant
         command: 'participant'
         payload: @definition
       @messaging.sendToQueue 'fbp', msg, (err) ->
+        console.log 'participant discovery sent'
         return callback err if err
         return callback null
 

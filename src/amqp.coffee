@@ -43,19 +43,30 @@ class Client
     return callback null
 
   subscribeToQueue: (queueName, handler, callback) ->
+    console.log 'amqp subscribe', queueName
     # queue must exists
     deserialize = (message) =>
-      msg = null
+      console.log 'amqp recv'
+      data = null
       try
-        msg = JSON.parse message.content.toString()
+        data = JSON.parse message.content.toString()
       catch e
         console.log 'JSON parse exception:', e
-      console.log 'amqp receive on queue', queueName, msg
-      @channel.ack message # FIXME: add proper ACK/NACK api
-      return handler msg if msg
+      console.log 'amqp receive on queue', queueName, data
+      out =
+        amqp: message
+        data: data
+      @ackMessage out # TEMP: should be done by consumers
+      return handler out
     @channel.consume queueName, deserialize
+    console.log 'amqp done subscribe', queueName
     return callback null
 
+  ## ACK/NACK messages
+  ackMessage: (message) ->
+    @channel.ack message.amqp
+  nackMessage: (message) ->
+    @channel.nack message.amqp
 
 exports.Client = Client
 exports.MessageBroker = Client

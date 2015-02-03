@@ -45,8 +45,10 @@ class Coordinator extends EventEmitter
     @broker.disconnect callback
 
   handleFbpMessage: (msg) ->
-    if msg.protocol == 'discovery' and msg.command == 'participant'
-      @addParticipant msg.payload
+    data = msg.data
+    if data.protocol == 'discovery' and data.command == 'participant'
+      @addParticipant data.payload
+#      @broker.ackMessage msg
     else
       throw new Error 'Unknown FBP message'
 
@@ -61,7 +63,7 @@ class Coordinator extends EventEmitter
     @emit 'participant-removed', definition
 
   sendTo: (participantId, inport, message) ->
-    console.log 'cordinator sendTo', participantId, inport
+    console.log 'cordinator sendTo', participantId, inport, message
     part = @participants[participantId]
     port = findPort part, 'inport', inport
     @broker.sendToQueue port.queue, message, (err) ->
@@ -70,16 +72,21 @@ class Coordinator extends EventEmitter
     part = @participants[participantId]
     console.log 'cordinator subscribeTo', participantId, outport
     port = findPort part, 'outport', outport
-    @broker.subscribeToQueue port.queue, handler, (err) ->
+    ackHandler = (msg) =>
+      handler msg
+#      @broker.ackMessage msg
+    @broker.subscribeToQueue port.queue, ackHandler, (err) ->
 
   unsubscribeFrom: () -> # FIXME: implement
 
   connect: (fromId, fromPort, toId, toName) ->
-    emitEdgeData = (msg) =>
-      @emit 'data', fromId, fromPort, toId, toName, msg
+    emitEdgeData = (data) =>
+      @emit 'data', fromId, fromPort, toId, toName, data
     handler = (msg) =>
-      @sendTo toId, toName, msg
-      emitEdgeData msg # NOTE: should respect "edges" message. Requires fixing Flowhub
+      console.log 'edge message', msg
+      @sendTo toId, toName, msg.data
+      # NOTE: should respect "edges" message. Requires fixing Flowhub
+      emitEdgeData msg.data
     @subscribeTo fromId, fromPort, handler
     id = connId fromId, fromPort, toId, toName
     @connections[id] = handler

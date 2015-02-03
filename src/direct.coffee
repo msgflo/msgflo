@@ -31,6 +31,12 @@ class Client extends interfaces.MessagingClient
   subscribeToQueue: (queueName, handler, callback) ->
     @broker.subscribeToQueue queueName, handler, callback
 
+  ## ACK/NACK messages
+  ackMessage: (message) ->
+    return
+  nackMessage: (message) ->
+    return
+
 
 class Queue extends EventEmitter
   constructor: () ->
@@ -70,8 +76,18 @@ class MessageBroker extends interfaces.MessageBroker
 
   subscribeToQueue: (queueName, handler, callback) ->
     @queues[queueName] = new Queue if not @queues[queueName]?
-    @queues[queueName].on 'message', handler
+    @queues[queueName].on 'message', (data) ->
+      out =
+        direct: null
+        data: data
+      return handler out
     return callback null
+
+  ## ACK/NACK messages
+  ackMessage: (message) ->
+    return
+  nackMessage: (message) ->
+    return
 
 exports.MessageBroker = MessageBroker
 exports.Client = Client

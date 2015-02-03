@@ -22,5 +22,11 @@ class MessagingSystem
   subscribeToQueue: (queueName, handler, callback) ->
     throw new Error 'Not Implemented'
 
+  ## ACK/NACK messages
+  ackMessage: (message) ->
+    throw new Error 'Not Implemented'
+  nackMessage: (message) ->
+    throw new Error 'Not Implemented'
+
 exports.MessageBroker = MessagingSystem
 exports.MessagingClient = MessagingSystem

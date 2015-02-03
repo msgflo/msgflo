@@ -39,13 +39,15 @@ class Client
   subscribeToQueue: (queueName, handler, callback) ->
     onMessage = (topic, message) =>
       return if topic != queueName
-
-      msg = null
+      data = null
       try
-        msg = JSON.parse message.toString()
+        data = JSON.parse message.toString()
       catch e
         console.log 'JSON parse exception:', e
-      return handler msg if msg
+      out =
+        data: data
+        mqtt: message
+      return handler out if data
     options = {}
 
     console.log 'mqtt subscribing', queueName
@@ -55,6 +57,11 @@ class Client
       @client.on 'message', onMessage
       return callback null
 
+  ## ACK/NACK messages
+  ackMessage: (message) ->
+    return
+  nackMessage: (message) ->
+    return
 
 exports.Client = Client
 exports.MessageBroker = Client
