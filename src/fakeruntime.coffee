@@ -11,16 +11,21 @@ findPort = (def, type, portName) ->
 class Participant
   # @func gets called with inport, , and should return outport, outdata
   constructor: (@messaging, @definition, @func) ->
+    @running = false
 
   start: (callback) ->
     @messaging.connect (err) =>
       console.log 'participant connected', err
       return callback err if err
       @setupPorts (err) =>
+        @running = true
         return callback err if err
-        @register callback
+        @register (err) ->
+          return callback err
 
   stop: (callback) ->
+    console.log 'stopping participant'
+    @running = false
     @messaging.removeQueue 'fbp', (err) =>
       @messaging.disconnect callback
 
@@ -34,6 +39,7 @@ class Participant
 
     subscribePort = (def, callback) =>
       callFunc = (msg) =>
+        return if not @running
         output = @func def.id, msg
         return sendFunc output if output
 
@@ -48,7 +54,7 @@ class Participant
         return callback null
   
 
-  register: () ->
+  register: (callback) ->
     # Send discovery package to broker on 'fbp' queue
     @messaging.createQueue 'fbp', (err) =>
       # console.log 'fbp queue created'
@@ -60,7 +66,7 @@ class Participant
         payload: @definition
       @messaging.sendToQueue 'fbp', msg, (err) ->
         return callback err if err
-
+        return callback null
 
 # TODO: consider making component api a bit more like NoFlo.WirePattern
 #

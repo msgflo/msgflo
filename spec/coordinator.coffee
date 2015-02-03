@@ -82,7 +82,6 @@ describe 'Coordinator', ->
             chai.expect(err).to.be.a 'null'
             done()
 
-      describe 'loading graph as json', ->
         it 'should set up participants', (done) ->
           participants = 0
           coordinator.on 'participant-added', (participant) ->
@@ -92,13 +91,13 @@ describe 'Coordinator', ->
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
             chai.expect(err).to.be.a 'null'
 
-      describe 'loading graph as json', ->
         it 'should set up connections', (done) ->
           @timeout 4000
           participants = 0
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
             chai.expect(err).to.be.a 'null'
             coordinator.subscribeTo 'helloC', 'out', (data) ->
+              return if data == "Hello Hello Hello World"
               chai.expect(data).to.equal 'Hello Hello Hello JSON'
               done()
             coordinator.sendTo 'helloA', 'name', 'JSON'

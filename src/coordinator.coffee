@@ -138,7 +138,7 @@ class Coordinator extends EventEmitter
       return callback null, @participants[processId] if @participants[processId]
 
       onTimeout = () =>
-        return callback err
+        return callback new Error 'Participant discovery timeout'
       timeout = setTimeout onTimeout, 10000
 
       onParticipantAdded = (part) =>
