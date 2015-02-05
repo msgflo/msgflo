@@ -37,11 +37,14 @@ class Coordinator extends EventEmitter
         return callback err if err
         @broker.subscribeToQueue 'fbp', (msg) =>
           @handleFbpMessage msg
-        , (err) ->
-          console.log 'coordinator started', err
-          return callback null
+          # @broker.ackMessage msg
+        , (err) =>
+          @started = if err then false else true
+          console.log 'coordinator started', err, @started
+          return callback err
 
   stop: (callback) ->
+    @started = false
     @broker.disconnect callback
 
   handleFbpMessage: (msg) ->
@@ -67,15 +70,18 @@ class Coordinator extends EventEmitter
     part = @participants[participantId]
     port = findPort part, 'inport', inport
     @broker.sendToQueue port.queue, message, (err) ->
+      throw err if err
 
   subscribeTo: (participantId, outport, handler) ->
     part = @participants[participantId]
     console.log 'cordinator subscribeTo', participantId, outport
     port = findPort part, 'outport', outport
     ackHandler = (msg) =>
+      return if not @started
       handler msg
-#      @broker.ackMessage msg
+      # @broker.ackMessage msg
     @broker.subscribeToQueue port.queue, ackHandler, (err) ->
+      throw err if err
 
   unsubscribeFrom: () -> # FIXME: implement
 
