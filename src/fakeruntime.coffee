@@ -1,6 +1,8 @@
 
-randomstring = require 'randomstring'
+chance = require 'chance'
 async = require 'async'
+
+random = new chance.Chance 10202
 
 findPort = (def, type, portName) ->
   ports = if type == 'inport' then def.inports else def.outports
@@ -83,7 +85,7 @@ class Participant
 # should one enforce use of promises? calling process returns a promise?
 
 HelloParticipant = (client, customId) ->
-  id = 'hello-' + randomstring.generate 6
+  id = 'hello-' + random.string {pool: 'abcdef', length: 4}
   id = customId if customId
 
   definition =
