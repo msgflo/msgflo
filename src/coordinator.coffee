@@ -1,8 +1,9 @@
 
 EventEmitter = require('events').EventEmitter
 fs = require 'fs'
-
 async = require 'async'
+
+ParticipantManager = require('./manager').ParticipantManager
 
 findPort = (def, type, portName) ->
   ports = if type == 'inport' then def.inports else def.outports
@@ -27,6 +28,7 @@ class Coordinator extends EventEmitter
     @connections = {} # connId -> function
     @iips = {} # iipId -> value
     @started = false
+    @manager = null
   
   start: (callback) ->
     @broker.connect (err) =>
@@ -45,7 +47,13 @@ class Coordinator extends EventEmitter
 
   stop: (callback) ->
     @started = false
-    @broker.disconnect callback
+    @broker.disconnect (err) =>
+      return callback err if err
+      if @manager
+        @manager.stop callback
+      else
+        return callback null
+
 
   handleFbpMessage: (msg) ->
     data = msg.data
@@ -154,8 +162,8 @@ class Coordinator extends EventEmitter
       timeout = setTimeout onTimeout, 10000
 
       onParticipantAdded = (part) =>
-        console.log 'onParticipant', part.id
         if part.id == processId
+          console.log 'onParticipant', part.id
           clearTimeout timeout
           @removeListener 'participant-added', onParticipantAdded
           return callback null
@@ -194,22 +202,10 @@ class Coordinator extends EventEmitter
           return callback err if err
           return callback null
 
-    # Loading fake participants, mostly for testing
-    # TODO: make participant starting into a general interface?
-    # one type could allow definiton a component library (in JSON),
-    # where each component has a command for starting an executable
-    # taking the broker address and participant identifier
-    runtime = graph.properties?.environment?.runtime
-    if runtime == 'fakemsgflo'
-      fakeruntime = require './fakeruntime'
-      transport = require './transport'
-      start = (processId, callback) =>
-        component = graph.processes[processId].component
-        client = transport.getClient @broker.address
-        fakeruntime.startParticipant client, component, processId, callback
-      console.log 'starting fake participants', graph.processes
-      async.map Object.keys(graph.processes), start, (err) ->
-        console.log 'fake participants started', err
+    # For testing, start participants
+    @manager = new ParticipantManager @broker.address, graph
+    @manager.start (err) ->
+      throw err if err
 
 
 exports.Coordinator = Coordinator

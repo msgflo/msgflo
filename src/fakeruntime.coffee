@@ -26,7 +26,6 @@ class Participant
           return callback err
 
   stop: (callback) ->
-    console.log 'stopping participant'
     @running = false
     @messaging.removeQueue 'fbp', (err) =>
       @messaging.disconnect callback
@@ -114,7 +113,8 @@ startParticipant = (client, componentName, id, callback) ->
 
   component = library[componentName]
   part = component client, id
-  part.start callback
+  part.start (err) ->
+    return callback err, part
 
 exports.HelloParticipant = HelloParticipant
 exports.Participant = Participant
