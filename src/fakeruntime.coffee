@@ -42,7 +42,7 @@ class Participant
     subscribePort = (def, callback) =>
       callFunc = (msg) =>
         console.log 'fake runtime got msg', msg.data
-#        @messaging.ackMessage msg
+        @messaging.ackMessage msg
         output = @func def.id, msg.data
         return sendFunc output if output
 

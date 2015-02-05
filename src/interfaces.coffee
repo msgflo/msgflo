@@ -19,6 +19,7 @@ class MessagingSystem
   ## Sending/Receiving messages
   sendToQueue: (queueName, message, callback) ->
     throw new Error 'Not Implemented'
+  # handler must call ackMessage() on succesful processing of a message
   subscribeToQueue: (queueName, handler, callback) ->
     throw new Error 'Not Implemented'
 

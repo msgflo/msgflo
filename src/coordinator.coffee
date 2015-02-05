@@ -37,7 +37,7 @@ class Coordinator extends EventEmitter
         return callback err if err
         @broker.subscribeToQueue 'fbp', (msg) =>
           @handleFbpMessage msg
-          # @broker.ackMessage msg
+          @broker.ackMessage msg
         , (err) =>
           @started = if err then false else true
           console.log 'coordinator started', err, @started
@@ -51,7 +51,6 @@ class Coordinator extends EventEmitter
     data = msg.data
     if data.protocol == 'discovery' and data.command == 'participant'
       @addParticipant data.payload
-#      @broker.ackMessage msg
     else
       throw new Error 'Unknown FBP message'
 
@@ -79,7 +78,7 @@ class Coordinator extends EventEmitter
     ackHandler = (msg) =>
       return if not @started
       handler msg
-      # @broker.ackMessage msg
+      @broker.ackMessage msg
     @broker.subscribeToQueue port.queue, ackHandler, (err) ->
       throw err if err
 

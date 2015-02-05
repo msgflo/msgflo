@@ -60,7 +60,6 @@ class Client
       out =
         amqp: message
         data: data
-      @ackMessage out # TEMP: should be done by consumers
       return handler out
     @channel.consume queueName, deserialize
     console.log 'amqp done subscribe', queueName
