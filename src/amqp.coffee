@@ -35,8 +35,8 @@ class Client
     @channel.assertQueue queueName
     return callback null
 
-  removeQueue: (queueName, callback) ->
-    throw new Error 'Not Implemented'
+  removeQueue: (queueName, callback) -> # FIXME: do something here?
+    return callback null
 
   ## Sending/Receiving messages
   sendToQueue: (queueName, message, callback) ->
