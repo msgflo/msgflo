@@ -10,7 +10,14 @@ It is intended for building robust polyglot FBP systems.
 
 ## Status
 
-Currently MsgFlo should be considered to be just an experiment.
+**Experimental**
+
+* Coordinator can discover particants and communicate between them
+* Implements basic FBP runtime protocol, can connect edges using Flowhub
+* A simple interface allows setting up non-FBP node.js code as participants
+* [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo) allows
+using NoFlo as the participants
+
 
 ## Architecture
 
