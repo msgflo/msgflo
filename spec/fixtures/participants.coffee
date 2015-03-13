@@ -24,8 +24,8 @@ HelloParticipant = (client, customId) ->
       queue: id+'-outputq'
       type: 'string'
     ]
-  process = (inport, indata) ->
-    return ['out', "Hello " + indata]
+  process = (inport, indata, callback) ->
+    return callback 'out', null, "Hello " + indata
   return new msgflo.participant.Participant client, definition, process
 
 exports.Hello = (c, i) -> new HelloParticipant c, i

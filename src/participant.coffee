@@ -36,16 +36,17 @@ class Participant
     setupPort = (def, callback) =>
       @messaging.createQueue def.queue, callback
 
-    sendFunc = (output) =>
-      port = findPort @definition, 'outport', output[0]
-      @messaging.sendToQueue port.queue, output[1], (err) ->
+    respondFunc = (outport, data, callback) =>
+      port = findPort @definition, 'outport', outport
+      @messaging.sendToQueue port.queue, data, callback
 
     subscribePort = (def, callback) =>
       callFunc = (msg) =>
         debug 'got msg', msg.data
-        @messaging.ackMessage msg
-        output = @func def.id, msg.data
-        return sendFunc output if output
+        @func def.id, msg.data, (port, err, data) =>
+          return @messaging.nackMessage msg if err
+          respondFunc port, data, () ->
+          @messaging.ackMessage msg
 
       debug 'subscribed to', def.queue
       @messaging.subscribeToQueue def.queue, callFunc, callback
