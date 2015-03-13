@@ -16,7 +16,6 @@ describe 'Runtime', ->
       host: 'localhost'
     runtime = new Runtime options
     runtime.start (err, url) ->
-      console.log 'runime startd', url
       chai.expect(err).to.be.a 'null'
       done()
   afterEach (done) ->
