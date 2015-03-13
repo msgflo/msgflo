@@ -2,11 +2,11 @@
 debug = require('debug')('msgflo:manager')
 async = require 'async'
 
-fakeruntime = require './fakeruntime'
+participant = require './participant'
 transport = require './transport'
 
-startProcesses = (address, runtime, processes, callback) ->
-  # Loading fake participants, mostly for testing
+startProcesses = (library, address, runtime, processes, callback) ->
+  # Loading participants, mostly for testing
   # one type could allow definiton a component library (in JSON),
   # where each component has a command for starting an executable
   # taking the broker address and participant identifier
@@ -14,24 +14,24 @@ startProcesses = (address, runtime, processes, callback) ->
   start = (processId, cb) =>
     component = processes[processId].component
     client = transport.getClient address
-    fakeruntime.startParticipant client, component, processId, (err, part) ->
+    participant.startParticipant library, client, component, processId, (err, part) ->
       return cb err, part
 
   debug 'starting participants', processes
   async.map Object.keys(processes), start, (err, parts) ->
-    debug 'fake participants started', err, parts.length
+    debug 'participants started', err, parts.length
     return callback err, parts
 
 class ParticipantManager
 
-  constructor: (@address, @graph) ->
+  constructor: (@address, @graph=null, @library={}) ->
     @participants = []
 
   start: (callback) ->
     runtime = @graph.properties?.environment?.runtime
     return callback null if runtime != 'fakemsgflo' # no-op
 
-    startProcesses @address, runtime, @graph.processes, (err, parts) =>
+    startProcesses @library, @address, runtime, @graph.processes, (err, parts) =>
       @participants = parts
       return callback err
 

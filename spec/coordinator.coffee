@@ -3,8 +3,8 @@ chai = require 'chai' unless chai
 path = require 'path'
 
 Coordinator = require('../src/coordinator').Coordinator
-runtime = require '../src/fakeruntime'
 transport = require '../src/transport'
+participants = require './fixtures/participants'
 
 # Note: most require running an external broker service
 transports =
@@ -12,6 +12,8 @@ transports =
   'MQTT': 'mqtt://localhost'
   'AMQP': 'amqp://localhost'
 
+participantLibrary =
+  Hello: participants.Hello
 
 describe 'Coordinator', ->
 
@@ -36,7 +38,7 @@ describe 'Coordinator', ->
 
       describe 'creating participant', ->
         it 'should emit participant-added', (done) ->
-          first = runtime.HelloParticipant transport.getClient address
+          first = participants.Hello transport.getClient address
           coordinator.once 'participant-added', (participant) ->
             chai.expect(participant).to.be.a 'object'
             chai.expect(participant.id).to.equal first.definition.id
@@ -46,7 +48,7 @@ describe 'Coordinator', ->
       describe 'sending data into participant input queue', ->
         it 'should receive results on output queue', (done) ->
           @timeout 4000
-          first = runtime.HelloParticipant transport.getClient address
+          first = participants.Hello transport.getClient address
           coordinator.once 'participant-added', (participant) ->
             id = first.definition.id
             coordinator.subscribeTo id, 'out', (msg) ->
@@ -58,12 +60,12 @@ describe 'Coordinator', ->
       describe 'sending data to participant connected to another', ->
         it 'should receive results at end of flow', (done) ->
           @timeout 4000
-          first = runtime.HelloParticipant transport.getClient address
-          second = runtime.HelloParticipant transport.getClient address
-          participants = 0
+          first = participants.Hello transport.getClient address
+          second = participants.Hello transport.getClient address
+          participantsNumber = 0
           coordinator.on 'participant-added', (participant) ->
-            participants = participants+1
-            return if participants != 2
+            participantsNumber = participantsNumber+1
+            return if participantsNumber != 2
             coordinator.connect first.definition.id, 'out', second.definition.id, 'name'
             coordinator.subscribeTo second.definition.id, 'out', (msg) ->
               chai.expect(msg.data).to.equal 'Hello Hello Johnny'
@@ -74,22 +76,24 @@ describe 'Coordinator', ->
 
       describe 'loading graph as json', ->
         it 'should not return error', (done) ->
+          coordinator.manager.library = participantLibrary
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
             chai.expect(err).to.be.a 'null'
             done()
 
         it 'should set up participants', (done) ->
-          participants = 0
+          participantsNumber = 0
+          coordinator.manager.library = participantLibrary
           coordinator.on 'participant-added', (participant) ->
-            participants = participants+1
-            return if participants != 3
+            participantsNumber = participantsNumber+1
+            return if participantsNumber != 3
             done()
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
             chai.expect(err).to.be.a 'null'
 
         it 'should set up connections', (done) ->
           @timeout 4000
-          participants = 0
+          coordinator.manager.library = participantLibrary
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
             chai.expect(err).to.be.a 'null'
             coordinator.subscribeTo 'helloC', 'out', (msg) ->

@@ -11,6 +11,7 @@ findPort = (def, type, portName) ->
     return port if port.id == portName
   return null
 
+# TODO: split into Produce and Transformer interfaces
 class Participant
   # @func gets called with inport, , and should return outport, outdata
   constructor: (@messaging, @definition, @func) ->
@@ -84,32 +85,7 @@ class Participant
 # groups attached to the packet, avoids separate lifetime handling, but still allows modification
 # should one enforce use of promises? calling process returns a promise?
 
-HelloParticipant = (client, customId) ->
-  id = 'hello-' + random.string {pool: 'abcdef', length: 4}
-  id = customId if customId
-
-  definition =
-    id: id
-    'class': 'Hello'
-    icon: 'file-word-o'
-    label: 'Prepends "Hello" to any input'
-    inports: [
-      id: 'name'
-      queue: id+'-inputq'
-      type: 'string'
-    ]
-    outports: [
-      id: 'out'
-      queue: id+'-outputq'
-      type: 'string'
-    ]
-  process = (inport, indata) ->
-    return ['out', "Hello " + indata]
-  return new Participant client, definition, process
-
-startParticipant = (client, componentName, id, callback) ->
-  library =
-    'Hello': HelloParticipant
+startParticipant = (library, client, componentName, id, callback) ->
   debug 'starting', componentName, id
 
   component = library[componentName]
@@ -117,6 +93,5 @@ startParticipant = (client, componentName, id, callback) ->
   part.start (err) ->
     return callback err, part
 
-exports.HelloParticipant = HelloParticipant
 exports.Participant = Participant
 exports.startParticipant = startParticipant

@@ -23,3 +23,4 @@ exports.main = main
 exports.transport = require '../src/transport'
 exports.coordinator = require '../src/coordinator'
 exports.runtime = require '../src/runtime'
+exports.participant = require '../src/participant'

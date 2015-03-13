@@ -29,8 +29,8 @@ class Coordinator extends EventEmitter
     @connections = {} # connId -> function
     @iips = {} # iipId -> value
     @started = false
-    @manager = null
-  
+    @manager = new ParticipantManager @broker.address
+
   start: (callback) ->
     @broker.connect (err) =>
       debug 'connected', err
@@ -202,7 +202,7 @@ class Coordinator extends EventEmitter
           return callback null
 
     # For testing, start participants
-    @manager = new ParticipantManager @broker.address, graph
+    @manager.graph = graph
     @manager.start (err) ->
       throw err if err
 
