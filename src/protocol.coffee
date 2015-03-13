@@ -2,10 +2,11 @@
 # Implementation of the FBP protocol
 # http://noflojs.org/documentation/protocol
 
+debug = require('debug')('msgflo:fbp')
 EventEmitter = require('events').EventEmitter
 
 handleMessage = (proto, sub, cmd, payload, ctx) ->
-  console.log 'FBP RECV:', sub, cmd, payload
+  debug 'RECV:', sub, cmd, payload
 
   defaultGraph = 'default/main'
 
@@ -34,7 +35,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         out.push m
       return out
 
-    console.log 'Protocol, attempting to list componenents'
+    debug 'attempting to list componenents'
 
     classes = []
     for name, part of proto.coordinator.participants
@@ -50,7 +51,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       proto.transport.send 'component', 'component', component, ctx
 
   else if sub == 'component' and cmd == 'getsource'
-    return console.log 'ERROR: cannot get source for #{payload.name}' if payload.name != defaultGraph
+    return debug 'ERROR: cannot get source for #{payload.name}' if payload.name != defaultGraph
 
     sendSource = () ->
       graph = proto.coordinator.serializeGraph 'main'
@@ -67,14 +68,14 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     handleGraphMessage proto, cmd, payload, ctx
 
   else
-    console.log 'Unhandled FBP protocol message: ', sub, cmd
+    debug 'Unhandled FBP protocol message: ', sub, cmd
 
 
 handleGraphMessage = (proto, cmd, payload, ctx) ->
   graph = payload.graph
 
   if cmd == 'addedge'
-    console.log 'add', payload
+    debug 'addedge', payload
     p = payload
     proto.coordinator.connect p.src.node, p.src.port, p.tgt.node, p.tgt.port
     proto.transport.sendAll 'graph', 'addedge', payload
@@ -89,7 +90,7 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
     proto.coordinator.removeInitial payload.tgt.node, payload.tgt.port
     proto.transport.sendAll 'graph', 'removeinitial', payload
   else
-    console.log 'Unhandled FBP protocol message: ', 'graph', cmd
+    debug 'Unhandled FBP protocol message: ', 'graph', cmd
 
 class Protocol
   constructor: (@transport, @coordinator) ->
@@ -99,7 +100,7 @@ class Protocol
       handleMessage @, protocol, command, payload, ctx
 
     @coordinator.on 'data', (from, fromPort, to, toPort, data) =>
-      console.log 'Proocol on data', from, fromPort, data
+      debug 'on data', from, fromPort, data
 
       id = "#{from}() #{fromPort.toUpperCase()} -> #{toPort.toUpperCase()} #{to}()"
       msg =
