@@ -1,7 +1,7 @@
 
 chance = require 'chance'
 
-participant = require '../../src/participant'
+msgflo = require '../..'
 
 random = new chance.Chance 10202
 
@@ -26,6 +26,6 @@ HelloParticipant = (client, customId) ->
     ]
   process = (inport, indata) ->
     return ['out', "Hello " + indata]
-  return new participant.Participant client, definition, process
+  return new msgflo.participant.Participant client, definition, process
 
 exports.Hello = (c, i) -> new HelloParticipant c, i
