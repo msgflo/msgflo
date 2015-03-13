@@ -19,6 +19,8 @@ class Participant
 
   start: (callback) ->
     @messaging.connect (err) =>
+      @messaging.channel?.prefetch 1 # FIXME: move out to consumer
+
       debug 'connected', err
       return callback err if err
       @setupPorts (err) =>
