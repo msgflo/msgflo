@@ -48,14 +48,11 @@ describe 'Coordinator', ->
           @timeout 4000
           first = runtime.HelloParticipant transport.getClient address
           coordinator.once 'participant-added', (participant) ->
-
-            console.log 'SPECT participant added'
             id = first.definition.id
             coordinator.subscribeTo id, 'out', (msg) ->
               chai.expect(msg.data).to.equal 'Hello Jon'
               done()
             coordinator.sendTo id, 'name', 'Jon'
-            console.log 'SPEC sent'
           first.start (err) -> chai.expect(err).to.be.a 'null'
 
       describe 'sending data to participant connected to another', ->
@@ -72,7 +69,6 @@ describe 'Coordinator', ->
               chai.expect(msg.data).to.equal 'Hello Hello Johnny'
               done()
             coordinator.sendTo first.definition.id, 'name', 'Johnny'
-            console.log 'SPEC sent'
           first.start (err) -> chai.expect(err).to.be.a 'null'
           second.start (err) -> chai.expect(err).to.be.a 'null'
 

@@ -1,4 +1,5 @@
 
+debug = require('debug')('msgflo:mqtt')
 mqtt = require 'mqtt'
 
 interfaces = require './interfaces'
@@ -37,17 +38,17 @@ class Client
   ## Sending/Receiving messages
   sendToQueue: (queueName, message, callback) ->
     published = (err, granted) =>
-      console.log 'mqtt published', err, granted
+      debug 'published', err, granted
       return callback err if err
       return callback null
     data = JSON.stringify message
-    console.log 'mqtt publishing', queueName, data
+    debug 'publishing', queueName, data
     @client.publish queueName, data, published
 
   subscribeToQueue: (queueName, handler, callback) ->
-    console.log 'mqtt subscribing', queueName
+    debug 'subscribing', queueName
     @client.subscribe queueName, (err) =>
-      console.log 'mqtt DONE subscribing', queueName, err
+      debug 'subscribed', queueName, err
       return callback err if err
       subs = @subscribers[queueName]
       if subs then subs.push handler else @subscribers[queueName] = [ handler ]
@@ -60,7 +61,6 @@ class Client
     return
 
   _onMessage: (topic, message) ->
-    console.log 'MQTT message', Object.keys(@subscribers).length > 0, @client != null
     return if not @client
     return if not Object.keys(@subscribers).length > 0
 
@@ -68,10 +68,10 @@ class Client
     try
       msg = JSON.parse message.toString()
     catch e
-      console.log 'JSON parse exception:', e
+      debug 'JSON parse exception:', e
     handlers = @subscribers[topic]
 
-    console.log 'MQTT MES', handlers.length, msg != null
+    debug 'message', handlers.length, msg != null
     return if not msg or not handlers
     out =
       data: msg

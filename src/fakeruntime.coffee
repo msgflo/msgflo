@@ -1,4 +1,5 @@
 
+debug = require('debug')('msgflo:participant')
 chance = require 'chance'
 async = require 'async'
 
@@ -17,7 +18,7 @@ class Participant
 
   start: (callback) ->
     @messaging.connect (err) =>
-      console.log 'participant connected', err
+      debug 'connected', err
       return callback err if err
       @setupPorts (err) =>
         @running = true
@@ -40,12 +41,12 @@ class Participant
 
     subscribePort = (def, callback) =>
       callFunc = (msg) =>
-        console.log 'fake runtime got msg', msg.data
+        debug 'got msg', msg.data
         @messaging.ackMessage msg
         output = @func def.id, msg.data
         return sendFunc output if output
 
-      console.log 'fake runtime subscribed to', def.queue
+      debug 'subscribed to', def.queue
       @messaging.subscribeToQueue def.queue, callFunc, callback
 
     allports = @definition.outports.concat @definition.inports
@@ -59,7 +60,7 @@ class Participant
 
   register: (callback) ->
     # Send discovery package to broker on 'fbp' queue
-    console.log 'participant registering'
+    debug 'register'
     @messaging.createQueue 'fbp', (err) =>
       # console.log 'fbp queue created'
       return callback err if err
@@ -69,7 +70,7 @@ class Participant
         command: 'participant'
         payload: @definition
       @messaging.sendToQueue 'fbp', msg, (err) ->
-        console.log 'participant discovery sent'
+        debug 'discovery sent'
         return callback err if err
         return callback null
 
@@ -109,7 +110,7 @@ HelloParticipant = (client, customId) ->
 startParticipant = (client, componentName, id, callback) ->
   library =
     'Hello': HelloParticipant
-  console.log 'starting', componentName, id
+  debug 'starting', componentName, id
 
   component = library[componentName]
   part = component client, id

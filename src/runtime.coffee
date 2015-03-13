@@ -4,6 +4,7 @@ transport = require './transport'
 coordinator = require './coordinator'
 querystring = require 'querystring'
 
+debug = require('debug')('msgflo:runtime')
 http = require 'http'
 EventEmitter = require('events').EventEmitter
 WebSocketServer = require('websocket').server
@@ -42,7 +43,7 @@ class WebSocketTransport extends EventEmitter
       protocol: protocol
       command: command
       payload: payload
-    console.log 'FBP SEND', msg
+    debug 'SEND', msg
     send connection, msg
 
   sendAll: (protocol, command, payload) ->
@@ -50,7 +51,7 @@ class WebSocketTransport extends EventEmitter
       protocol: protocol
       command: command
       payload: payload
-    console.log 'FBP SENDALL', @connections.length, msg
+    debug 'SENDALL', @connections.length, msg
     for connection in @connections
       send connection, msg
 

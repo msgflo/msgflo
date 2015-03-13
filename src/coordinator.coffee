@@ -1,4 +1,5 @@
 
+debug = require('debug')('msgflo:coordinator')
 EventEmitter = require('events').EventEmitter
 fs = require 'fs'
 async = require 'async'
@@ -32,17 +33,17 @@ class Coordinator extends EventEmitter
   
   start: (callback) ->
     @broker.connect (err) =>
-      console.log 'coordinator connected', err
+      debug 'connected', err
       return callback err if err
       @broker.createQueue 'fbp', (err) =>
-        console.log 'fbp queue created', err
+        debug '"fbp" queue created', err
         return callback err if err
         @broker.subscribeToQueue 'fbp', (msg) =>
           @handleFbpMessage msg
           @broker.ackMessage msg
         , (err) =>
           @started = if err then false else true
-          console.log 'coordinator started', err, @started
+          debug 'started', err, @started
           return callback err
 
   stop: (callback) ->
@@ -63,17 +64,16 @@ class Coordinator extends EventEmitter
       throw new Error 'Unknown FBP message'
 
   addParticipant: (definition) ->
-    console.log 'addParticipant', definition.id
+    debug 'addParticipant', definition.id
     @participants[definition.id] = definition
     @emit 'participant-added', definition
-    console.log 'addParticipant DONE', definition.id
 
   removeParticipant: (id) ->
     definition = @participants[id]
     @emit 'participant-removed', definition
 
   sendTo: (participantId, inport, message) ->
-    console.log 'cordinator sendTo', participantId, inport, message
+    debug 'sendTo', participantId, inport, message
     part = @participants[participantId]
     port = findPort part, 'inport', inport
     @broker.sendToQueue port.queue, message, (err) ->
@@ -81,7 +81,7 @@ class Coordinator extends EventEmitter
 
   subscribeTo: (participantId, outport, handler) ->
     part = @participants[participantId]
-    console.log 'cordinator subscribeTo', participantId, outport
+    debug 'subscribeTo', participantId, outport
     port = findPort part, 'outport', outport
     ackHandler = (msg) =>
       return if not @started
@@ -96,7 +96,7 @@ class Coordinator extends EventEmitter
     emitEdgeData = (data) =>
       @emit 'data', fromId, fromPort, toId, toName, data
     handler = (msg) =>
-      console.log 'edge message', msg
+      debug 'edge message', msg
       @sendTo toId, toName, msg.data
       # NOTE: should respect "edges" message. Requires fixing Flowhub
       emitEdgeData msg.data
@@ -163,7 +163,7 @@ class Coordinator extends EventEmitter
 
       onParticipantAdded = (part) =>
         if part.id == processId
-          console.log 'onParticipant', part.id
+          debug 'onParticipant', part.id
           clearTimeout timeout
           @removeListener 'participant-added', onParticipantAdded
           return callback null
@@ -171,7 +171,7 @@ class Coordinator extends EventEmitter
 
     # Connecting edges
     connectEdge = (edge, callback) =>
-      console.log 'CONNECT EDGE', edge
+      debug 'connect edge', edge
       @connect edge.src.process, edge.src.port, edge.tgt.process, edge.tgt.port
       return callback null
 
@@ -182,7 +182,7 @@ class Coordinator extends EventEmitter
 
     async.map Object.keys(graph.processes), waitForParticipant, (err) =>
       @started = err != null
-      console.log 'loaded participants', err
+      debug 'participants loaded', err
       return callback err if err
 
       edges = []
@@ -190,14 +190,13 @@ class Coordinator extends EventEmitter
       for conn in graph.connections
         target = if conn.src then edges else iips
         target.push conn
-      console.log edges
 
       async.map edges, connectEdge, (err) =>
-        console.log 'edges connected', err
+        debug 'edges connected', err
         return callback err if err
 
         async.map iips, sendInitial, (err) =>
-          console.log 'IIPs sent'
+          debug 'IIPs sent'
           @started = (err != null)
           return callback err if err
           return callback null

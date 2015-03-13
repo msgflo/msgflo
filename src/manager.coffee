@@ -1,4 +1,5 @@
 
+debug = require('debug')('msgflo:manager')
 async = require 'async'
 
 fakeruntime = require './fakeruntime'
@@ -16,9 +17,9 @@ startProcesses = (address, runtime, processes, callback) ->
     fakeruntime.startParticipant client, component, processId, (err, part) ->
       return cb err, part
 
-  console.log 'starting fake participants', processes
+  debug 'starting participants', processes
   async.map Object.keys(processes), start, (err, parts) ->
-    console.log 'fake participants started', err, parts.length
+    debug 'fake participants started', err, parts.length
     return callback err, parts
 
 class ParticipantManager
