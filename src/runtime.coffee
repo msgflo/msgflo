@@ -20,7 +20,7 @@ class WebSocketTransport extends EventEmitter
     handleMessage = (message, connection) =>
       return if message.type != 'utf8'
       try
-        msg = JSON.parse(message.utf8Data);
+        msg = JSON.parse(message.utf8Data)
       catch e
         return null
       @emitMessage msg, connection
