@@ -11,7 +11,7 @@ main = () ->
     .option('--broker <uri>', 'Broker address', String, 'amqp://localhost')
     .option('--ide <uri>', 'FBP IDE address', String, 'http://app.flowhub.io')
     .option('--graph <file.json>', 'Initial graph to load', String, '')
-    .parse(process.argv);
+    .parse(process.argv)
 
   r = new runtime.Runtime program
   r.start (err, address, liveUrl) ->

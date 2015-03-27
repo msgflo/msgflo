@@ -35,7 +35,6 @@ module.exports = ->
   # Grunt plugins used for testing
   @loadNpmTasks 'grunt-mocha-test'
   @loadNpmTasks 'grunt-coffeelint'
-  @loadNpmTasks 'grunt-contrib-watch'
   @loadNpmTasks 'grunt-shell-spawn'
 
   # Our local tasks
