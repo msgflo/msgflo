@@ -28,7 +28,7 @@ Usecases with similar setups are also in-scope.
 
 aka "Cloud".
 
-!["Example web service system using msgflo"](./doc/msgflo-system-example-cloud.svg)
+!["Example web service system using msgflo"](./doc/msgflo-system-example-cloud.png)
 
 A web service built using several groups of workers,
 each performing a set of tasks, and communicating with eachother using a messaging queue service.
