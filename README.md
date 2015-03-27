@@ -6,17 +6,48 @@ This is an implementation of the
 as the communications layer between different processes. Initial message queue transports targeted are
 [AMQP](http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
 and [MQTT](http://mqtt.org).
-It is intended for building robust polyglot FBP systems.
+It is intended for building robust polyglot FBP systems spanning multiple nodes.
+Each node can be implemented in different languages, and be a FBP runtime internally or not.
 
 ## Status
 
 **Experimental**
 
 * Coordinator can discover particants and communicate between them
-* Implements basic FBP runtime protocol, can connect edges using Flowhub
-* A simple interface allows setting up non-FBP node.js code as participants
-* [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo) allows
-using NoFlo as the participants
+* Coordinator implements basic FBP runtime protocol, can connect edges using Flowhub
+* A convenience interface allows setting up non-FBP node.js code as participants
+* [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo)
+allows using NoFlo as the participants
+
+## Usecases
+
+There are two primary usecases targetted by `msgflo`.
+Usecases with similar setups are also in-scope.
+
+### Horizontally scalable web services
+
+aka "Cloud".
+
+!["Example web service system using msgflo"](./doc/msgflo-system-example-cloud.svg)
+
+A web service built using several groups of workers,
+each performing a set of tasks, and communicating with eachother using a messaging queue service.
+Some of the participants may provide HTTP REST interfaces or persistance to SQL/noSQL database,
+others just perform computation.
+Typical execution environments include Heroku, Amazon EC2, OpenStack, OpenShift.
+Typical messaging system used are AMQP, ZeroMQ, Amazon Simple Queue Service, Google Cloud Pubsub.
+
+### Embedded device networks
+
+aka "Internet of Things".
+
+A bigger embedded system is built using several embedded devices,
+each performing a set of tasks, and communicating with eachother using
+a messing queue service (typically running on an IoT gateway).
+Some devices act as sensors, some as actuators and some provide computation.
+
+Typical execution environments include Embedded Linux, microcontrollers.
+Typical messaging systems used are MQTT.
 
 
 ## Architecture
@@ -116,20 +147,22 @@ Here are listed some additional messages that are used for the MsgFlo environmen
 
 #### Connecting ports to queues
 
-The coordinator can tell a participant to connect an inport of a running graph to a message queue with the `connectinport` message with the following payload:
+The coordinator can tell a participant to connect an inport of a running graph
+to a message queue with the `connectinport` message with the following payload:
 
-* `src`:
+* `src`: source
   - `queue`: message queue name
   - `options`: queue options as specified by the message queue implementation
-* `tgt`:
+* `tgt`: target
   - `port`: port name
   - `index`: connection index (optional, for addressable ports)
 * `metadata` (optional): structure of key-value pairs for edge metadata
 * `graph`: graph the action targets
 
-The coordinator can also tell a participant to connect an outport of a running graph to a message queue with the `connectoutport` message with the following payload:
+The coordinator can also tell a participant to connect an outport of a running graph
+to a message queue with the `connectoutport` message with the following payload:
 
-* `src`:
+* `src`:  source
   - `port`: port name
   - `index`: connection index (optional, for addressable ports)
 * `tgt`:
