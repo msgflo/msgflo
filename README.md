@@ -50,6 +50,15 @@ Typical execution environments include Embedded Linux, microcontrollers.
 Typical messaging systems used are MQTT.
 
 
+## Debugging
+
+The msgflo executable, as well as the transport/participant library
+uses the [debug NPM module](https://www.npmjs.com/package/debug).
+You can enable (all) logging using:
+
+    export DEBUG=msgflo*
+
+
 ## Architecture
 
 ### Message queue
