@@ -58,9 +58,9 @@ FooSourceParticipant = (client, customId) ->
     sayFoo = () ->
         return send 'out', null, "Foo"
     if indata == 0
-        clearInterval callback.interval if callback.interval? and callback.interval
+        clearInterval @interval if @interval? and @interval
     else
-        callback.interval = setInterval sayFoo, indata
+        @interval = setInterval sayFoo, indata
 
   return new msgflo.participant.Participant client, definition, process
 

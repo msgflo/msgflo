@@ -34,21 +34,34 @@ class Participant
     @messaging.removeQueue 'fbp', (err) =>
       @messaging.disconnect callback
 
+  # Send data on inport
+  # Normally only used directly for Source type participants
+  # For Transform or Sink type, is called on data from input queue
+  send: (inport, data) ->
+    debug 'got msg from send', inport, data
+    @func inport, data, (outport, err, data) =>
+      if not err
+        @onResult outport, data, () ->
+
+  onResult: (outport, data, callback) =>
+    port = findPort @definition, 'outport', outport
+    @messaging.sendToQueue port.queue, data, callback
+
   setupPorts: (callback) ->
     setupPort = (def, callback) =>
+      return callback null if not def.queue
       @messaging.createQueue def.queue, callback
 
-    respondFunc = (outport, data, callback) =>
-      port = findPort @definition, 'outport', outport
-      @messaging.sendToQueue port.queue, data, callback
-
     subscribePort = (def, callback) =>
+      return callback null if not def.queue
+
       callFunc = (msg) =>
-        debug 'got msg', msg.data
-        @func def.id, msg.data, (port, err, data) =>
+        debug 'got msg from queue', msg.data
+        @func def.id, msg.data, (outport, err, data) =>
           return @messaging.nackMessage msg if err
-          respondFunc port, data, () ->
-          @messaging.ackMessage msg
+          @onResult outport, data, (err) =>
+            return @messaging.nackMessage msg if err
+            @messaging.ackMessage msg if msg
 
       debug 'subscribed to', def.queue
       @messaging.subscribeToQueue def.queue, callFunc, callback
