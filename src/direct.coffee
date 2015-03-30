@@ -8,12 +8,14 @@ brokers = {}
 class Client extends interfaces.MessagingClient
   constructor: (@address) ->
 #    console.log 'client', @address
-    @broker = brokers[@address]
+    @broker = null
   
   ## Broker connection management
   connect: (callback) ->
+    @broker = brokers[@address]
     return callback null
   disconnect: (callback) ->
+    @broker = null
     return callback null
 
   ## Manipulating queues
