@@ -22,7 +22,7 @@ describe 'Coordinator', ->
     coordinator = null
     first = null
 
-    describe ", transport=#{type}: ", () ->
+    describe "#{type} transport", () ->
 
       beforeEach (done) ->
         broker = transport.getBroker address
