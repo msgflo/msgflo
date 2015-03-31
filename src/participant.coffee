@@ -51,7 +51,10 @@ class Participant extends EventEmitter
   onResult: (outport, data, callback) =>
     port = findPort @definition, 'outport', outport
     @emitData port.id, data
-    @messaging.sendToQueue port.queue, data, callback if port.queue
+    if port.queue
+      @messaging.sendToQueue port.queue, data, callback
+    else
+      return callback null
 
   setupPorts: (callback) ->
     setupPort = (def, callback) =>
