@@ -69,3 +69,32 @@ describe 'Participant', ->
     describe 'sending data on input queue', ->
       it 'produces data on output queue'
 
+
+  describe 'Sink participant', ->
+    sink = null
+    beforeEach (done) ->
+      sink = participants.DevNullSink msgflo.transport.getClient address
+      sink.start done
+    afterEach (done) ->
+      sink.stop done
+
+    it 'has inports with queues', ->
+      ports = sink.definition.inports
+      chai.expect(ports).to.have.length 1
+      chai.expect(ports[0].id).to.equal 'drop'
+      chai.expect(ports[0].queue).to.be.a 'string'
+      chai.expect(ports[0].queue).to.contain 'devnullsink'
+      chai.expect(ports[0].queue).to.contain 'drop'
+    it 'has outports without queues', ->
+      ports = sink.definition.outports
+      chai.expect(ports).to.have.length 1
+      chai.expect(ports[0].id).to.equal 'dropped'
+      chai.expect(ports[0].queue).to.be.a 'undefined'
+    describe 'sending data on input queue', ->
+      it 'produces data on output port', (done) ->
+        sink.on 'data', (outport, data) ->
+          chai.expect(outport).to.equal 'dropped'
+          chai.expect(data).to.equal 'myinput32'
+          done()
+        sink.send 'drop', "myinput32", () ->
+

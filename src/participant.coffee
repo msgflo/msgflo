@@ -2,6 +2,7 @@
 debug = require('debug')('msgflo:participant')
 chance = require 'chance'
 async = require 'async'
+EventEmitter = require('events').EventEmitter
 
 random = new chance.Chance 10202
 
@@ -12,7 +13,7 @@ findPort = (def, type, portName) ->
   return null
 
 # TODO: split into Produce and Transformer interfaces
-class Participant
+class Participant extends EventEmitter
   # @func gets called with inport, , and should return outport, outdata
   constructor: (@messaging, @definition, @func) ->
     @running = false
@@ -43,9 +44,14 @@ class Participant
       if not err
         @onResult outport, data, () ->
 
+  # Emit data on outport
+  emitData: (outport, data) ->
+    @emit 'data', outport, data
+
   onResult: (outport, data, callback) =>
     port = findPort @definition, 'outport', outport
-    @messaging.sendToQueue port.queue, data, callback
+    @emitData port.id, data
+    @messaging.sendToQueue port.queue, data, callback if port.queue
 
   setupPorts: (callback) ->
     setupPort = (def, callback) =>
@@ -82,6 +88,7 @@ class Participant
       # console.log 'fbp queue created'
       return callback err if err
       # TODO: be able to define in/outports and metadata
+      # FIXME: don't send ports without queues (Source participants)
       msg =
         protocol: 'discovery'
         command: 'participant'

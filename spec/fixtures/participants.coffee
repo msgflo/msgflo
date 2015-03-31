@@ -65,3 +65,32 @@ FooSourceParticipant = (client, customId) ->
   return new msgflo.participant.Participant client, definition, process
 
 exports.FooSource = (c, i) -> new FooSourceParticipant c, i
+
+
+DevNullParticipant = (client, customId) ->
+  id = 'devnullsink-' + random.string {pool: 'abcdef', length: 4}
+  id = customId if customId
+
+  definition =
+    id: id
+    'class': 'DevNullSink'
+    icon: 'file-word-o'
+    label: 'Drops all input'
+    inports: [
+      id: 'drop'
+      type: 'any'
+      queue: id+'-dropq'
+    ]
+    outports: [
+      id: 'dropped'
+      type: 'string'
+      description: 'Confirmation port for dropped input' 
+    ]
+  process = (inport, indata, send) ->
+    return unless inport == 'drop'
+    return send 'dropped', null, indata
+
+  return new msgflo.participant.Participant client, definition, process
+
+exports.DevNullSink = (c, i) -> new DevNullParticipant c, i
+
