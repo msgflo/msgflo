@@ -39,7 +39,7 @@ class Participant extends EventEmitter
   # Normally only used directly for Source type participants
   # For Transform or Sink type, is called on data from input queue
   send: (inport, data) ->
-    debug 'got msg from send', inport, data
+    debug 'got msg from send()', inport
     @func inport, data, (outport, err, data) =>
       if not err
         @onResult outport, data, () ->
@@ -62,7 +62,7 @@ class Participant extends EventEmitter
       return callback null if not def.queue
 
       callFunc = (msg) =>
-        debug 'got msg from queue', msg.data
+        debug 'got msg from queue', def.queue
         @func def.id, msg.data, (outport, err, data) =>
           return @messaging.nackMessage msg if err
           @onResult outport, data, (err) =>
