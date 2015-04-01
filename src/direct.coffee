@@ -1,4 +1,5 @@
 
+debug = require('debug')('msgflo:direct')
 interfaces = require './interfaces'
 EventEmitter = require('events').EventEmitter
 
@@ -12,9 +13,11 @@ class Client extends interfaces.MessagingClient
   
   ## Broker connection management
   connect: (callback) ->
+    debug 'client connect'
     @broker = brokers[@address]
     return callback null
   disconnect: (callback) ->
+    debug 'client disconnect'
     @broker = null
     return callback null
 
@@ -53,12 +56,15 @@ class MessageBroker extends interfaces.MessageBroker
   constructor: (@address) ->
     @queues = {}
 #    console.log 'broker', @address
-    brokers[@address] = this
 
   ## Broker connection management
   connect: (callback) ->
+    debug 'broker connect'
+    brokers[@address] = this
     return callback null
   disconnect: (callback) ->
+    debug 'broker disconnect'
+    delete brokers[@address]
     return callback null
 
   ## Manipulating queues
