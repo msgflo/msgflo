@@ -1,4 +1,6 @@
 
+common = require './common'
+
 debug = require('debug')('msgflo:participant')
 chance = require 'chance'
 async = require 'async'
@@ -12,7 +14,17 @@ findPort = (def, type, portName) ->
     return port if port.id == portName
   return null
 
-# TODO: split into Produce and Transformer interfaces
+definitionToFbp = (d) ->
+  def = common.clone d
+  portsWithQueue = (ports) ->
+    # these cannot be wired, so should not show. For Sources/Sinks
+    return ports.filter (p) -> return p.queue?
+
+  def.inports = portsWithQueue def.inports
+  def.outports = portsWithQueue def.outports
+  return def
+
+
 class Participant extends EventEmitter
   # @func gets called with inport, , and should return outport, outdata
   constructor: (@messaging, @definition, @func) ->
@@ -91,11 +103,11 @@ class Participant extends EventEmitter
       # console.log 'fbp queue created'
       return callback err if err
       # TODO: be able to define in/outports and metadata
-      # FIXME: don't send ports without queues (Source participants)
+      definition = definitionToFbp @definition
       msg =
         protocol: 'discovery'
         command: 'participant'
-        payload: @definition
+        payload: definition
       @messaging.sendToQueue 'fbp', msg, (err) ->
         debug 'discovery sent'
         return callback err if err
