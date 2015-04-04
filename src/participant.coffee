@@ -26,12 +26,6 @@ definitionToFbp = (d) ->
   def.outports = portsWithQueue def.outports
   return def
 
-# Improvements in participant definition
-# TODO: introduce a 'role' field. This will .
-# Multiple participants with same role will be automatically merged into one
-# TODO: when no id specified (normal case), generate id = role+uuid.v4()
-# TODO: take address string, create transport automatically
-
 addQueues = (ports, role) ->
   for p in ports
     p.hidden = false if not p.hidden?
