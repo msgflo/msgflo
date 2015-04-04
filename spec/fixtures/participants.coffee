@@ -13,12 +13,10 @@ HelloParticipant = (client, role) ->
     label: 'Prepends "Hello" to any input'
     inports: [
       id: 'name'
-      queue: id+'-inputq'
       type: 'string'
     ]
     outports: [
       id: 'out'
-      queue: id+'-outputq'
       type: 'string'
     ]
   process = (inport, indata, callback) ->
@@ -44,7 +42,6 @@ FooSourceParticipant = (client, role) ->
     outports: [
       id: 'out'
       type: 'string'
-      queue: id+'-outputq'
     ]
   process = (inport, indata, send) ->
     return unless inport == 'interval'
@@ -71,7 +68,6 @@ DevNullParticipant = (client, role) ->
     inports: [
       id: 'drop'
       type: 'any'
-      queue: id+'-dropq'
     ]
     outports: [
       id: 'dropped'

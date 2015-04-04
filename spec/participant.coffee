@@ -22,8 +22,8 @@ describe 'Participant', ->
       chai.expect(ports).to.have.length 1
       chai.expect(ports[0].id).to.equal 'out'
       chai.expect(ports[0].queue).to.be.a 'string'
-      chai.expect(ports[0].queue).to.contain 'foosource'
-      chai.expect(ports[0].queue).to.contain 'outputq'
+      chai.expect(ports[0].queue).to.contain 'foo'
+      chai.expect(ports[0].queue).to.contain 'OUT'
     describe 'running data', ->
       messages = []
       beforeEach (done) ->
@@ -51,21 +51,21 @@ describe 'Participant', ->
   describe 'Transform participant', ->
     source = null
     beforeEach () ->
-      source = participants.Hello msgflo.transport.getClient address
+      source = participants.Hello (msgflo.transport.getClient address), 'hello'
     it 'has inports with queues', ->
       ports = source.definition.inports
       chai.expect(ports).to.have.length 1
       chai.expect(ports[0].id).to.equal 'name'
       chai.expect(ports[0].queue).to.be.a 'string'
+      chai.expect(ports[0].queue).to.contain 'NAME'
       chai.expect(ports[0].queue).to.contain 'hello'
-      chai.expect(ports[0].queue).to.contain 'inputq'
     it 'has outports with queues', ->
       ports = source.definition.outports
       chai.expect(ports).to.have.length 1
       chai.expect(ports[0].id).to.equal 'out'
       chai.expect(ports[0].queue).to.be.a 'string'
+      chai.expect(ports[0].queue).to.contain 'OUT'
       chai.expect(ports[0].queue).to.contain 'hello'
-      chai.expect(ports[0].queue).to.contain 'outputq'
     describe 'sending data on input queue', ->
       it 'produces data on output queue'
 
@@ -83,8 +83,8 @@ describe 'Participant', ->
       chai.expect(ports).to.have.length 1
       chai.expect(ports[0].id).to.equal 'drop'
       chai.expect(ports[0].queue).to.be.a 'string'
-      chai.expect(ports[0].queue).to.contain 'devnullsink'
-      chai.expect(ports[0].queue).to.contain 'drop'
+      chai.expect(ports[0].queue).to.contain 'DROP'
+      chai.expect(ports[0].queue).to.contain 'devnull'
     it 'has outports without queues', ->
       ports = sink.definition.outports
       chai.expect(ports).to.have.length 1
