@@ -24,7 +24,8 @@
     "commander": "^2.6.0",
     "debug": "^2.1.2",
     "mqtt": "^1.0.6",
-    "websocket": "^1.0.17"
+    "websocket": "^1.0.17",
+    "uuid": "^2.0.1"
   },
   "devDependencies": {
     "chai": "~1.9.0",

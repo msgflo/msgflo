@@ -5,12 +5,9 @@ msgflo = require '../..'
 
 random = new chance.Chance 10202
 
-HelloParticipant = (client, customId) ->
-  id = 'hello-' + random.string {pool: 'abcdef', length: 4}
-  id = customId if customId
+HelloParticipant = (client, role) ->
 
   definition =
-    id: id
     component: 'Hello'
     icon: 'file-word-o'
     label: 'Prepends "Hello" to any input'
@@ -26,17 +23,14 @@ HelloParticipant = (client, customId) ->
     ]
   process = (inport, indata, callback) ->
     return callback 'out', null, "Hello " + indata
-  return new msgflo.participant.Participant client, definition, process
+  return new msgflo.participant.Participant client, definition, process, role
 
 exports.Hello = (c, i) -> new HelloParticipant c, i
 
 
-FooSourceParticipant = (client, customId) ->
-  id = 'foosource-' + random.string {pool: 'abcdef', length: 4}
-  id = customId if customId
+FooSourceParticipant = (client, role) ->
 
   definition =
-    id: id
     component: 'FooSource'
     icon: 'file-word-o'
     label: 'Says "Foo" continiously when interval is non-0'
@@ -45,6 +39,7 @@ FooSourceParticipant = (client, customId) ->
       type: 'number'
       description: 'time between each Foo (in milliseconds)'
       default: 0
+      hidden: true
     ]
     outports: [
       id: 'out'
@@ -62,17 +57,14 @@ FooSourceParticipant = (client, customId) ->
     else
         @interval = setInterval sayFoo, indata
 
-  return new msgflo.participant.Participant client, definition, process
+  return new msgflo.participant.Participant client, definition, process, role
 
 exports.FooSource = (c, i) -> new FooSourceParticipant c, i
 
 
-DevNullParticipant = (client, customId) ->
-  id = 'devnullsink-' + random.string {pool: 'abcdef', length: 4}
-  id = customId if customId
+DevNullParticipant = (client, role) ->
 
   definition =
-    id: id
     component: 'DevNullSink'
     icon: 'file-word-o'
     label: 'Drops all input'
@@ -85,12 +77,13 @@ DevNullParticipant = (client, customId) ->
       id: 'dropped'
       type: 'string'
       description: 'Confirmation port for dropped input' 
+      hidden: true
     ]
   process = (inport, indata, send) ->
     return unless inport == 'drop'
     return send 'dropped', null, indata
 
-  return new msgflo.participant.Participant client, definition, process
+  return new msgflo.participant.Participant client, definition, process, role
 
 exports.DevNullSink = (c, i) -> new DevNullParticipant c, i
 

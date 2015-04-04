@@ -82,6 +82,7 @@ class Coordinator extends EventEmitter
   subscribeTo: (participantId, outport, handler) ->
     part = @participants[participantId]
     debug 'subscribeTo', participantId, outport
+#    console.log part.outports, outport
     port = findPort part, 'outport', outport
     ackHandler = (msg) =>
       return if not @started
@@ -150,20 +151,29 @@ class Coordinator extends EventEmitter
         return callback e if e
       @loadGraph graph, callback
 
+  participantsByRole: (role) ->
+    matchRole = (id) =>
+      part = @participants[id]
+      return part.role == role
+
+    m = Object.keys(@participants).filter matchRole
+    return m
+
   loadGraph: (graph, callback) ->
     # TODO: clear existing state?
 
     # Waiting until all participants have registerd
     waitForParticipant = (processId, callback) =>
-      return callback null, @participants[processId] if @participants[processId]
+      existing = @participantsByRole processId
+      return callback null, @participants[existing[0]] if existing.length
 
       onTimeout = () =>
         return callback new Error 'Participant discovery timeout'
       timeout = setTimeout onTimeout, 10000
 
       onParticipantAdded = (part) =>
-        if part.id == processId
-          debug 'onParticipant', part.id
+        if part.role == processId
+          debug 'onParticipant', part.role # FIXME: take into account multiple participants with same role
           clearTimeout timeout
           @removeListener 'participant-added', onParticipantAdded
           return callback null
@@ -171,13 +181,15 @@ class Coordinator extends EventEmitter
 
     # Connecting edges
     connectEdge = (edge, callback) =>
-      debug 'connect edge', edge
-      @connect edge.src.process, edge.src.port, edge.tgt.process, edge.tgt.port
+      src = @participantsByRole edge.src.process
+      tgt = @participantsByRole edge.tgt.process
+      @connect src, edge.src.port, tgt, edge.tgt.port
       return callback null
 
     # Sending IIPs
     sendInitial = (iip, callback) =>
-      @addInitial iip.tgt.process, iip.tgt.port, iip.data
+      tgt = @participantsByRole iip.tgt.process
+      @addInitial tgt[0], iip.tgt.port, iip.data
       return callback null
 
     async.map Object.keys(graph.processes), waitForParticipant, (err) =>

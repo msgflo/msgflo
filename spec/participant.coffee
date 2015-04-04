@@ -10,7 +10,7 @@ describe 'Participant', ->
   describe 'Source participant', ->
     source = null
     beforeEach () ->
-      source = participants.FooSource msgflo.transport.getClient address
+      source = participants.FooSource (msgflo.transport.getClient address), 'foo'
 
     it 'has inports without queues', ->
       ports = source.definition.inports
@@ -73,7 +73,7 @@ describe 'Participant', ->
   describe 'Sink participant', ->
     sink = null
     beforeEach (done) ->
-      sink = participants.DevNullSink msgflo.transport.getClient address
+      sink = participants.DevNullSink (msgflo.transport.getClient address), 'devnull'
       sink.start done
     afterEach (done) ->
       sink.stop done

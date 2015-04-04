@@ -38,7 +38,7 @@ describe 'Coordinator', ->
 
       describe 'creating participant', ->
         it 'should emit participant-added', (done) ->
-          first = participants.Hello transport.getClient address
+          first = participants.Hello (transport.getClient address), 'hello-first'
           coordinator.once 'participant-added', (participant) ->
             chai.expect(participant).to.be.a 'object'
             chai.expect(participant.id).to.equal first.definition.id
@@ -48,7 +48,7 @@ describe 'Coordinator', ->
       describe 'sending data into participant input queue', ->
         it 'should receive results on output queue', (done) ->
           @timeout 4000
-          first = participants.Hello transport.getClient address
+          first = participants.Hello (transport.getClient address), 'hello-first'
           coordinator.once 'participant-added', (participant) ->
             id = first.definition.id
             coordinator.subscribeTo id, 'out', (msg) ->
@@ -60,8 +60,8 @@ describe 'Coordinator', ->
       describe 'sending data to participant connected to another', ->
         it 'should receive results at end of flow', (done) ->
           @timeout 4000
-          first = participants.Hello transport.getClient address
-          second = participants.Hello transport.getClient address
+          first = participants.Hello (transport.getClient address), 'hello1'
+          second = participants.Hello (transport.getClient address), 'hello2'
           participantsNumber = 0
           coordinator.on 'participant-added', (participant) ->
             participantsNumber = participantsNumber+1
@@ -96,9 +96,11 @@ describe 'Coordinator', ->
           coordinator.manager.library = participantLibrary
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
             chai.expect(err).to.be.a 'null'
-            coordinator.subscribeTo 'helloC', 'out', (msg) ->
+            helloCs = coordinator.participantsByRole 'helloC'
+            helloAs = coordinator.participantsByRole 'helloA'
+            coordinator.subscribeTo helloCs[0], 'out', (msg) ->
               return if msg.data == 'Hello Hello Hello World' # IIP
               chai.expect(msg.data).to.equal 'Hello Hello Hello JSON'
               done()
-            coordinator.sendTo 'helloA', 'name', 'JSON'
+            coordinator.sendTo helloAs[0], 'name', 'JSON'
 
