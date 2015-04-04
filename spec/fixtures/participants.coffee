@@ -11,7 +11,7 @@ HelloParticipant = (client, customId) ->
 
   definition =
     id: id
-    'class': 'Hello'
+    component: 'Hello'
     icon: 'file-word-o'
     label: 'Prepends "Hello" to any input'
     inports: [
@@ -37,7 +37,7 @@ FooSourceParticipant = (client, customId) ->
 
   definition =
     id: id
-    'class': 'FooSource'
+    component: 'FooSource'
     icon: 'file-word-o'
     label: 'Says "Foo" continiously when interval is non-0'
     inports: [
@@ -73,7 +73,7 @@ DevNullParticipant = (client, customId) ->
 
   definition =
     id: id
-    'class': 'DevNullSink'
+    component: 'DevNullSink'
     icon: 'file-word-o'
     label: 'Drops all input'
     inports: [

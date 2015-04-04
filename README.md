@@ -118,8 +118,10 @@ In case of systems incapable of communicating via FBP protocol
 but which can nonetheless be connected to a network,
 the message `payload` contains the following information:
 
-* `class`: the class of the participant. For instance MeasurementWorker
+
 * `id`: short unique name for the participant. Ex: measure1
+* `role`: the role this participant has in the network. Used to group multiple partipants. Ex: measure
+* `component`: the component name of the participant. One component may be used in several roles. For instance MeasurementWorker
 * `label`: (optional) human-readable description of the system
 * `icon`: (optional) icon to use to describe the system, using [Font Awesome](http://fontawesome.io/icons/) semantics
 * `inports`: list of inports containing:

@@ -25,7 +25,6 @@ definitionToFbp = (d) ->
   return def
 
 # Improvements in participant definition
-# TODO: rename 'class' to "component"
 # TODO: introduce a 'role' field. This will .
 # Multiple participants with same role will be automatically merged into one
 # TODO: when no id specified (normal case), generate id = role+uuid.v4()

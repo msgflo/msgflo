@@ -37,12 +37,12 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
     debug 'attempting to list componenents'
 
-    classes = []
+    components = []
     for name, part of proto.coordinator.participants
-      return if part['class'] in classes # Avoid duplicates
-      classes.push part['class']
+      return if part.component in classes # Avoid duplicates
+      components.push part.component
       component =
-        name: part['class']
+        name: part.component
         description: part.label or "" # FIXME: should be .description instead?
         icon: part.icon
         subgraph: false # TODO: implement

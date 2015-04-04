@@ -126,7 +126,7 @@ class Coordinator extends EventEmitter
 
     for id, part of @participants
       graph.processes[id] =
-        component: part['class']
+        component: part.component
 
     for id, conn of @connections
       parts = fromConnId id
