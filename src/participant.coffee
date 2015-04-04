@@ -1,5 +1,6 @@
 
 common = require './common'
+transport = require './transport'
 
 debug = require('debug')('msgflo:participant')
 chance = require 'chance'
@@ -54,6 +55,7 @@ instantiateDefinition = (d, role) ->
 class Participant extends EventEmitter
   # @func gets called with inport, , and should return outport, outdata
   constructor: (@messaging, def, @func, role) ->
+    @messaging = transport.getClient @messaging if typeof messaging == 'string'
     role = 'unknown' if not role
     @definition = instantiateDefinition def, role
     @running = false

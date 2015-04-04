@@ -38,7 +38,7 @@ describe 'Coordinator', ->
 
       describe 'creating participant', ->
         it 'should emit participant-added', (done) ->
-          first = participants.Hello (transport.getClient address), 'hello-first'
+          first = participants.Hello address, 'hello-first'
           coordinator.once 'participant-added', (participant) ->
             chai.expect(participant).to.be.a 'object'
             chai.expect(participant.id).to.equal first.definition.id
@@ -48,7 +48,7 @@ describe 'Coordinator', ->
       describe 'sending data into participant input queue', ->
         it 'should receive results on output queue', (done) ->
           @timeout 4000
-          first = participants.Hello (transport.getClient address), 'hello-first'
+          first = participants.Hello address, 'hello-first'
           coordinator.once 'participant-added', (participant) ->
             id = first.definition.id
             coordinator.subscribeTo id, 'out', (msg) ->
@@ -60,8 +60,8 @@ describe 'Coordinator', ->
       describe 'sending data to participant connected to another', ->
         it 'should receive results at end of flow', (done) ->
           @timeout 4000
-          first = participants.Hello (transport.getClient address), 'hello1'
-          second = participants.Hello (transport.getClient address), 'hello2'
+          first = participants.Hello address, 'hello1'
+          second = participants.Hello address, 'hello2'
           participantsNumber = 0
           coordinator.on 'participant-added', (participant) ->
             participantsNumber = participantsNumber+1

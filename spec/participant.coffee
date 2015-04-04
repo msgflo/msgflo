@@ -10,7 +10,7 @@ describe 'Participant', ->
   describe 'Source participant', ->
     source = null
     beforeEach () ->
-      source = participants.FooSource (msgflo.transport.getClient address), 'foo'
+      source = participants.FooSource address, 'foo'
 
     it 'has inports without queues', ->
       ports = source.definition.inports
@@ -51,7 +51,7 @@ describe 'Participant', ->
   describe 'Transform participant', ->
     source = null
     beforeEach () ->
-      source = participants.Hello (msgflo.transport.getClient address), 'hello'
+      source = participants.Hello address, 'hello'
     it 'has inports with queues', ->
       ports = source.definition.inports
       chai.expect(ports).to.have.length 1
@@ -73,7 +73,7 @@ describe 'Participant', ->
   describe 'Sink participant', ->
     sink = null
     beforeEach (done) ->
-      sink = participants.DevNullSink (msgflo.transport.getClient address), 'devnull'
+      sink = participants.DevNullSink address, 'devnull'
       sink.start done
     afterEach (done) ->
       sink.stop done
