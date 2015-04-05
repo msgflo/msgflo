@@ -39,7 +39,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
     components = []
     for name, part of proto.coordinator.participants
-      return if part.component in classes # Avoid duplicates
+      return if part.component in components # Avoid duplicates
       components.push part.component
       component =
         name: part.component
