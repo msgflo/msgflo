@@ -26,10 +26,12 @@ fromIipId = (id) ->
 class Coordinator extends EventEmitter
   constructor: (@broker, @initialGraph) ->
     @participants = {}
-    @connections = {} # connId -> function
+    @connections = {} # connId -> { queue: opt String, handler: opt function }
     @iips = {} # iipId -> value
     @started = false
     @manager = new ParticipantManager @broker.address
+
+    @on 'participant', @checkParticipantConnections
 
   start: (callback) ->
     @broker.connect (err) =>
@@ -67,10 +69,12 @@ class Coordinator extends EventEmitter
     debug 'addParticipant', definition.id
     @participants[definition.id] = definition
     @emit 'participant-added', definition
+    @emit 'participant', 'added', definition
 
   removeParticipant: (id) ->
     definition = @participants[id]
     @emit 'participant-removed', definition
+    @emit 'participant', 'removed', definition
 
   sendTo: (participantId, inport, message) ->
     debug 'sendTo', participantId, inport, message
@@ -107,6 +111,43 @@ class Coordinator extends EventEmitter
 
   disconnect: (fromId, fromPortId, toId, toPortId) -> # FIXME: implement
 
+
+  checkParticipantConnections: (action, participant) ->
+    findConnectedPorts = (dir, srcPort) =>
+      conn = []
+      # return conn if not srcPort.queue
+      for id, part of @participants
+        for port in part[dir]
+          continue if not port.queue
+          conn.push { part: part, port: port } if port.queue == srcPort.queue
+      return conn
+
+    isConnected = (e) =>
+      [fromId, fromPort, toId, toPort] = e
+      id = connId fromId, fromPort, toId, toPort
+      return @connections[id]?
+
+    if action == 'added'
+      id = participant.id
+      # inbound
+      for port in participant.inports
+        matches = findConnectedPorts 'outports', port
+        for m in matches
+          e = [m.part.id, m.port.id, id, port.id]
+          @connect e[0], e[1], e[2], e[3] if not isConnected e
+
+      # outbound
+      for port in participant.outports
+        matches = findConnectedPorts 'inports', port
+        for m in matches
+          e = [id, port.id, m.part.id, m.port.id]
+          @connect e[0], e[1], e[2], e[3] if not isConnected e
+
+    else if action == 'removed'
+      # TODO: implement
+
+    else
+      # ignored
 
   addInitial: (partId, portId, data) ->
     id = iipId partId, portId

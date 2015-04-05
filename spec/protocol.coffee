@@ -2,7 +2,9 @@
 chai = require 'chai'
 EventEmitter = require('events').EventEmitter
 websocket = require 'websocket'
+fbp = require 'fbp'
 
+participants = require './fixtures/participants'
 Runtime = require('../src/runtime').Runtime
 
 class MockUi extends EventEmitter
@@ -45,12 +47,12 @@ class MockUi extends EventEmitter
 describe 'FBP runtime protocol', () ->
   runtime = null
   ui = new MockUi
+  options =
+    broker: 'direct://broker111'
+    port: 3333
+    host: 'localhost'
 
   before (done) ->
-    options =
-      broker: 'direct://broker111'
-      port: 3333
-      host: 'localhost'
     runtime = new Runtime options
     runtime.start (err, url) ->
       chai.expect(err).to.be.a 'null'
@@ -68,7 +70,7 @@ describe 'FBP runtime protocol', () ->
     info = null
     it 'should be returned on getruntime', (done) ->
       ui.send "runtime", "getruntime"
-      ui.on 'message', (d, protocol, command, payload) ->
+      ui.once 'message', (d, protocol, command, payload) ->
         info = payload
         chai.expect(info).to.be.an 'object'
         done()
@@ -89,4 +91,42 @@ describe 'FBP runtime protocol', () ->
       it 'should include "component:getsource"', ->
         chai.expect(info.capabilities).to.include "component:getsource"
 
+  describe 'participant queues already connected', ->
+    # TODO: move IIP sending into Participant class?
+    sendGraphIIPs = (part, graph) ->
+      processIsParticipant = (name) ->
+        process = graph.processes[name]
+        return name == part.definition.id
+      processes = Object.keys(graph.processes).filter processIsParticipant
+      iips = graph.connections.filter (c) -> return c.data? and c.tgt.process in processes
+      for iip in iips
+        part.send iip.tgt.port, iip.data
+
+    it 'should show as connected edges', (done) ->
+      graph = fbp.parse " 'world' -> NAME say(Hello) OUT -> DROP sink(DevNullSink) "
+      source = participants.Hello options.broker, 'say'
+      sink = participants.DevNullSink options.broker, 'sink'
+      source.connectGraphEdges graph
+      sink.connectGraphEdges graph
+      sink.start (err) ->
+        chai.expect(err).to.be.a 'null'
+        source.start (err) ->
+          chai.expect(err).to.be.a 'null'
+
+          ui.send 'component', 'getsource', { name: 'default/main' }
+          ui.on 'message', (d, protocol, command, payload) ->
+            chai.expect(payload).to.be.an 'object'
+            chai.expect(payload).to.include.keys ['name', 'code', 'language']
+            chai.expect(payload.language).to.equal 'json'
+            graph = JSON.parse payload.code
+            chai.expect(graph).to.include.keys ['connections', 'processes']
+            chai.expect(graph.connections).to.have.length 1
+            conn = graph.connections[0]
+            chai.expect(conn.src.process).to.contain 'say'
+            chai.expect(conn.src.port).to.equal 'out'
+            chai.expect(conn.tgt.process).to.contain 'sink'
+            chai.expect(conn.tgt.port).to.equal 'drop'
+            done()
+
+    # TODO: automatically represent multiple participants of same class as subgraph
 
