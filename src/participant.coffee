@@ -2,11 +2,14 @@
 common = require './common'
 transport = require './transport'
 
+path = require 'path'
+fs = require 'fs'
 debug = require('debug')('msgflo:participant')
 chance = require 'chance'
 async = require 'async'
 EventEmitter = require('events').EventEmitter
 uuid = require 'uuid'
+fbp = require 'fbp'
 
 random = new chance.Chance 10202
 
@@ -154,6 +157,20 @@ class Participant extends EventEmitter
         ports = @definition.outports.filter (p) -> return p.id == conn.src.port
         ports[0].queue = tgtQueue
 
+  connectGraphEdgesFile: (filepath, callback) ->
+    ext = path.extname filepath
+    fs.readFile filepath, { encoding: 'utf-8' }, (err, contents) =>
+      return callback err if err
+      try
+        if ext == '.fbp'
+          graph = fbp.parse contents
+        else
+          graph = JSON.parse contents
+        console.log 'graph', graph
+        @connectGraphEdges graph
+      catch e
+        return callback e
+      return callback null
 
 # TODO: consider making component api a bit more like NoFlo.WirePattern
 #
