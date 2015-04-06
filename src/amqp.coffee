@@ -52,7 +52,7 @@ class Client
     debug 'subscribe', queueName
     # queue must exists
     deserialize = (message) =>
-      debug 'receive on queue', queueName
+      debug 'receive on queue', queueName, message.fields.deliveryTag
       data = null
       try
         data = JSON.parse message.content.toString()
@@ -68,11 +68,14 @@ class Client
 
   ## ACK/NACK messages
   ackMessage: (message) ->
-    debug 'ACK'
+    fields = message.amqp.fields
+    debug 'ACK', fields.routingKey, fields.deliveryTag
     # NOTE: server will only give us new message after this
-    @channel.ack message.amqp, (err) -> throw err
+    @channel.ack message.amqp, false
   nackMessage: (message) ->
-    @channel.nack message.amqp, (err) -> throw err
+    fields = message.amqp.fields
+    debug 'NACK', fields.routingKey, fields.deliveryTag
+    @channel.nack message.amqp, false
 
 exports.Client = Client
 exports.MessageBroker = Client
