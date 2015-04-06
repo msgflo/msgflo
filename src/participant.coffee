@@ -59,7 +59,6 @@ class Participant extends EventEmitter
 
   start: (callback) ->
     @messaging.connect (err) =>
-      @messaging.channel?.prefetch 1 # FIXME: move out to consumer
 
       debug 'connected', err
       return callback err if err
