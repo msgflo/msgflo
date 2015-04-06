@@ -165,7 +165,6 @@ class Participant extends EventEmitter
           graph = fbp.parse contents
         else
           graph = JSON.parse contents
-        console.log 'graph', graph
         @connectGraphEdges graph
       catch e
         return callback e
