@@ -21,6 +21,7 @@ class Client
         debug 'channel created', err
         return callback err if err
         @channel = ch
+        debug 'setting prefetch', @options.prefetch
         @channel.prefetch @options.prefetch
         @channel.on 'close', () ->
           debug 'channel closed'
