@@ -7,7 +7,7 @@ brokers = {}
 
 
 class Client extends interfaces.MessagingClient
-  constructor: (@address) ->
+  constructor: (@address, @options) ->
 #    console.log 'client', @address
     @broker = null
   

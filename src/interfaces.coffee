@@ -2,7 +2,7 @@
 # Abstraction of the concrete message queue system used
 # Examples: AMQP, MQTT
 class MessagingSystem
-  constructor: (address) ->
+  constructor: (address, options) ->
 
   ## Broker connection management
   connect: (callback) ->

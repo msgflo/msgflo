@@ -5,7 +5,7 @@ mqtt = require 'mqtt'
 interfaces = require './interfaces'
 
 class Client
-  constructor: (@address) ->
+  constructor: (@address, @options) ->
     @client = null
     @subscribers = {} # queueName -> [handler1, ...]
 

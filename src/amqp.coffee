@@ -5,9 +5,10 @@ debug = require('debug')('msgflo:amqp')
 interfaces = require './interfaces'
 
 class Client
-  constructor: (@address) ->
+  constructor: (@address, @options={}) ->
     @connection = null
     @channel = null
+    @options.prefetch = 2 if not @options.prefetch?
 
   ## Broker connection management
   connect: (callback) ->
@@ -20,6 +21,7 @@ class Client
         debug 'channel created', err
         return callback err if err
         @channel = ch
+        @channel.prefetch @options.prefetch
         @channel.on 'close', () ->
           debug 'channel closed'
         @channel.on 'error', (err) ->
