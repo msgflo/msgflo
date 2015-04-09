@@ -13,6 +13,7 @@ class Client
   connect: (callback) ->
     @client = mqtt.connect @address
     onConnected = (err) =>
+      debug 'connected'
       @client.on 'message', (topic, message) =>
         @_onMessage topic, message
       return callback err
@@ -23,6 +24,7 @@ class Client
     @client.removeAllListeners 'connect'
     @subscribers = {}
     @client.end (err) =>
+      debug 'disconnected'
       @client = null
       return callback err
 
