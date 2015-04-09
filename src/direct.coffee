@@ -21,19 +21,28 @@ class Client extends interfaces.MessagingClient
     @broker = null
     return callback null
 
+  _assertBroker: (callback) ->
+    err = new Error "no broker connected #{@address}" if not @broker
+    console.log err, @address, @broker?
+    return callback err if err
+
   ## Manipulating queues
   createQueue: (queueName, callback) ->
 #    console.log 'client create queue', queueName
+    @_assertBroker callback
     @broker.createQueue queueName, callback
 
   removeQueue: (queueName, callback) ->
+    @_assertBroker callback
     @broker.removeQueue queueName, callback
 
   ## Sending/Receiving messages
   sendToQueue: (queueName, message, callback) ->
+    @_assertBroker callback
     @broker.sendToQueue queueName, message, callback
 
   subscribeToQueue: (queueName, handler, callback) ->
+    @_assertBroker callback
     @broker.subscribeToQueue queueName, handler, callback
 
   ## ACK/NACK messages
