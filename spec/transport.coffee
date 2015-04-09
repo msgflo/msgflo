@@ -17,8 +17,44 @@ transports =
 connectAll = (clients, callback) ->
   connect = (c, cb) ->
     c.connect cb
+
   async.map clients, connect, callback
 
+zip = () ->
+  lengthArray = (arr.length for arr in arguments)
+  length = Math.min(lengthArray...)
+  for i in [0...length]
+    arr[i] for arr in arguments
+
+#
+createConnectClients = (address, names, callback) ->
+  createConnect = (name, cb) ->
+    client = transport.getClient address
+    client.connect (err) ->
+      cb err, client
+
+  async.map names, createConnect, (err, clients) ->
+    return callback err if err
+    ret = {}
+    for nc in zip names, clients
+      ret[nc[0]] = nc[1]
+    return callback null, ret
+
+createBindQueues = (broker, queueMapping, callback) ->
+  createBindQueue = (det, cb) ->
+    [client, srcQ, tgtQ] = det
+    client.createQueue 'outqueue', srcQ, (err) ->
+      return cb err if err
+      broker.bindQueue srcQ, tgtQ, cb
+
+  async.map queueMapping, createBindQueue, callback
+
+sendPackets = (packets, callback) ->
+  send = (p, cb) ->
+    [client, queue, data] = p
+    client.sendToQueue queue, data, cb
+
+  async.map packets, send, callback
 
 describe 'Transport', ->
 
@@ -117,3 +153,49 @@ describe 'Transport', ->
                   chai.expect(err).to.be.a 'null'
                 sender.sendToQueue outQueue, payload, (err) ->
                   chai.expect(err).to.be.a 'null'
+
+
+      describe 'multiple outqueues bound to one inqueue', ->
+        it 'all sent on outqueues shows up on inqueue', (done) ->
+          @timeout 3000
+          senders = [ 'sendA', 'sendB', 'sendC' ]
+          clientNames = ['receive']
+          clientNames.push.apply clientNames, senders
+          createConnectClients address, clientNames, (err, clients) ->
+            chai.expect(err).to.be.a 'null'
+
+            expect = [ {name:'sendA'}, {name:'sendB'}, {name:'sendC'} ]
+
+            received = []
+            onReceive = (msg) ->
+              clients.receive.ackMessage msg
+              chai.expect(msg).to.include.keys 'data'
+              received.push msg.data
+              if received.length == expect.length
+                received.sort (a,b) ->
+                  return -1 if a.name < b.name
+                  return 1 if a.name > b.name
+                  return 0
+                chai.expect(received).to.eql expect
+                done()
+
+            inQueue = 'inqueue27'
+
+            clients.receive.createQueue 'inqueue', inQueue, (err) ->
+              chai.expect(err).to.not.exist
+              clients.receive.subscribeToQueue inQueue, onReceive, (err) ->
+                chai.expect(err).to.not.exist
+
+                # Bind all outqueues to same inqueue
+                queueMapping = []
+                for name in senders
+                  queueMapping.push [ clients[name], name, inQueue ]
+                createBindQueues broker, queueMapping, (err) ->
+                  chai.expect(err).to.not.exist
+
+                  packets = []
+                  for name in senders
+                    packets.push [ clients[name], name, { name: name } ]
+                  sendPackets packets, (err) ->
+                    chai.expect(err).to.not.exist
+
