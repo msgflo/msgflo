@@ -3,6 +3,7 @@ debug = require('debug')('msgflo:mqtt')
 mqtt = require 'mqtt'
 
 interfaces = require './interfaces'
+routing = require './routing'
 
 class Client
   constructor: (@address, @options) ->
@@ -81,6 +82,11 @@ class Client
     for handler in handlers
       handler out
 
+class MessageBroker extends Client
+  constructor: (address, options) ->
+    super address, options
+    routing.binderMixin this
+
 
 exports.Client = Client
-exports.MessageBroker = Client
+exports.MessageBroker = MessageBroker

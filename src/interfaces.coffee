@@ -31,5 +31,15 @@ class MessagingSystem
   nackMessage: (message) ->
     throw new Error 'Not Implemented'
 
-exports.MessageBroker = MessagingSystem
 exports.MessagingClient = MessagingSystem
+
+class MessageBroker extends MessagingSystem
+
+  bindQueue: (from, to, callback) ->
+    throw new Error 'Not Implemented'
+  unbindQueue: (from, to, callback) ->
+    throw new Error 'Not Implemented'
+  listBindings: (from, callback) ->
+    throw new Error 'Not Implemented'
+
+exports.MessageBroker = MessageBroker

@@ -1,7 +1,9 @@
 
 debug = require('debug')('msgflo:direct')
-interfaces = require './interfaces'
 EventEmitter = require('events').EventEmitter
+
+interfaces = require './interfaces'
+routing = require './routing'
 
 brokers = {}
 
@@ -62,6 +64,7 @@ class Queue extends EventEmitter
 
 class MessageBroker extends interfaces.MessageBroker
   constructor: (@address) ->
+    routing.binderMixin this
     @queues = {}
 #    console.log 'broker', @address
 

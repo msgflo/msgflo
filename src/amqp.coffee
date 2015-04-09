@@ -80,5 +80,16 @@ class Client
     debug 'NACK', fields.routingKey, fields.deliveryTag
     @channel.nack message.amqp, false
 
+class MessageBroker extends Client
+  constructor: (address, options) ->
+    super address, options
+
+  bindQueue: (from, to, callback) ->
+    throw new Error 'Not Implemented'
+  unbindQueue: (from, to, callback) ->
+    throw new Error 'Not Implemented'
+  listBindings: (from, callback) ->
+    throw new Error 'Not Implemented'
+
 exports.Client = Client
-exports.MessageBroker = Client
+exports.MessageBroker = MessageBroker

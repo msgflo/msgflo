@@ -46,8 +46,8 @@ describe 'Transport', ->
           clientA.connect (err) ->
             done err
 
-      describe 'subscribing to queue', ->
-        it 'should produce data when sending there', (done) ->
+      describe 'inqueue==outqueue without binding', ->
+        it 'sending should be received on other end', (done) ->
           sender = transport.getClient address
           receiver = transport.getClient address
           payload = { foo: 'bar91' }

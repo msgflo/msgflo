@@ -98,6 +98,11 @@ class Coordinator extends EventEmitter
   unsubscribeFrom: () -> # FIXME: implement
 
   connect: (fromId, fromPort, toId, toName) ->
+    # TODO: use transport queue binding
+    # determine from participant data which queues arguments point to
+    # insert info from/to/queues to @connections
+    # TODO: introduce some "spying functionality" to provide edge messages, add tests
+
     emitEdgeData = (data) =>
       @emit 'data', fromId, fromPort, toId, toName, data
     handler = (msg) =>
