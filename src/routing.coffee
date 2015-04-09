@@ -8,6 +8,7 @@ class Binder
 
   bindQueue: (from, to, callback) ->
     debug 'Binder.bindQueue'
+    return callback null
   
   ### TODO: implement like in Coordinator
     emitEdgeData = (data) =>

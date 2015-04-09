@@ -95,11 +95,11 @@ class MessageBroker extends Client
     super address, options
 
   bindQueue: (from, to, callback) ->
-    throw new Error 'Not Implemented'
+    return callback null
   unbindQueue: (from, to, callback) ->
-    throw new Error 'Not Implemented'
+    return callback null
   listBindings: (from, callback) ->
-    throw new Error 'Not Implemented'
+    return callback null
     
   # Participant registration
   subscribeParticipantChange: (handler) ->

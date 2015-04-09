@@ -59,10 +59,35 @@ describe 'Transport', ->
           connectAll [sender, receiver], (err) ->
             receiver.createQueue 'inqueue', sharedQueue, (err) ->
               chai.expect(err).to.be.a 'null'
+              sender.createQueue 'outqueue', sharedQueue, (err) ->
+                chai.expect(err).to.be.a 'null'
+
               receiver.subscribeToQueue sharedQueue, onReceive, (err) ->
                 chai.expect(err).to.be.a 'null'
               sender.sendToQueue sharedQueue, payload, (err) ->
                 chai.expect(err).to.be.a 'null'
 
 
+      describe 'inqueue==outqueue with binding', ->
+        it 'sending should be received on other end', (done) ->
+          sender = transport.getClient address
+          receiver = transport.getClient address
+          payload = { foo: 'bar92' }
+          sharedQueue = 'myqueue35'
+          onReceive = (msg) ->
+            chai.expect(msg).to.include.keys 'data'
+            chai.expect(msg.data).to.eql payload
+            done()
+          connectAll [sender, receiver], (err) ->
+            receiver.createQueue 'inqueue', sharedQueue, (err) ->
+              chai.expect(err).to.be.a 'null'
+              sender.createQueue 'outqueue', sharedQueue, (err) ->
+                chai.expect(err).to.be.a 'null'
 
+              broker.bindQueue sharedQueue, sharedQueue, (err) ->
+                chai.expect(err).to.be.a 'null'
+
+                receiver.subscribeToQueue sharedQueue, onReceive, (err) ->
+                  chai.expect(err).to.be.a 'null'
+                sender.sendToQueue sharedQueue, payload, (err) ->
+                  chai.expect(err).to.be.a 'null'
