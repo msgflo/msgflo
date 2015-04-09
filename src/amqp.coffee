@@ -80,6 +80,16 @@ class Client
     debug 'NACK', fields.routingKey, fields.deliveryTag
     @channel.nack message.amqp, false
 
+  # Participant registration
+  registerParticipant: (part, callback) ->
+    msg =
+      protocol: 'discovery'
+      command: 'participant'
+      payload: part
+    @channel.assertQueue 'fbp'
+    data = new Buffer JSON.stringify msg
+    return @channel.sendToQueue 'fbp', data, callback
+
 class MessageBroker extends Client
   constructor: (address, options) ->
     super address, options
@@ -90,6 +100,23 @@ class MessageBroker extends Client
     throw new Error 'Not Implemented'
   listBindings: (from, callback) ->
     throw new Error 'Not Implemented'
+    
+  # Participant registration
+  subscribeParticipantChange: (handler) ->
+    deserialize = (message) =>
+      debug 'receive on fbp', message.fields.deliveryTag
+      data = null
+      try
+        data = JSON.parse message.content.toString()
+      catch e
+        debug 'JSON exception:', e
+      out =
+        amqp: message
+        data: data
+      return handler out
+
+    @channel.assertQueue 'fbp'
+    @channel.consume 'fbp', deserialize
 
 exports.Client = Client
 exports.MessageBroker = MessageBroker

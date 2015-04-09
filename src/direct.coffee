@@ -52,6 +52,14 @@ class Client extends interfaces.MessagingClient
   nackMessage: (message) ->
     return
 
+  # Participant discovery
+  registerParticipant: (part, callback) ->
+    @createQueue '', 'fbp', (err) =>
+      msg =
+        protocol: 'discovery'
+        command: 'participant'
+        payload: part
+      @sendToQueue 'fbp', msg, callback
 
 class Queue extends EventEmitter
   constructor: () ->
@@ -107,6 +115,10 @@ class MessageBroker extends interfaces.MessageBroker
     return
   nackMessage: (message) ->
     return
+
+  subscribeParticipantChange: (handler) ->
+    @createQueue '', 'fbp', (err) =>
+      @subscribeToQueue 'fbp', handler, () ->
 
 exports.MessageBroker = MessageBroker
 exports.Client = Client

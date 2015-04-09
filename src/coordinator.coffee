@@ -37,16 +37,12 @@ class Coordinator extends EventEmitter
     @broker.connect (err) =>
       debug 'connected', err
       return callback err if err
-      @broker.createQueue 'inqueue', 'fbp', (err) =>
-        debug '"fbp" queue created', err
-        return callback err if err
-        @broker.subscribeToQueue 'fbp', (msg) =>
-          @handleFbpMessage msg
-          @broker.ackMessage msg
-        , (err) =>
-          @started = if err then false else true
-          debug 'started', err, @started
-          return callback err
+      @broker.subscribeParticipantChange (msg) =>
+        @handleFbpMessage msg.data
+        @broker.ackMessage msg
+      @started = true
+      debug 'started', err, @started
+      return callback null
 
   stop: (callback) ->
     @started = false
@@ -58,8 +54,7 @@ class Coordinator extends EventEmitter
         return callback null
 
 
-  handleFbpMessage: (msg) ->
-    data = msg.data
+  handleFbpMessage: (data) ->
     if data.protocol == 'discovery' and data.command == 'participant'
       @addParticipant data.payload
     else

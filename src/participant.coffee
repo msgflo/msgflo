@@ -70,8 +70,7 @@ class Participant extends EventEmitter
 
   stop: (callback) ->
     @running = false
-    @messaging.removeQueue 'outqueue', 'fbp', (err) =>
-      @messaging.disconnect callback
+    @messaging.disconnect callback
 
   # Send data on inport
   # Normally only used directly for Source type participants
@@ -120,23 +119,14 @@ class Participant extends EventEmitter
       async.map @definition.inports, subscribePort, (err) =>
         return callback err if err
         return callback null
-  
 
   register: (callback) ->
     # Send discovery package to broker on 'fbp' queue
     debug 'register'
-    @messaging.createQueue 'outqueue', 'fbp', (err) =>
-      # console.log 'fbp queue created'
-      return callback err if err
-      definition = definitionToFbp @definition
-      msg =
-        protocol: 'discovery'
-        command: 'participant'
-        payload: definition
-      @messaging.sendToQueue 'fbp', msg, (err) ->
-        debug 'discovery sent'
-        return callback err if err
-        return callback null
+    definition = definitionToFbp @definition
+    @messaging.registerParticipant definition, (err) =>
+      debug 'registered', err
+      return callback err
 
   # Sets up queues to match those defined in graph
   connectGraphEdges: (graph) ->

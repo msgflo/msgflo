@@ -82,11 +82,22 @@ class Client
     for handler in handlers
       handler out
 
+  registerParticipant: (part, callback) ->
+    msg =
+      protocol: 'discovery'
+      command: 'participant'
+      payload: part
+    @sendToQueue 'fbp', msg, callback
+
 class MessageBroker extends Client
   constructor: (address, options) ->
     super address, options
     routing.binderMixin this
 
+  # Participant registration
+  subscribeParticipantChange: (handler) ->
+    @createQueue '', 'fbp', (err) =>
+      @subscribeToQueue 'fbp', handler, () ->
 
 exports.Client = Client
 exports.MessageBroker = MessageBroker
