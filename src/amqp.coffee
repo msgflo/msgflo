@@ -36,18 +36,27 @@ class Client
 
   ## Manipulating queues
   createQueue: (type, queueName, callback) ->
-    @channel.assertQueue queueName
-    return callback null
+    options = {}
+    if type == 'inqueue'
+      @channel.assertQueue queueName, options, callback
+    else
+      console.log 'create exchange', queueName, type
+      @channel.assertExchange queueName, 'fanout', options, (err) =>
+        return callback err if err
+        # HACK: to make inqueue==outqueue work:
+        @channel.assertQueue queueName, options, (err) =>
+          @channel.bindQueue queueName, queueName, '', {}, callback
 
   removeQueue: (type, queueName, callback) -> # FIXME: do something here?
     return callback null
 
   ## Sending/Receiving messages
-  sendToQueue: (queueName, message, callback) ->
+  sendToQueue: (exchangeName, message, callback) ->
     # queue must exists
-    debug 'send', queueName
+    debug 'send', exchangeName
     data = new Buffer JSON.stringify message
-    @channel.sendToQueue queueName, data, (err) ->
+    routingKey = '' # ignored for fan-out exchanges
+    @channel.publish exchangeName, routingKey, data, (err) ->
       throw err if err
     return callback null
 
@@ -95,7 +104,7 @@ class MessageBroker extends Client
     super address, options
 
   bindQueue: (from, to, callback) ->
-    return callback null
+    @channel.bindQueue to, from, '', {}, callback
   unbindQueue: (from, to, callback) ->
     return callback null
   listBindings: (from, callback) ->

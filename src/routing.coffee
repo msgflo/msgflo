@@ -3,28 +3,28 @@ debug = require('debug')('msgflo:routing')
 
 # Used to bind one queue/exchange to another when the Broker
 # of the transport cannot provide this functionality, like on MQTT
+bindingId = (f, t) ->
+  return "#{f}-#{t}"
+
 class Binder
   constructor: (@transport) ->
+    @bindings = {}
 
   bindQueue: (from, to, callback) ->
-    debug 'Binder.bindQueue'
-    return callback null
-  
-  ### TODO: implement like in Coordinator
-    emitEdgeData = (data) =>
-      @emit 'data', fromId, fromPort, toId, toName, data
+    id = bindingId from, to
+    debug 'Binder.bindQueue', id
+    return callback null if @bindings[id] or from == to
+
     handler = (msg) =>
       debug 'edge message', msg
-      @sendTo toId, toName, msg.data
-      # NOTE: should respect "edges" message. Requires fixing Flowhub
-      emitEdgeData msg.data
+      @transport.sendToQueue to, msg.data, (err) ->
+        throw err if err
+    @transport.subscribeToQueue from, handler, (err) =>
+      return callback err if err
+      @bindings[id] = handler
+      return callback null
 
-    @subscribeTo fromId, fromPort, handler
-    id = connId fromId, fromPort, toId, toName
-    @connections[id] = handler
-  ###
-
-  unbindQueue: (from, to, callback) ->
+  unbindQueue: (from, to, callback) -> # FIXME: implement
     debug 'Binder.unbindQueue'
 
   listBindings: (callback) ->
