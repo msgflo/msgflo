@@ -35,11 +35,11 @@ class Client
       return callback err
 
   ## Manipulating queues
-  createQueue: (queueName, callback) ->
+  createQueue: (type, queueName, callback) ->
     @channel.assertQueue queueName
     return callback null
 
-  removeQueue: (queueName, callback) -> # FIXME: do something here?
+  removeQueue: (type, queueName, callback) -> # FIXME: do something here?
     return callback null
 
   ## Sending/Receiving messages

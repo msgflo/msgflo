@@ -70,7 +70,7 @@ class Participant extends EventEmitter
 
   stop: (callback) ->
     @running = false
-    @messaging.removeQueue 'fbp', (err) =>
+    @messaging.removeQueue 'outqueue', 'fbp', (err) =>
       @messaging.disconnect callback
 
   # Send data on inport
@@ -97,7 +97,7 @@ class Participant extends EventEmitter
   setupPorts: (callback) ->
     setupPort = (def, callback) =>
       return callback null if not def.queue
-      @messaging.createQueue def.queue, callback
+      @messaging.createQueue 'TODO:distinquish', def.queue, callback
 
     subscribePort = (def, callback) =>
       return callback null if not def.queue
@@ -125,10 +125,9 @@ class Participant extends EventEmitter
   register: (callback) ->
     # Send discovery package to broker on 'fbp' queue
     debug 'register'
-    @messaging.createQueue 'fbp', (err) =>
+    @messaging.createQueue 'outqueue', 'fbp', (err) =>
       # console.log 'fbp queue created'
       return callback err if err
-      # TODO: be able to define in/outports and metadata
       definition = definitionToFbp @definition
       msg =
         protocol: 'discovery'

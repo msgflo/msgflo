@@ -57,7 +57,7 @@ describe 'Transport', ->
             chai.expect(msg.data).to.eql payload
             done()
           connectAll [sender, receiver], (err) ->
-            receiver.createQueue sharedQueue, (err) ->
+            receiver.createQueue 'inqueue', sharedQueue, (err) ->
               chai.expect(err).to.be.a 'null'
               receiver.subscribeToQueue sharedQueue, onReceive, (err) ->
                 chai.expect(err).to.be.a 'null'

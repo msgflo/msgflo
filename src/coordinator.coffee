@@ -37,7 +37,7 @@ class Coordinator extends EventEmitter
     @broker.connect (err) =>
       debug 'connected', err
       return callback err if err
-      @broker.createQueue 'fbp', (err) =>
+      @broker.createQueue 'inqueue', 'fbp', (err) =>
         debug '"fbp" queue created', err
         return callback err if err
         @broker.subscribeToQueue 'fbp', (msg) =>

@@ -27,14 +27,14 @@ class Client extends interfaces.MessagingClient
     return callback err if err
 
   ## Manipulating queues
-  createQueue: (queueName, callback) ->
+  createQueue: (type, queueName, callback) ->
 #    console.log 'client create queue', queueName
     @_assertBroker callback
-    @broker.createQueue queueName, callback
+    @broker.createQueue type, queueName, callback
 
-  removeQueue: (queueName, callback) ->
+  removeQueue: (type, queueName, callback) ->
     @_assertBroker callback
-    @broker.removeQueue queueName, callback
+    @broker.removeQueue type, queueName, callback
 
   ## Sending/Receiving messages
   sendToQueue: (queueName, message, callback) ->
@@ -77,11 +77,11 @@ class MessageBroker extends interfaces.MessageBroker
     return callback null
 
   ## Manipulating queues
-  createQueue: (queueName, callback) ->
+  createQueue: (type, queueName, callback) ->
     @queues[queueName] = new Queue if not @queues[queueName]?
     return callback null
 
-  removeQueue: (queueName, callback) ->
+  removeQueue: (type, queueName, callback) ->
     delete @queues[queueName]
     return callback null
 

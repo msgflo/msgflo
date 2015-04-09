@@ -11,12 +11,14 @@ class MessagingSystem
     throw new Error 'Not Implemented'
 
   ## Manipulating queues
-  createQueue: (queueName, callback) ->
+  # @type: inqueue|outqueue
+  createQueue: (type, queueName, callback) ->
     throw new Error 'Not Implemented'
-  removeQueue: (queueName, callback) ->
+  removeQueue: (type, queueName, callback) ->
     throw new Error 'Not Implemented'
 
   ## Sending/Receiving messages
+  # queueName must be created beforehand, and be of correct type
   sendToQueue: (queueName, message, callback) ->
     throw new Error 'Not Implemented'
   # handler must call ackMessage() on succesful processing of a message

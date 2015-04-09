@@ -29,11 +29,11 @@ class Client
       return callback err
 
   ## Manipulating queues
-  createQueue: (queueName, callback) ->
+  createQueue: (type, queueName, callback) ->
     # Noop, in MQTT one can send messages on 'topics' at any time
     return callback null
 
-  removeQueue: (queueName, callback) ->
+  removeQueue: (type, queueName, callback) ->
     # Noop, in MQTT one can send messages on 'topics' at any time
     return callback null
 
