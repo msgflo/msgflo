@@ -23,7 +23,6 @@ class Client extends interfaces.MessagingClient
 
   _assertBroker: (callback) ->
     err = new Error "no broker connected #{@address}" if not @broker
-    console.log err, @address, @broker?
     return callback err if err
 
   ## Manipulating queues
