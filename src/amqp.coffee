@@ -40,7 +40,6 @@ class Client
     if type == 'inqueue'
       @channel.assertQueue queueName, options, callback
     else
-      console.log 'create exchange', queueName, type
       @channel.assertExchange queueName, 'fanout', options, (err) =>
         return callback err if err
         # HACK: to make inqueue==outqueue work:
@@ -104,6 +103,7 @@ class MessageBroker extends Client
     super address, options
 
   bindQueue: (from, to, callback) ->
+    debug 'bind', from, to
     @channel.bindQueue to, from, '', {}, callback
   unbindQueue: (from, to, callback) ->
     return callback null
