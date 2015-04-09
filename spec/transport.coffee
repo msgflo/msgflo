@@ -91,3 +91,29 @@ describe 'Transport', ->
                   chai.expect(err).to.be.a 'null'
                 sender.sendToQueue sharedQueue, payload, (err) ->
                   chai.expect(err).to.be.a 'null'
+
+
+      describe 'outqueue bound to inqueue', ->
+        it 'sending to inqueue, show up on outqueue', (done) ->
+          sender = transport.getClient address
+          receiver = transport.getClient address
+          payload = { foo: 'bar99' }
+          inQueue = 'inqueue23'
+          outQueue = 'outqueue32'
+          onReceive = (msg) ->
+            chai.expect(msg).to.include.keys 'data'
+            chai.expect(msg.data).to.eql payload
+            done()
+          connectAll [sender, receiver], (err) ->
+            receiver.createQueue 'inqueue', inQueue, (err) ->
+              chai.expect(err).to.be.a 'null'
+              sender.createQueue 'outqueue', outQueue, (err) ->
+                chai.expect(err).to.be.a 'null'
+
+              broker.bindQueue outQueue, inQueue, (err) ->
+                chai.expect(err).to.be.a 'null'
+
+                receiver.subscribeToQueue inQueue, onReceive, (err) ->
+                  chai.expect(err).to.be.a 'null'
+                sender.sendToQueue outQueue, payload, (err) ->
+                  chai.expect(err).to.be.a 'null'
