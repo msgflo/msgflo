@@ -17,7 +17,7 @@ module.exports = ->
           src: ['spec/*.coffee', 'src/*.coffee', 'src/runtimes/*.coffee']
         options:
           max_line_length:
-            value: 80
+            value: 100
             level: 'warn'
 
     # Protocol tests
