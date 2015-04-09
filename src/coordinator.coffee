@@ -93,21 +93,24 @@ class Coordinator extends EventEmitter
   unsubscribeFrom: () -> # FIXME: implement
 
   connect: (fromId, fromPort, toId, toName) ->
-    # TODO: use transport queue binding
-    # determine from participant data which queues arguments point to
-    # insert info from/to/queues to @connections
-    # TODO: introduce some "spying functionality" to provide edge messages, add tests
+    findQueue = (partId, dir, portName) =>
+      part = @participants[partId]
+      for port in part[dir]
+        return port.queue if port.id == portName
 
-    emitEdgeData = (data) =>
-      @emit 'data', fromId, fromPort, toId, toName, data
-    handler = (msg) =>
-      debug 'edge message', msg
-      @sendTo toId, toName, msg.data
-      # NOTE: should respect "edges" message. Requires fixing Flowhub
-      emitEdgeData msg.data
-    @subscribeTo fromId, fromPort, handler
-    id = connId fromId, fromPort, toId, toName
-    @connections[id] = handler
+    edge =
+      fromId: fromId
+      fromPort: fromPort
+      toId: toId
+      toName: toName
+      srcQueue: findQueue fromId, 'outports', fromPort
+      tgtQueue: findQueue toId, 'inports', toName
+
+    @broker.bindQueue edge.srcQueue, edge.tgtQueue, (err) =>
+      id = connId fromId, fromPort, toId, toName
+      @connections[id] = edge
+
+    # TODO: introduce some "spying functionality" to provide edge messages, add tests
 
   disconnect: (fromId, fromPortId, toId, toPortId) -> # FIXME: implement
 
