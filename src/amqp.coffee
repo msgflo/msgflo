@@ -30,6 +30,7 @@ class Client
         return callback null
 
   disconnect: (callback) ->
+    debug 'disconnect'
     @channel.close (err) =>
       debug 'close', err
       return callback err
