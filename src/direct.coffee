@@ -1,25 +1,31 @@
 
 debug = require('debug')('msgflo:direct')
 EventEmitter = require('events').EventEmitter
+uuid = require 'uuid'
 
 interfaces = require './interfaces'
 routing = require './routing'
 
 brokers = {}
 
+newMessageId = () ->
+  return "msg-#{uuid.v4()}"
 
 class Client extends interfaces.MessagingClient
   constructor: (@address, @options) ->
 #    console.log 'client', @address
     @broker = null
+    @id = "client-#{uuid.v4()}"
   
   ## Broker connection management
   connect: (callback) ->
     debug 'client connect'
     @broker = brokers[@address]
+    @broker._clientConnect this
     return callback null
   disconnect: (callback) ->
     debug 'client disconnect'
+    @broker._clientDisconnect this
     @broker = null
     return callback null
 
@@ -48,9 +54,12 @@ class Client extends interfaces.MessagingClient
 
   ## ACK/NACK messages
   ackMessage: (message) ->
-    return
+    @_assertBroker callback
+    @broker._clientAckMessage this, message
+
   nackMessage: (message) ->
-    return
+    @_assertBroker callback
+    @broker._clientNackMessage this, message
 
   # Participant discovery
   registerParticipant: (part, callback) ->
@@ -70,10 +79,17 @@ class Queue extends EventEmitter
   _emitSend: (msg) ->
     @emit 'message', msg
 
+
+class ClientData
+  constructor: () ->
+    @messages = {}
+
 class MessageBroker extends interfaces.MessageBroker
   constructor: (@address) ->
     routing.binderMixin this
     @queues = {}
+    @clientData = {} # client.id -> ClientData
+    @id = @address
 #    console.log 'broker', @address
 
   ## Broker connection management
@@ -85,6 +101,11 @@ class MessageBroker extends interfaces.MessageBroker
     debug 'broker disconnect'
     delete brokers[@address]
     return callback null
+
+  _clientConnect: (client) ->
+    @clients[client.id] = client
+  _clientDisconnect: (client) ->
+    delete @clients[client.id]
 
   ## Manipulating queues
   createQueue: (type, queueName, callback) ->
@@ -102,19 +123,29 @@ class MessageBroker extends interfaces.MessageBroker
     return callback null
 
   subscribeToQueue: (queueName, handler, callback) ->
+    @_clientSubscribeToQueue this, queueName, handler, callback
+
+  _clientSubscribeToQueue: (client, queueName, handler, callback) ->
     @queues[queueName] = new Queue if not @queues[queueName]?
     @queues[queueName].on 'message', (data) ->
       out =
-        direct: null
+        direct:
+          id: newMessageId()
         data: data
       return handler out
     return callback null
 
+  _clientAckMessage: (client, message) ->
+    msgId = message.direct.id
+    return
+  _clientNackMessage: (client, message) ->
+    return
+
   ## ACK/NACK messages
   ackMessage: (message) ->
-    return
+    @_clientAckMessage this, message
   nackMessage: (message) ->
-    return
+    @_clientAckMessage this, message
 
   subscribeParticipantChange: (handler) ->
     @createQueue '', 'fbp', (err) =>

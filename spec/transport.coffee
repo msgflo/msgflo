@@ -261,3 +261,8 @@ describe 'Transport', ->
                   clients.sender.sendToQueue outQueue2, {data: 'ident'}, (err) ->
                     chai.expect(err).to.not.exist
 
+      describe 'Using prefetch=1', ->
+        it 'should only send one message at a time', (done) ->
+            
+
+
