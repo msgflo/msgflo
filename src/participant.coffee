@@ -94,11 +94,11 @@ class Participant extends EventEmitter
       return callback null
 
   setupPorts: (callback) ->
-    setupPort = (def, callback) =>
+    setupOutPort = (def, callback) =>
       return callback null if not def.queue
-      @messaging.createQueue 'TODO:distinquish', def.queue, callback
+      @messaging.createQueue 'outqueue', def.queue, callback
 
-    subscribePort = (def, callback) =>
+    setupInPort = (def, callback) =>
       return callback null if not def.queue
 
       callFunc = (msg) =>
@@ -109,14 +109,14 @@ class Participant extends EventEmitter
             return @messaging.nackMessage msg if err
             @messaging.ackMessage msg if msg
 
-      debug 'subscribed to', def.queue
-      @messaging.subscribeToQueue def.queue, callFunc, callback
+      @messaging.createQueue 'inqueue', def.queue, (err) =>
+        return callback err if err
+        @messaging.subscribeToQueue def.queue, callFunc, callback
+        debug 'subscribe to', def.queue
 
-    allports = @definition.outports.concat @definition.inports
-
-    async.map allports, setupPort, (err) =>
+    async.map @definition.outports, setupOutPort, (err) =>
       return callback err if err
-      async.map @definition.inports, subscribePort, (err) =>
+      async.map @definition.inports, setupInPort, (err) =>
         return callback err if err
         return callback null
 
