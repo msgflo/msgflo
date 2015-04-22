@@ -37,15 +37,17 @@ class Client
 
   ## Manipulating queues
   createQueue: (type, queueName, callback) ->
+    debug 'create queue', type, queueName
     options = {}
     if type == 'inqueue'
       @channel.assertQueue queueName, options, callback
     else
-      @channel.assertExchange queueName, 'fanout', options, (err) =>
+      exchangeName = queueName
+      @channel.assertExchange exchangeName, 'fanout', options, (err) =>
         return callback err if err
         # HACK: to make inqueue==outqueue work:
         @channel.assertQueue queueName, options, (err) =>
-          @channel.bindQueue queueName, queueName, '', {}, callback
+          @channel.bindQueue exchangeName, queueName, '', {}, callback
 
   removeQueue: (type, queueName, callback) -> # FIXME: do something here?
     return callback null
