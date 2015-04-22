@@ -12,7 +12,7 @@ class Client
 
   ## Broker connection management
   connect: (callback) ->
-    debug 'connect'
+    debug 'connect', @address
     amqp.connect @address, (err, conn) =>
       debug 'connected', err
       return callback err if err
