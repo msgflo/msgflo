@@ -59,7 +59,7 @@ class Client
     data = new Buffer JSON.stringify message
     routingKey = '' # ignored for fan-out exchanges
     @channel.publish exchangeName, routingKey, data, (err) ->
-      throw err if err
+      return callback err if err
     return callback null
 
   subscribeToQueue: (queueName, handler, callback) ->
