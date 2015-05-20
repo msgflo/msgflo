@@ -256,6 +256,13 @@ transportTests = (type) ->
               clients.sender.sendToQueue outQueue2, {data: 'ident'}, (err) ->
                 chai.expect(err).to.not.exist
 
+  describe 'Roundrobin binding', ->
+    describe 'data is ACKed', ->
+      it 'should be sent to only one consumer'
+      it 'should not be sent do deadletter queue'
+
+    describe 'data is NACKed', ->
+      it 'should be sent to deadletter queue'
 
 describe 'Transport', ->
   Object.keys(transports).forEach (type) =>
