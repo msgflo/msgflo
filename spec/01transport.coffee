@@ -14,6 +14,13 @@ transports =
   'MQTT': 'mqtt://localhost'
   'AMQP': 'amqp://localhost'
 
+randomString = (n) ->
+  text = ""
+  possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  for i in [0...n]
+    idx = Math.floor Math.random()*possible.length
+    text += possible.charAt idx
+  return text
 
 zip = () ->
   lengthArray = (arr.length for arr in arguments)
@@ -72,6 +79,19 @@ subscribeData = (handlers, callback) ->
     client.subscribeToQueue queue, ackHandler, cb
 
   async.map handlers, sub, callback
+
+subscribeDataNoAck = (handlers, callback) ->
+  sub = (h, cb) ->
+    [client, queue, handler] = h
+    client.subscribeToQueue queue, handler, cb
+  async.map handlers, sub, callback
+
+
+setupBindings = (broker, bindings, callback) ->
+  send = (b, cb) ->
+    broker.addBinding b, cb
+
+  async.map bindings, send, callback
 # End utils
 
 
@@ -263,12 +283,73 @@ transportTests = (type) ->
                 chai.expect(err).to.not.exist
 
   describe 'Roundrobin binding', ->
-    describe 'data is ACKed', ->
-      it 'should be sent to only one consumer'
-      it 'should not be sent do deadletter queue'
+    describe 'sending ACKed message, then NACKed message', ->
+      received = null
+      beforeEach (done) ->
+        received = { worker1: [], worker2: [], deadletter: [] }
+        r = randomString '3'
+        outq =
+          sender: 'outQ-'+r
+        inq =
+          worker1: 'workerQ-'+r
+          worker2: 'workerQ-'+r
+          deadletter: 'deadletterQ-'+r
+        clientNames = Object.keys inq
+        clientNames = clientNames.concat Object.keys(outq)
+        createConnectClients address, clientNames, (err, clients) ->
+          chai.expect(err).to.not.exist
 
-    describe 'data is NACKed', ->
-      it 'should be sent to deadletter queue'
+          queues = []
+          for clientName, queueName of outq
+            queues.push [ clients[clientName], 'outqueue', queueName ]
+          for clientName, queueName of inq
+            queues.push [ clients[clientName], 'inqueue', queueName ]
+
+          createQueues queues, (err) ->
+            chai.expect(err).to.not.exist
+
+            bindings = [
+              { type: 'roundrobin', src: outq.sender, tgt: inq.worker1, deadletter: inq.deadletter }
+            ]
+            setupBindings broker, bindings, (err) ->
+              chai.expect(err).to.not.exist
+
+              # Setup queue subscribers
+              ackFunc = (data) ->
+                return 'nackMessage' if data.foo == 'nack'
+                return 'ackMessage'
+              onReceives =
+                worker1: (msg) ->
+                  console.log 'worker1 got', msg.data
+                  received.worker1.push msg.data
+                  clients.worker1[ackFunc(msg.data)] msg, () ->
+                worker2: (msg) ->
+                  console.log 'worker2 got', msg.data
+                  received.worker2.push msg.data
+                  clients.worker2[ackFunc(msg.data)] msg, () ->
+                deadletter: (msg) ->
+                  console.log 'deadletter got', msg.data
+                  received.deadletter.push msg.data
+                  clients.deadletter.ackMessage msg, () ->
+                  done()
+              handlers = []
+              for name in Object.keys inq
+                handlers.push [ clients[name], inq[name], onReceives[name] ]
+              subscribeDataNoAck handlers, (err) ->
+                chai.expect(err).to.not.exist
+
+                packets = [
+                  [ clients.sender, outq.sender, {foo: 'ack'} ]
+                  [ clients.sender, outq.sender, {foo: 'nack'} ]
+                ]
+                sendPackets packets, (err) ->
+                  chai.expect(err).to.not.exist
+
+      it 'each message is only sent to one worker', () ->
+        workerData = received.worker1.concat received.worker2
+        chai.expect(workerData).to.have.length 2
+      it 'only NACKed message is sent to deadletter', ->
+        chai.expect(received.deadletter).to.eql [ { foo: 'nack'} ]
 
 describe 'Transport', ->
   Object.keys(transports).forEach (type) =>
