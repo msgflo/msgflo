@@ -35,7 +35,7 @@ class MessagingClient extends MessagingSystem
 
   # Participant registration
   registerParticipant: (part) ->
-    throw new Error 'Not Implemente'
+    throw new Error 'Not Implemented'
 
 exports.MessagingClient = MessagingClient
 
