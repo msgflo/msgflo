@@ -38,15 +38,18 @@ class Client extends interfaces.MessagingClient
   ## Manipulating queues
   createQueue: (type, queueName, callback) ->
     debug 'create queue', type, queueName
-    options = {}
+    queueOptions =
+      deadLetterExchange: 'dead-'+queueName # if not existing, messages will be dropped
+    exchangeOptions = {}
     if type == 'inqueue'
-      @channel.assertQueue queueName, options, callback
+      @channel.assertQueue queueName, queueOptions, callback
     else
       exchangeName = queueName
-      @channel.assertExchange exchangeName, 'fanout', options, (err) =>
+      @channel.assertExchange exchangeName, 'fanout', exchangeOptions, (err) =>
         return callback err if err
         # HACK: to make inqueue==outqueue work:
-        @channel.assertQueue queueName, options, (err) =>
+        @channel.assertQueue queueName, queueOptions, (err) =>
+          return callback err if err
           @channel.bindQueue exchangeName, queueName, '', {}, callback
 
   removeQueue: (type, queueName, callback) ->
@@ -69,6 +72,7 @@ class Client extends interfaces.MessagingClient
       exchange = ''
       routingKey = name
     else
+      # to fanout exchange
       exchange = name
       routingKey = ''
     @channel.publish exchange, routingKey, data
@@ -122,7 +126,34 @@ class MessageBroker extends Client
   addBinding: (binding, callback) ->
     # TODO: support roundrobin type
     debug 'Broker.addBinding', binding
-    @channel.bindQueue binding.tgt, binding.src, '', {}, callback
+    if binding.type == 'pubsub'
+      @channel.bindQueue binding.tgt, binding.src, '', {}, callback
+    else if binding.type == 'roundrobin'
+      # Create a direct exchange, for round-robin sending to consumers
+      deadLetterExchange = 'dead-'+binding.tgt
+      directExchange = 'out-'+binding.src
+
+      # XXX: do we have to pass routingKey=queueName when sending now??
+      pattern = ''
+      directOptions = {}
+      @channel.assertExchange directExchange, 'direct', directOptions, (err) =>
+        return callback err if err
+        # bind input
+        @channel.bindExchange directExchange, binding.src, pattern, (err), =>
+          return callback err if err
+          # bind output
+          @channel.bindQueue binding.tgt, directExchange, pattern, {}, (err) =>
+            return callback err if err
+
+          # Setup the deadletter exchange, bind to deadletter queue
+          # TODO: allow to as two independent steps? bind normal out, bind deadletter?
+          deadLetterOptions = {}
+          @channel.assertExchange deadLetterExchange, 'fanout', deadLetterOptions, (err) =>
+            return callback err if err
+            console.log 'binding deadletter', deadLetterExchange
+            @channel.bindQueue binding.deadletter, deadLetterExchange, pattern, {}, callback
+    else
+      return callback new Error 'Unsupported binding type: '+binding.type
   removeBinding: (binding, callback) ->
     # FIXME: implement
     return callback null
