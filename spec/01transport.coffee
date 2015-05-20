@@ -47,7 +47,7 @@ createBindQueues = (broker, queueMapping, callback) ->
     createQ = if type == 'outqueue' then srcQ else tgtQ
     client.createQueue type, createQ, (err) ->
       return cb err if err
-      broker.bindQueue srcQ, tgtQ, cb
+      broker.addBinding {type:'pubsub', src:srcQ, tgt:tgtQ}, cb
 
   async.map queueMapping, createBindQueue, callback
 
@@ -133,7 +133,7 @@ describe 'Transport', ->
               sender.createQueue 'outqueue', sharedQueue, (err) ->
                 chai.expect(err).to.be.a 'null'
 
-              broker.bindQueue sharedQueue, sharedQueue, (err) ->
+              broker.addBinding {type:'pubsub', src:sharedQueue, tgt:sharedQueue}, (err) ->
                 chai.expect(err).to.be.a 'null'
 
                 receiver.subscribeToQueue sharedQueue, onReceive, (err) ->
@@ -160,7 +160,7 @@ describe 'Transport', ->
               sender.createQueue 'outqueue', outQueue, (err) ->
                 chai.expect(err).to.be.a 'null'
 
-              broker.bindQueue outQueue, inQueue, (err) ->
+              broker.addBinding {type:'pubsub', src:outQueue, tgt:inQueue}, (err) ->
                 chai.expect(err).to.be.a 'null'
 
                 receiver.subscribeToQueue inQueue, onReceive, (err) ->

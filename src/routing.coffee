@@ -10,9 +10,12 @@ class Binder
   constructor: (@transport) ->
     @bindings = {}
 
-  bindQueue: (from, to, callback) ->
+  addBinding: (binding, callback) ->
+    from = binding.src
+    to = binding.tgt
+    # TODO: handle non-pubsub types
     id = bindingId from, to
-    debug 'Binder.bindQueue', id
+    debug 'Binder.addBinding', binding.type, id
     return callback null if @bindings[id] or from == to
 
     handler = (msg) =>
@@ -24,8 +27,8 @@ class Binder
       @bindings[id] = handler
       return callback null
 
-  unbindQueue: (from, to, callback) -> # FIXME: implement
-    debug 'Binder.unbindQueue'
+  removeBinding: (binding, callback) -> # FIXME: implement
+    debug 'Binder.removeBinding', binding
 
   listBindings: (callback) ->
     debug 'Binder.listBindings'
@@ -35,7 +38,7 @@ exports.Binder = Binder
 exports.binderMixin = (transport) ->
   b = new Binder transport
   transport._binder = b
-  transport.bindQueue = b.bindQueue.bind b
-  transport.unbindQueue = b.unbindQueue.bind b
+  transport.addBinding = b.addBinding.bind b
+  transport.removeBinding = b.removeBinding.bind b
   transport.listBindings = b.listBindings.bind b
 

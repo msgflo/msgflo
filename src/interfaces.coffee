@@ -41,11 +41,26 @@ exports.MessagingClient = MessagingClient
 
 class MessageBroker extends MessagingSystem
 
-  bindQueue: (from, to, callback) ->
+  # Manipulating queue bindings
+  # Binding object:
+  # {
+  #   type: 'roundrobin'|'pubsub'
+  #   src: 'source queue'
+  #   tgt: 'target queue'
+  #   $type: { 'type-specific-bar': 'foo' }
+  #   deadletter: 'queue name' # only for roundrobin
+  # }
+  # Types:
+  # pubsub: Messages are delivered to all consumers on queue. (default)
+  #              ack/nack does not impact sending
+  # roundrobin:  Messages are delivered to one consumer on queue.
+  #              If not acked or nacked, put to deadletter
+  addBinding: (binding, callback) ->
     throw new Error 'Not Implemented'
-  unbindQueue: (from, to, callback) ->
+  removeBinding: (binding, callback) ->
     throw new Error 'Not Implemented'
-  listBindings: (from, callback) ->
+  # @callback err, [Binding, Binding, ..]
+  listBindings: (callback) ->
     throw new Error 'Not Implemented'
 
   # Participant registration

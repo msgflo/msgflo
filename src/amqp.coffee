@@ -106,13 +106,15 @@ class MessageBroker extends Client
   constructor: (address, options) ->
     super address, options
 
-  bindQueue: (from, to, callback) ->
-    debug 'bind', from, to
-    @channel.bindQueue to, from, '', {}, callback
-  unbindQueue: (from, to, callback) ->
+  addBinding: (binding, callback) ->
+    # TODO: support roundrobin type
+    debug 'Broker.addBinding', binding
+    @channel.bindQueue binding.tgt, binding.src, '', {}, callback
+  removeBinding: (binding, callback) ->
+    # FIXME: implement
     return callback null
   listBindings: (from, callback) ->
-    return callback null
+    return callback null, []
     
   # Participant registration
   subscribeParticipantChange: (handler) ->

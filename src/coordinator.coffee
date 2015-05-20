@@ -106,7 +106,8 @@ class Coordinator extends EventEmitter
       srcQueue: findQueue fromId, 'outports', fromPort
       tgtQueue: findQueue toId, 'inports', toName
 
-    @broker.bindQueue edge.srcQueue, edge.tgtQueue, (err) =>
+    # TODO: support roundtrip
+    @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
       id = connId fromId, fromPort, toId, toName
       @connections[id] = edge
 
