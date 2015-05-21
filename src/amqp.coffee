@@ -49,8 +49,15 @@ class Client
         @channel.assertQueue queueName, options, (err) =>
           @channel.bindQueue exchangeName, queueName, '', {}, callback
 
-  removeQueue: (type, queueName, callback) -> # FIXME: do something here?
-    return callback null
+  removeQueue: (type, queueName, callback) ->
+    debug 'remove queue', type, queueName
+    if type == 'inqueue'
+      @channel.deleteQueue queueName, {}, callback
+    else
+      exchangeName = queueName
+      @channel.deleteExchange exchangeName, {}, (err) =>
+        return callback err if err
+        @channel.deleteQueue queueName, {}, callback
 
   ## Sending/Receiving messages
   sendToQueue: (exchangeName, message, callback) ->
