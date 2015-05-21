@@ -35,13 +35,24 @@ createConnectClients = (address, names, callback) ->
       ret[nc[0]] = nc[1]
     return callback null, ret
 
+createQueues = (queueMapping, callback) ->
+  createQueue = (det, cb) ->
+    [client, type, queueName] = det
+    client.removeQueue type, queueName, (err) ->
+      return cb err if err
+      client.createQueue type, queueName, cb
+
+  async.map queueMapping, createQueue, callback
+
 createBindQueues = (broker, queueMapping, callback) ->
   createBindQueue = (det, cb) ->
     [client, type, srcQ, tgtQ] = det
     createQ = if type == 'outqueue' then srcQ else tgtQ
-    client.createQueue type, createQ, (err) ->
+    client.removeQueue type, createQ, (err) ->
       return cb err if err
-      broker.addBinding {type:'pubsub', src:srcQ, tgt:tgtQ}, cb
+      client.createQueue type, createQ, (err) ->
+        return cb err if err
+        broker.addBinding {type:'pubsub', src:srcQ, tgt:tgtQ}, cb
 
   async.map queueMapping, createBindQueue, callback
 
@@ -95,11 +106,12 @@ transportTests = (type) ->
         chai.expect(msg).to.include.keys 'data'
         chai.expect(msg.data).to.eql payload
         done()
-      createConnectClients ['sender', 'receiver'], (clients, err) ->
-        clients.receiver.createQueue 'inqueue', sharedQueue, (err) ->
-          chai.expect(err).to.be.a 'null'
-          clients.sender.createQueue 'outqueue', sharedQueue, (err) ->
-            chai.expect(err).to.be.a 'null'
+      createConnectClients address, ['sender', 'receiver'], (err, clients) ->
+        createQueues [
+          [ clients.receiver, 'inqueue', sharedQueue ]
+          [ clients.sender, 'outqueue', sharedQueue ]
+        ], (err) ->
+          chai.expect(err).to.not.exist
 
           clients.receiver.subscribeToQueue sharedQueue, onReceive, (err) ->
             chai.expect(err).to.be.a 'null'
@@ -115,11 +127,12 @@ transportTests = (type) ->
         chai.expect(msg).to.include.keys 'data'
         chai.expect(msg.data).to.eql payload
         done()
-      createConnectClients ['sender', 'receiver'], (clients, err) ->
-        clients.receiver.createQueue 'inqueue', sharedQueue, (err) ->
-          chai.expect(err).to.be.a 'null'
-          clients.sender.createQueue 'outqueue', sharedQueue, (err) ->
-            chai.expect(err).to.be.a 'null'
+      createConnectClients address, ['sender', 'receiver'], (err, clients) ->
+        createQueues [
+          [ clients.receiver, 'inqueue', sharedQueue ]
+          [ clients.sender, 'outqueue', sharedQueue ]
+        ], (err) ->
+          chai.expect(err).to.not.exist
 
           broker.addBinding {type:'pubsub', src:sharedQueue, tgt:sharedQueue}, (err) ->
             chai.expect(err).to.be.a 'null'
@@ -135,16 +148,18 @@ transportTests = (type) ->
       payload = { foo: 'bar99' }
       inQueue = 'inqueue232'
       outQueue = 'outqueue353'
-      onReceive = (msg) ->
-        receiver.ackMessage msg
-        chai.expect(msg).to.include.keys 'data'
-        chai.expect(msg.data).to.eql payload
-        done()
-      createConnectClients ['sender', 'receiver'], (err) ->
-        clients.receiver.createQueue 'inqueue', inQueue, (err) ->
-          chai.expect(err).to.be.a 'null'
-          clients.sender.createQueue 'outqueue', outQueue, (err) ->
-            chai.expect(err).to.be.a 'null'
+      createConnectClients address, ['sender', 'receiver'], (err, clients) ->
+        createQueues [
+          [ clients.receiver, 'inqueue', inQueue ]
+          [ clients.sender, 'outqueue', outQueue ]
+        ], (err) ->
+          chai.expect(err).to.not.exist
+
+          onReceive = (msg) ->
+            clients.receiver.ackMessage msg
+            chai.expect(msg).to.include.keys 'data'
+            chai.expect(msg.data).to.eql payload
+            done()
 
           broker.addBinding {type:'pubsub', src:outQueue, tgt:inQueue}, (err) ->
             chai.expect(err).to.be.a 'null'
@@ -181,7 +196,7 @@ transportTests = (type) ->
 
         inQueue = 'inqueue27'
 
-        clients.receive.createQueue 'inqueue', inQueue, (err) ->
+        createQueues [ [ clients.receive, 'inqueue', inQueue] ], (err) ->
           chai.expect(err).to.not.exist
           clients.receive.subscribeToQueue inQueue, onReceive, (err) ->
             chai.expect(err).to.not.exist
@@ -229,7 +244,7 @@ transportTests = (type) ->
           r3: (msg) -> checkExpected 'r3', msg
 
         outQueue2 = 'outqueue39'
-        clients.sender.createQueue 'outqueue', outQueue2, (err) ->
+        createQueues [ [clients.sender, 'outqueue', outQueue2] ], (err) ->
           chai.expect(err).to.not.exist
 
           # Bind same outqueue to all inqueues
