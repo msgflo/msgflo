@@ -15,12 +15,6 @@ transports =
   'AMQP': 'amqp://localhost'
 
 
-connectAll = (clients, callback) ->
-  connect = (c, cb) ->
-    c.connect cb
-
-  async.map clients, connect, callback
-
 zip = () ->
   lengthArray = (arr.length for arr in arguments)
   length = Math.min(lengthArray...)
@@ -67,7 +61,10 @@ subscribeData = (handlers, callback) ->
     client.subscribeToQueue queue, ackHandler, cb
 
   async.map handlers, sub, callback
+# End utils
 
+
+# Tests
 transportTests = (type) ->
   address = transports[type]
   broker = null
@@ -92,55 +89,49 @@ transportTests = (type) ->
 
   describe 'inqueue==outqueue without binding', ->
     it 'sending should be received on other end', (done) ->
-      sender = transport.getClient address
-      receiver = transport.getClient address
       payload = { foo: 'bar91' }
       sharedQueue = 'myqueue33'
       onReceive = (msg) ->
         chai.expect(msg).to.include.keys 'data'
         chai.expect(msg.data).to.eql payload
         done()
-      connectAll [sender, receiver], (err) ->
-        receiver.createQueue 'inqueue', sharedQueue, (err) ->
+      createConnectClients ['sender', 'receiver'], (clients, err) ->
+        clients.receiver.createQueue 'inqueue', sharedQueue, (err) ->
           chai.expect(err).to.be.a 'null'
-          sender.createQueue 'outqueue', sharedQueue, (err) ->
+          clients.sender.createQueue 'outqueue', sharedQueue, (err) ->
             chai.expect(err).to.be.a 'null'
 
-          receiver.subscribeToQueue sharedQueue, onReceive, (err) ->
+          clients.receiver.subscribeToQueue sharedQueue, onReceive, (err) ->
             chai.expect(err).to.be.a 'null'
-          sender.sendToQueue sharedQueue, payload, (err) ->
+          clients.sender.sendToQueue sharedQueue, payload, (err) ->
             chai.expect(err).to.be.a 'null'
 
 
   describe 'inqueue==outqueue with binding', ->
     it 'sending should be received on other end', (done) ->
-      sender = transport.getClient address
-      receiver = transport.getClient address
       payload = { foo: 'bar92' }
       sharedQueue = 'myqueue35'
       onReceive = (msg) ->
         chai.expect(msg).to.include.keys 'data'
         chai.expect(msg.data).to.eql payload
         done()
-      connectAll [sender, receiver], (err) ->
-        receiver.createQueue 'inqueue', sharedQueue, (err) ->
+      createConnectClients ['sender', 'receiver'], (clients, err) ->
+        clients.receiver.createQueue 'inqueue', sharedQueue, (err) ->
           chai.expect(err).to.be.a 'null'
-          sender.createQueue 'outqueue', sharedQueue, (err) ->
+          clients.sender.createQueue 'outqueue', sharedQueue, (err) ->
             chai.expect(err).to.be.a 'null'
 
           broker.addBinding {type:'pubsub', src:sharedQueue, tgt:sharedQueue}, (err) ->
             chai.expect(err).to.be.a 'null'
 
-            receiver.subscribeToQueue sharedQueue, onReceive, (err) ->
+            clients.receiver.subscribeToQueue sharedQueue, onReceive, (err) ->
               chai.expect(err).to.be.a 'null'
-            sender.sendToQueue sharedQueue, payload, (err) ->
+            clients.sender.sendToQueue sharedQueue, payload, (err) ->
               chai.expect(err).to.be.a 'null'
 
 
   describe 'outqueue bound to inqueue', ->
     it 'sending to inqueue, show up on outqueue', (done) ->
-      sender = transport.getClient address
-      receiver = transport.getClient address
       payload = { foo: 'bar99' }
       inQueue = 'inqueue232'
       outQueue = 'outqueue353'
@@ -149,18 +140,18 @@ transportTests = (type) ->
         chai.expect(msg).to.include.keys 'data'
         chai.expect(msg.data).to.eql payload
         done()
-      connectAll [sender, receiver], (err) ->
-        receiver.createQueue 'inqueue', inQueue, (err) ->
+      createConnectClients ['sender', 'receiver'], (err) ->
+        clients.receiver.createQueue 'inqueue', inQueue, (err) ->
           chai.expect(err).to.be.a 'null'
-          sender.createQueue 'outqueue', outQueue, (err) ->
+          clients.sender.createQueue 'outqueue', outQueue, (err) ->
             chai.expect(err).to.be.a 'null'
 
           broker.addBinding {type:'pubsub', src:outQueue, tgt:inQueue}, (err) ->
             chai.expect(err).to.be.a 'null'
 
-            receiver.subscribeToQueue inQueue, onReceive, (err) ->
+            clients.receiver.subscribeToQueue inQueue, onReceive, (err) ->
               chai.expect(err).to.be.a 'null'
-            sender.sendToQueue outQueue, payload, (err) ->
+            clients.sender.sendToQueue outQueue, payload, (err) ->
               chai.expect(err).to.be.a 'null'
 
 
