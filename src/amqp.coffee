@@ -106,7 +106,7 @@ class Client extends interfaces.MessagingClient
   nackMessage: (message) ->
     fields = message.amqp.fields
     debug 'NACK', fields.routingKey, fields.deliveryTag
-    @channel.nack message.amqp, false
+    @channel.nack message.amqp, false, false
 
   # Participant registration
   registerParticipant: (part, callback) ->
