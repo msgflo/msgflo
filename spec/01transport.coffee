@@ -322,15 +322,12 @@ transportTests = (type) ->
                 return 'ackMessage'
               onReceives =
                 worker1: (msg) ->
-                  console.log 'worker1 got', msg.data
                   received.worker1.push msg.data
                   clients.worker1[ackFunc(msg.data)] msg, () ->
                 worker2: (msg) ->
-                  console.log 'worker2 got', msg.data
                   received.worker2.push msg.data
                   clients.worker2[ackFunc(msg.data)] msg, () ->
                 deadletter: (msg) ->
-                  console.log 'deadletter got', msg.data
                   received.deadletter.push msg.data
                   clients.deadletter.ackMessage msg, () ->
                   done()

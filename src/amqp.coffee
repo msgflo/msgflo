@@ -150,7 +150,6 @@ class MessageBroker extends Client
           deadLetterOptions = {}
           @channel.assertExchange deadLetterExchange, 'fanout', deadLetterOptions, (err) =>
             return callback err if err
-            console.log 'binding deadletter', deadLetterExchange
             @channel.bindQueue binding.deadletter, deadLetterExchange, pattern, {}, callback
     else
       return callback new Error 'Unsupported binding type: '+binding.type
