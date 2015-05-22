@@ -13,6 +13,7 @@ install:
 - cmake .
 - sudo make install
 - cd ..
+- npm install
 before_script:
 - mosquitto -d
 - npm install -g grunt-cli
