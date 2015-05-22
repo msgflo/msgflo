@@ -100,6 +100,8 @@ transportTests = (type) ->
   address = transports[type]
   broker = null
 
+  describeIfRoundRobinSupport = if type == 'AMQP' then describe else describe.skip
+
   beforeEach (done) ->
     broker = transport.getBroker address
     broker.connect (err) ->
@@ -282,7 +284,7 @@ transportTests = (type) ->
               clients.sender.sendToQueue outQueue2, {data: 'ident'}, (err) ->
                 chai.expect(err).to.not.exist
 
-  describe 'Roundrobin binding', ->
+  describeIfRoundRobinSupport 'Roundrobin binding', ->
     describe 'sending ACKed message, then NACKed message', ->
       received = null
       beforeEach (done) ->
