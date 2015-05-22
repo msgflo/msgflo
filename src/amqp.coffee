@@ -31,11 +31,15 @@ class Client extends interfaces.MessagingClient
 
   disconnect: (callback) ->
     debug 'disconnect'
+    return callback null if not @connection
     return callback null if not @channel
     @channel.close (err) =>
-      debug 'close', err
+      debug 'channel closed', err
       @channel = null
-      return callback err
+      @connection.close (err) =>
+        debug 'connection closed'
+        @connection = null
+        return callback err
 
   ## Manipulating queues
   createQueue: (type, queueName, callback) ->
