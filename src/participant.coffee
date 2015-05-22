@@ -179,3 +179,4 @@ startParticipant = (library, client, componentName, id, callback) ->
 
 exports.Participant = Participant
 exports.startParticipant = startParticipant
+exports.instantiateDefinition = instantiateDefinition
