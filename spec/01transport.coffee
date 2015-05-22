@@ -311,7 +311,8 @@ transportTests = (type) ->
             chai.expect(err).to.not.exist
 
             bindings = [
-              { type: 'roundrobin', src: outq.sender, tgt: inq.worker1, deadletter: inq.deadletter }
+              { type: 'roundrobin', tgt: inq.worker1, deadletter: inq.deadletter }
+              { type: 'roundrobin', src: outq.sender, tgt: inq.worker1 }
             ]
             setupBindings broker, bindings, (err) ->
               chai.expect(err).to.not.exist

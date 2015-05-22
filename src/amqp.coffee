@@ -1,6 +1,7 @@
 
 amqp = require 'amqplib/callback_api'
 debug = require('debug')('msgflo:amqp')
+async = require 'async'
 
 interfaces = require './interfaces'
 
@@ -135,28 +136,35 @@ class MessageBroker extends Client
     if binding.type == 'pubsub'
       @channel.bindQueue binding.tgt, binding.src, '', {}, callback
     else if binding.type == 'roundrobin'
-      # Create a direct exchange, for round-robin sending to consumers
-      deadLetterExchange = 'dead-'+binding.tgt
-      directExchange = 'out-'+binding.src
-
-      # XXX: do we have to pass routingKey=queueName when sending now??
       pattern = ''
-      directOptions = {}
-      @channel.assertExchange directExchange, 'direct', directOptions, (err) =>
-        return callback err if err
-        # bind input
-        @channel.bindExchange directExchange, binding.src, pattern, (err), =>
+      bindSrcTgt = (callback) =>
+        # TODO: avoid creating the direct exchange?
+        debug 'binding src to tgt', binding.src, binding.tgt
+        directExchange = 'out-'+binding.src
+        directOptions = {}
+        @channel.assertExchange directExchange, 'direct', directOptions, (err) =>
           return callback err if err
-          # bind output
-          @channel.bindQueue binding.tgt, directExchange, pattern, {}, (err) =>
+          # bind input
+          @channel.bindExchange directExchange, binding.src, pattern, (err), =>
             return callback err if err
+            # bind output
+            @channel.bindQueue binding.tgt, directExchange, pattern, {}, (err) =>
+              return callback err
 
-          # Setup the deadletter exchange, bind to deadletter queue
-          # TODO: allow to as two independent steps? bind normal out, bind deadletter?
-          deadLetterOptions = {}
-          @channel.assertExchange deadLetterExchange, 'fanout', deadLetterOptions, (err) =>
-            return callback err if err
-            @channel.bindQueue binding.deadletter, deadLetterExchange, pattern, {}, callback
+      bindDeadLetter = (callback) =>
+        # Setup the deadletter exchange, bind to deadletter queue
+        debug 'binding deadletter queue', binding.deadletter, binding.tgt
+        deadLetterExchange = 'dead-'+binding.tgt
+        deadLetterOptions = {}
+        @channel.assertExchange deadLetterExchange, 'fanout', deadLetterOptions, (err) =>
+          return callback err if err
+          @channel.bindQueue binding.deadletter, deadLetterExchange, pattern, {}, callback
+
+      steps = []
+      steps.push bindSrcTgt if binding.src and binding.tgt
+      steps.push bindDeadLetter if binding.deadletter and binding.tgt
+      async.series steps, callback
+
     else
       return callback new Error 'Unsupported binding type: '+binding.type
   removeBinding: (binding, callback) ->
