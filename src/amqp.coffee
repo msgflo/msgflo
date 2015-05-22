@@ -4,7 +4,7 @@ debug = require('debug')('msgflo:amqp')
 
 interfaces = require './interfaces'
 
-class Client
+class Client extends interfaces.MessagingClient
   constructor: (@address, @options={}) ->
     @connection = null
     @channel = null
@@ -60,14 +60,20 @@ class Client
         @channel.deleteQueue queueName, {}, callback
 
   ## Sending/Receiving messages
-  sendToQueue: (exchangeName, message, callback) ->
+  sendTo: (type, name, message, callback) ->
     # queue must exists
-    debug 'send', exchangeName
+    debug 'sendTo', type, name, message
     data = new Buffer JSON.stringify message
-    routingKey = '' # ignored for fan-out exchanges
-    @channel.publish exchangeName, routingKey, data, (err) ->
-      return callback err if err
+    if type == 'inqueue'
+      # direct to queue
+      exchange = ''
+      routingKey = name
+    else
+      exchange = name
+      routingKey = ''
+    @channel.publish exchange, routingKey, data
     return callback null
+
 
   subscribeToQueue: (queueName, handler, callback) ->
     debug 'subscribe', queueName

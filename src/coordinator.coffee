@@ -75,7 +75,7 @@ class Coordinator extends EventEmitter
     debug 'sendTo', participantId, inport, message
     part = @participants[participantId]
     port = findPort part, 'inport', inport
-    @broker.sendToQueue port.queue, message, (err) ->
+    @broker.sendTo 'inqueue', port.queue, message, (err) ->
       throw err if err
 
   subscribeTo: (participantId, outport, handler) ->

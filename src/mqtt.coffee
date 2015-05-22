@@ -5,7 +5,7 @@ mqtt = require 'mqtt'
 interfaces = require './interfaces'
 routing = require './routing'
 
-class Client
+class Client extends interfaces.MessagingClient
   constructor: (@address, @options) ->
     @client = null
     @subscribers = {} # queueName -> [handler1, ...]
@@ -39,7 +39,7 @@ class Client
     return callback null
 
   ## Sending/Receiving messages
-  sendToQueue: (queueName, message, callback) ->
+  sendTo: (type, queueName, message, callback) ->
     published = (err, granted) =>
       debug 'published', err, granted
       return callback err if err

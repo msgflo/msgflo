@@ -38,9 +38,9 @@ class Client extends interfaces.MessagingClient
     @broker.removeQueue type, queueName, callback
 
   ## Sending/Receiving messages
-  sendToQueue: (queueName, message, callback) ->
+  sendTo: (type, queueName, message, callback) ->
     @_assertBroker callback
-    @broker.sendToQueue queueName, message, callback
+    @broker.sendTo type, queueName, message, callback
 
   subscribeToQueue: (queueName, handler, callback) ->
     @_assertBroker callback
@@ -96,7 +96,7 @@ class MessageBroker extends interfaces.MessageBroker
     return callback null
 
   ## Sending/Receiving messages
-  sendToQueue: (queueName, message, callback) ->
+  sendTo: (type, queueName, message, callback) ->
 #    console.log 'broker sendToQueue', queueName, Object.keys(@queues), @queues[queueName]
     @queues[queueName].send message
     return callback null
