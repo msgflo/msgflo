@@ -15,3 +15,5 @@ install:
 before_script:
 - mosquitto -d
 - npm install -g grunt-cli
+script:
+- npm test
