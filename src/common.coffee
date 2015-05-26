@@ -20,3 +20,20 @@ exports.clone = clone = (obj) ->
     newInstance[key] = clone obj[key]
 
   return newInstance
+
+exports.readGraph = (filepath, callback) ->
+  ext = path.extname filepath
+  fs.readFile filepath, { encoding: 'utf-8' }, (err, contents) =>
+    return callback err if err
+    try
+      if ext == '.fbp'
+        graph = fbp.parse contents
+      else
+        graph = JSON.parse contents
+      return callback null, graph
+    catch e
+      return callback e
+
+# Note: relies on convention
+exports.queueName = (role, port) ->
+  return "#{role}.#{port.toUpperCase()}"
