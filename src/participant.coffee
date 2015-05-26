@@ -130,7 +130,7 @@ class Participant extends EventEmitter
 
   # Sets up queues to match those defined in graph
   connectGraphEdges: (graph) ->
-    processName = @definition.role # TODO: support also 'role'
+    processName = @definition.role
 
     # If there are outbound connections
     # Set the output queue to equal to the input queue of the target
