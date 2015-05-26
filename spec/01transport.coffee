@@ -6,7 +6,6 @@ async = require 'async'
 Coordinator = require('../src/coordinator').Coordinator
 transport = require '../src/transport'
 common = require '../src/common'
-participants = require './fixtures/participants'
 
 # Note: most require running an external broker service
 transports =
