@@ -60,7 +60,7 @@ exports.bindings = setupBindings = (options, callback) ->
       return callback err if err
 
       addBindings broker, bindings, (err) ->
-        return callback err, bindings
+        return callback err, bindings, graph
 
 exports.parse = parse = (args) ->
   graph = null
