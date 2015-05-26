@@ -3,7 +3,6 @@ chance = require 'chance'
 
 msgflo = require '../..'
 
-random = new chance.Chance 10202
 
 HelloParticipant = (client, role) ->
 
@@ -82,4 +81,51 @@ DevNullParticipant = (client, role) ->
   return new msgflo.participant.Participant client, definition, process, role
 
 exports.DevNullSink = (c, i) -> new DevNullParticipant c, i
+exports.Drop = exports.DevNullSink
 
+
+RepeatParticipant = (client, role) ->
+
+  definition =
+    component: 'Repeat'
+    icon: 'file-word-o'
+    label: 'Repeats in data without changes'
+    inports: [
+      id: 'in'
+      type: 'any'
+    ]
+    outports: [
+      id: 'out'
+      type: 'any'
+    ]
+  process = (inport, indata, callback) ->
+    return callback 'out', null, indata
+  return new msgflo.participant.Participant client, definition, process, role
+
+exports.Repeat = (c, i) -> new RepeatParticipant c, i
+
+ErrorIfParticipant = (client, role) ->
+
+  definition =
+    component: 'ErrorIf'
+    icon: 'file-word-o'
+    label: 'Outputs Error if input is truthy else sends input on unchanged'
+    inports: [
+      id: 'in'
+      type: 'any'
+    ]
+    outports: [
+        id: 'out'
+        type: 'any'
+      ,
+        id: 'error'
+        type: 'error'
+    ]
+  process = (inport, indata, callback) ->
+    if indata.error
+      return callback 'error', new Error err.error, indata
+    else
+      return callback 'out', null, indata
+  return new msgflo.participant.Participant client, definition, process, role
+
+exports.ErrorIf = (c, i) -> new ErrorIfParticipant c, i

@@ -1,0 +1,5 @@
+# !runtime msgflo
+
+s_api(Repeat) OUT -> IN s_jobs(msgflo/RoundRobin) OUT -> IN s_worker(ErrorIf)
+s_worker OUT -> IN s_api
+s_jobs DEADLETTER -> DROP s_drop(Drop)

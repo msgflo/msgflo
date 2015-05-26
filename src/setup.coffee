@@ -1,5 +1,6 @@
 
 common = require './common'
+transport = require './transport'
 
 fbp = require 'fbp'
 async = require 'async'
@@ -89,8 +90,6 @@ exports.prettyFormatBindings = pretty = (bindings) ->
       lines.push "UNKNOWN binding type: #{b.type}"
 
   return lines.join '\n'
-
-
 
 exports.main = main = () ->
   options = parse process.argv
