@@ -41,9 +41,9 @@ class ParticipantManager
         return callback err if err
         return callback null
 
-    async.map @participants, stopParticipant, (err) ->
+    async.map @participants, stopParticipant, (err) =>
       return callback err if err
-      @participant = []
+      @participants = []
       return callback null
 
 exports.ParticipantManager = ParticipantManager
