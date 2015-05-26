@@ -1,0 +1,5 @@
+
+# !runtime msgflo
+imgflo_api(imgflo-server/HttpApi) NEWJOB -> IN imgflo_jobs(msgflo/RoundRobin) OUT -> JOB imgflo_worker(imgflo-server/ProcessImage)
+imgflo_worker JOBRESULT -> JOBRESULT imgflo_api
+imgflo_jobs DEADLETTER -> IN drop(Drop)

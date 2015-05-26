@@ -22,6 +22,10 @@ exports.clone = clone = (obj) ->
   return newInstance
 
 exports.readGraph = (filepath, callback) ->
+  path = require 'path'
+  fs = require 'fs'
+  fbp = require 'fbp'
+
   ext = path.extname filepath
   fs.readFile filepath, { encoding: 'utf-8' }, (err, contents) =>
     return callback err if err

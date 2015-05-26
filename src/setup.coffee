@@ -13,25 +13,34 @@ queueName = (c) ->
   return common.queueName c.process, c.port
 
 # Extact the queue bindings, including types from an FBP graph definition
-graphBindings = (graph) ->
+exports.graphBindings = graphBindings = (graph) ->
   bindings = []
-  roundRobins = []
-  for name, process of graph
-    roundRobins.push name if process.component == 'msgflo/RoundRobin'
+  roundRobins = {}
+  for name, process of graph.processes
+    continue if process.component != 'msgflo/RoundRobin'
+    roundRobins[name] =
+      type: 'roundrobin'
 
-  for conn in graph
-    if conn.src.process in roundRobins
-      bindings.push
-        type: 'roundrobin'
-    else if conn.tgt.process in roundRobins
-      bindings.push
-        type: 'roundrobin'
+  roundRobinNames = Object.keys roundRobins
+  for conn in graph.connections
+    if conn.src.process in roundRobinNames
+      binding = roundRobins[conn.src.process]
+      if conn.src.port == 'deadletter'
+        binding.deadletter = queueName conn.tgt
+      else
+        binding.tgt = queueName conn.tgt
+    else if conn.tgt.process in roundRobinNames
+      binding = roundRobins[conn.tgt.process]
+      binding.src = queueName conn.src
     else
       # ordinary connection
       bindings.push
         type: 'pubsub'
         src: queueName conn.src
-        tgt: queueName conn.src
+        tgt: queueName conn.tgt
+
+  for n, binding of roundRobins
+    bindings.push binding
 
   return bindings
 
@@ -59,17 +68,17 @@ exports.parse = parse = (args) ->
   program.graphfile = graph
   return program
 
-pretty = (bindings) ->
+exports.prettyFormatBindings = pretty = (bindings) ->
   lines = []
   for b in bindings
     type = b.type.toUpperCase()
     if b.type == 'roundrobin'
       if b.tgt and b.deadletter
-        lines.push "DEADLETTER #{b.tgt} -> #{b.deadletter}"
-      if b.tgt and b.src 
-        lines.push "ROUNDROBIN #{b.src} -> #{b.tgt}"
+        lines.push "DEADLETTER:\t #{b.tgt} -> #{b.deadletter}"
+      if b.tgt and b.src
+        lines.push "ROUNDROBIN:\t #{b.src} -> #{b.tgt}"
     else if b.type == 'pubsub'
-      lines.push "#{type} #{b.src} -> #{b.tgt}"
+      lines.push "PUBSUB: \t #{b.src} -> #{b.tgt}"
     else
       lines.push "UNKNOWN binding type: #{b.type}"
 
