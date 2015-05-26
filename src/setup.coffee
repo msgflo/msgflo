@@ -44,7 +44,13 @@ exports.graphBindings = graphBindings = (graph) ->
 
   return bindings
 
+exports.normalizeOptions = normalize = (options) ->
+  options.broker = process.env['MSGFLO_BROKER'] if not options.broker
+  options.broker = process.env['CLOUDAMQP_URL'] if not options.broker
+  return options
+
 exports.bindings = setupBindings = (options, callback) ->
+  options = normalize options
   common.readGraph options.graphfile, (err, graph) ->
     return callback err if err
     bindings = graphBindings graph
