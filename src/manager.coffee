@@ -34,6 +34,7 @@ class ParticipantManager
 
   start: (callback) ->
     runtime = @graph.properties?.environment?.runtime
+    runtime = 'msgflo' if not runtime
     return callback null if runtime != 'msgflo' # no-op
 
     startProcesses @library, @address, runtime, @graph.processes, (err, parts) =>
