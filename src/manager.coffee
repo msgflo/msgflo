@@ -22,7 +22,7 @@ startProcesses = (library, address, runtime, processes, callback) ->
     return component != 'msgflo/RoundRobin'
 
   participants = Object.keys(processes).filter isParticipant
-  debug 'starting participants', participants, processes
+  debug 'starting participants', participants
   async.map participants, start, (err, parts) ->
     debug 'participants started', err, parts.length
     return callback err, parts

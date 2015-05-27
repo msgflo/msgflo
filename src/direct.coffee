@@ -39,6 +39,7 @@ class Client extends interfaces.MessagingClient
 
   ## Sending/Receiving messages
   sendTo: (type, queueName, message, callback) ->
+    debug 'client sendTo', type, queueName
     @_assertBroker callback
     @broker.sendTo type, queueName, message, callback
 
