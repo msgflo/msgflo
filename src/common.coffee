@@ -27,16 +27,17 @@ exports.readGraph = (filepath, callback) ->
   fbp = require 'fbp'
 
   ext = path.extname filepath
-  fs.readFile filepath, { encoding: 'utf-8' }, (err, contents) =>
+  fs.readFile filepath, { encoding: 'utf-8' }, (err, contents) ->
     return callback err if err
     try
       if ext == '.fbp'
         graph = fbp.parse contents
       else
         graph = JSON.parse contents
-      return callback null, graph
     catch e
       return callback e
+    return callback null, graph
+
 
 # Note: relies on convention
 exports.queueName = (role, port) ->
