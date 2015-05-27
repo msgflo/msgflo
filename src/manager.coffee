@@ -17,8 +17,13 @@ startProcesses = (library, address, runtime, processes, callback) ->
     participant.startParticipant library, client, component, processId, (err, part) ->
       return cb err, part
 
-  debug 'starting participants', processes
-  async.map Object.keys(processes), start, (err, parts) ->
+  isParticipant = (name) ->
+    component = processes[name].component
+    return component != 'msgflo/RoundRobin'
+
+  participants = Object.keys(processes).filter isParticipant
+  debug 'starting participants', participants, processes
+  async.map participants, start, (err, parts) ->
     debug 'participants started', err, parts.length
     return callback err, parts
 
