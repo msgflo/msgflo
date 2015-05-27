@@ -173,7 +173,9 @@ startParticipant = (library, client, componentName, id, callback) ->
   debug 'starting', componentName, id
 
   component = library[componentName]
+  return callback new Error "No Participant factory in library for #{componentName}" if not component?
   part = component client, id
+
   part.start (err) ->
     return callback err, part
 
