@@ -20,7 +20,7 @@ class Binder
 
     handler = (msg) =>
       debug 'edge message', msg
-      @transport.sendToQueue to, msg.data, (err) ->
+      @transport.sendTo 'outqueue', to, msg.data, (err) ->
         throw err if err
     @transport.subscribeToQueue from, handler, (err) =>
       return callback err if err

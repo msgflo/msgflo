@@ -89,7 +89,7 @@ class Participant extends EventEmitter
     port = findPort @definition, 'outport', outport
     @emitData port.id, data
     if port.queue
-      @messaging.sendToQueue port.queue, data, callback
+      @messaging.sendTo 'outqueue', port.queue, data, callback
     else
       return callback null
 

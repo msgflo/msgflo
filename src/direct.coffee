@@ -59,7 +59,7 @@ class Client extends interfaces.MessagingClient
         protocol: 'discovery'
         command: 'participant'
         payload: part
-      @sendToQueue 'fbp', msg, callback
+      @sendTo 'outqueue', 'fbp', msg, callback
 
 class Queue extends EventEmitter
   constructor: () ->
