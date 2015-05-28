@@ -72,8 +72,10 @@ class Client extends interfaces.MessagingClient
   ## Sending/Receiving messages
   sendTo: (type, name, message, callback) ->
     # queue must exists
-    debug 'sendTo', type, name, message
     data = new Buffer JSON.stringify message
+    showLimit = 80
+    dataShow = if data.length > showLimit then data.slice(0, showLimit)+'...' else data
+    debug 'sendTo', type, name, dataShow
     if type == 'inqueue'
       # direct to queue
       exchange = ''
