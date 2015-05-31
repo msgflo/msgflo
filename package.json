@@ -38,6 +38,11 @@
     "mocha": "~1.21.0"
   },
   "keywords": [],
+  "bin": {
+    "msgflo": "./bin/msgflo",
+    "msgflo-dump-message": "./bin/msgflo-dump-message",
+    "msgflo-setup": "./bin/msgflo-setup"
+  },
   "scripts": {
     "test": "grunt test"
   }
