@@ -130,6 +130,7 @@ class Participant extends EventEmitter
 
   # Sets up queues to match those defined in graph
   connectGraphEdges: (graph) ->
+    console.log 'WARN: msgflo.Participant::connectGraphEdges() is deprecated. Use msgflo.setup.setupBindings() instead'
     processName = @definition.role
 
     # If there are outbound connections
@@ -146,6 +147,7 @@ class Participant extends EventEmitter
         ports[0].queue = tgtQueue
 
   connectGraphEdgesFile: (filepath, callback) ->
+    console.log 'WARN: msgflo.Participant::connectGraphEdgesFile() is deprecated. Use msgflo.setup.setupBindings() instead'
     ext = path.extname filepath
     fs.readFile filepath, { encoding: 'utf-8' }, (err, contents) =>
       return callback err if err
