@@ -46,6 +46,7 @@ class Participant:
 def sendParticipantDefinition(channel, d):
   msg = haigha_Message(json.dumps(d))
   channel.basic.publish(msg, '', 'fbp')
+  print 'sent discovery message', msg
   return
 
 def setupQueue(part, channel, direction, port):
@@ -129,8 +130,8 @@ class GeventEngine(object):
 class Repeat(Participant):
   def __init__(self, role):
     d = {
-      'component': 'Repeat',
-      'id': role
+      'component': 'PythonRepeat',
+      'id': role,
     }
     Participant.__init__(self, d, role)
 
@@ -145,12 +146,16 @@ def main():
   GeventEngine(p, waiter.set)
   
   print "Running"
+  sys.stdout.flush()
   waiter.wait()
+  print "Shutdown"
+  sys.stdout.flush()
 
   return
 
-
 if __name__ == '__main__':
+  print 'Starting'
+  sys.stdout.flush()
   logging.basicConfig()
   main()
 
