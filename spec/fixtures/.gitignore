@@ -1,0 +1,5 @@
+gevent
+haigha
+greenlet
+*.so
+*egg-info
