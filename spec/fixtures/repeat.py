@@ -43,6 +43,12 @@ class Participant:
   def process(self, inport, inmsg):
     raise NotImplementedError('IParticipant.process()')
 
+  def ack(self, msg):
+    self._runtime._channel.ack(msg.delivery_tag)
+
+  def nack(self, msg):
+    self._runtime._channel.nack(msg.delivery_tag)
+
 def sendParticipantDefinition(channel, d):
   msg = haigha_Message(json.dumps(d))
   channel.basic.publish(msg, '', 'fbp')
@@ -58,7 +64,6 @@ def setupQueue(part, channel, direction, port):
 
     msg.data = json.loads(msg.body.decode("utf-8"))
     part.process(port, msg)
-    # FIXME: ACK / NACK
     return
 
   if 'in' in direction:
@@ -146,7 +151,7 @@ class Repeat(Participant):
 
   def process(self, inport, msg):
     self.send('out', msg.data)
-    # TODO> support ACK/NACK
+    self.ack(msg)
 
 
 def main():
