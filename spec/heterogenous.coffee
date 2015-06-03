@@ -8,6 +8,7 @@ child_process = require 'child_process'
 python = process.env.PYTHON or 'python'
 foreignParticipants =
   'PythonRepeat': [python, path.join __dirname, 'fixtures', './repeat.py']
+#  'CppRepeat': [python, path.join __dirname, 'fixtures', './repeat-cpp']
 
 startProcess = (args, callback) ->
   prog = args[0]
@@ -37,39 +38,34 @@ startForeign = (name, callback) ->
   args = foreignParticipants[name]
   return startProcess args, callback
 
-describe 'Heterogenous', ->
-  address = 'amqp://localhost'
-  broker = null
+testParticipant = (state, name) ->
 
-  beforeEach (done) ->
-    broker = msgflo.transport.getBroker address
-    broker.connect done
-  afterEach (done) ->
-    broker.disconnect done
-
-  # TODO: make parametric over the participants
-  describe 'PythonRepeat participant', ->
+  describe "#{name} participant", ->
     participant = null
     beforeEach (done) ->
       @timeout 4000
-      participant = startForeign 'PythonRepeat', done
+      participant = startForeign name, done
     afterEach (done) ->
       participant.kill()
       done()
 
     describe 'when started', ->
       it 'sends definition on fbp queue', (done) ->
+        broker = state.broker
+
         onDiscovery = (msg) ->
           def = msg.data
           chai.expect(def).to.be.an 'object'
           chai.expect(def).to.have.keys ['id', 'icon', 'component', 'label', 'inports', 'outports']
-          broker.ackMessage msg
-          return if def.component != 'PythonRepeat'
+          state.broker.ackMessage msg
+          return if def.component != name
           done()
-        broker.subscribeParticipantChange onDiscovery
+        state.broker.subscribeParticipantChange onDiscovery
 
     describe 'sending data on inport queue', ->
       it 'repeats the same data on outport queue', (done) ->
+        broker = state.broker
+
         input = { bar: 'foo' }
         onReceive = (msg) ->
           broker.ackMessage msg
@@ -93,4 +89,22 @@ describe 'Heterogenous', ->
             broker.subscribeToQueue receiveQueue, onReceive, (err) ->
               chai.expect(err).to.not.exist
               setTimeout send, 1000 # HACK: wait for inqueue to be setup
+
+
+
+describe 'Heterogenous', ->
+  address = 'amqp://localhost'
+  g =
+    broker: null
+
+  beforeEach (done) ->
+    g.broker = msgflo.transport.getBroker address
+    g.broker.connect done
+  afterEach (done) ->
+    g.broker.disconnect done
+
+  names = Object.keys foreignParticipants
+  names.forEach (name) ->
+    testParticipant g, name
+
 
