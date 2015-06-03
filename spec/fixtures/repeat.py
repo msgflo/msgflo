@@ -1,0 +1,156 @@
+#!/usr/bin/env python
+
+import sys, os, json
+sys.path.append(os.path.abspath("."))
+
+import logging
+
+import gevent
+import gevent.event
+
+from haigha.connection import Connection as haigha_Connection
+from haigha.message import Message as haigha_Message
+
+def addDefaultQueue(p, role):
+  defaultQueue = '%s.%s' % (role, p['id'].upper())
+  p.setdefault('queue', defaultQueue)
+  return p
+
+def normalizeDefinition(d, role):
+  # Apply defaults
+  d.setdefault('icon', 'file-word-o')
+  d.setdefault('label', "")
+  inports = d.setdefault('inports', [
+      { 'id': 'in', 'type': 'any' }
+  ])
+  outports = d.setdefault('outports', [
+      { 'id': 'out', 'type': 'any' }
+  ])
+  inports = [addDefaultQueue(p, role) for p in inports]
+  outports = [addDefaultQueue(p, role) for p in outports]
+
+  return d
+
+class Participant:
+  def __init__(self, d, role):
+    self.definition = normalizeDefinition(d, role)
+
+  def send(self, outport, outdata):
+    if not self._runtime:
+      return
+    self._runtime._send(outport, outdata)
+
+  def process(self, inport, indata):
+    raise NotImplementedError('IParticipant.process()')
+
+def sendParticipantDefinition(channel, d):
+  msg = haigha_Message(json.dumps(d))
+  channel.basic.publish(msg, '', 'fbp')
+  return
+
+def setupQueue(part, channel, direction, port):
+  queue = port['queue']
+
+  def handleInput(msg):
+    print "Received message: %s" % (msg,)
+    part.process(port, msg)
+    # FIXME: ACK / NACK
+    return
+
+  if 'in' in direction:
+    channel.queue.declare(queue)
+    channel.basic.consume(queue=queue, consumer=handleInput)
+  else:
+    channel.exchange.declare(queue, 'fanout')
+
+class GeventEngine(object):
+
+  def __init__(self, participant, done_cb):
+    self._done_cb = done_cb
+    self.participant = participant
+    self.participant._runtime = self
+
+    # Connect to AMQP broker with default connection and authentication
+    # settings (assumes broker is on localhost)
+    self._conn = haigha_Connection(transport='gevent',
+                                   close_cb=self._connection_closed_cb,
+                                   logger=logging.getLogger())
+
+    # Start message pump
+    self._message_pump_greenlet = gevent.spawn(self._message_pump_greenthread)
+
+    # Create message channel
+    self._channel = self._conn.channel()
+    self._channel.add_close_listener(self._channel_closed_cb)
+
+    sendParticipantDefinition(self._channel, self.participant.definition)
+
+    # Create and configure message exchange and queue
+    for p in self.participant.definition['inports']:
+      setupQueue(self.participant, self._channel, 'in', p)
+    for p in self.participant.definition['outports']:
+      setupQueue(self.participant, self._channel, 'out', p)
+
+  def _send(self, inport, indata):
+    msg = haigha_Message(indata)
+    print "Publising message: %s" % (msg,)
+    inports = self.participant.definition['inports']
+    inport = [p for p in inports if inport == inports['id']][0]
+    self._channel.basic.publish(msg, inport['queue'], '')
+    return
+  
+  def _message_pump_greenthread(self):
+    try:
+      while self._conn is not None:
+        # Pump
+        self._conn.read_frames()
+        # Yield to other greenlets so they don't starve
+        gevent.sleep()
+    finally:
+      self._done_cb()
+    return 
+  
+  def _channel_closed_cb(self, ch):
+    print "AMQP channel closed; close-info: %s" % (
+      self._channel.close_info,)
+    self._channel = None
+    
+    # Initiate graceful closing of the AMQP broker connection
+    self._conn.close()
+    return
+  
+  def _connection_closed_cb(self):
+    print "AMQP broker connection closed; close-info: %s" % (
+      self._conn.close_info,)
+    self._conn = None
+    return
+
+
+class Repeat(Participant):
+  def __init__(self, role):
+    d = {
+      'component': 'Repeat',
+      'id': role
+    }
+    Participant.__init__(self, d, role)
+
+  def process(self, inport, data):
+    self.send('out', data)
+
+
+def main():
+  waiter = gevent.event.AsyncResult()
+  
+  p = Repeat('repeat')
+  GeventEngine(p, waiter.set)
+  
+  print "Running"
+  waiter.wait()
+
+  return
+
+
+if __name__ == '__main__':
+  logging.basicConfig()
+  main()
+
