@@ -11,13 +11,17 @@ Each node can be implemented in different languages, and be a FBP runtime intern
 
 ## Status
 
-**Experimental**
+**Production**
 
-* Coordinator can discover particants and communicate between them
-* Coordinator implements basic FBP runtime protocol, can connect edges using Flowhub
-* A convenience interface allows setting up non-FBP node.js code as participants
+* Used at [TheGrid](https://thegrid.io) for all workers,
+including in [imgflo-server](https://github.com/jonnor/imgflo-server)
 * [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo)
-allows using NoFlo as the participants
+makes it super easy to use NoFlo in the participants
+* [msgflo.Participant](./src/participant.coffee) makes it easy to set up plain [Node.js](http://nodejs.org/) participants
+* Production support for AMQP/RabbitMQ. *Experimental support for MQTT and direct* transports.
+* *Non-Node.js/NoFlo participant currently untested*
+* Coordinator implements basic [FBP runtime protocol](http://noflojs.org/documentation/protocol/). Can enumerate partipants and connect edges using Flowhub
+
 
 ## Usecases
 
@@ -48,6 +52,55 @@ Some devices act as sensors, some as actuators and some provide computation.
 
 Typical execution environments include Embedded Linux, microcontrollers.
 Typical messaging systems used are MQTT.
+
+
+## Usage
+
+Setup a NoFlo participant using noflo-runtime-msgflo
+
+    noflo-runtime-msgflo --name readenv --graph core/ReadEnv --broker amqp://localhost
+
+Setup a Node.js participant using msgflo.Participant (CoffeeScript)
+
+    msgflo = require 'msgflo'
+
+    RepeatParticipant = (client, role) ->
+      definition =
+        component: 'Repeat'
+        icon: 'file-word-o'
+        label: 'Repeats in data without changes'
+        inports: [
+          id: 'in'
+          type: 'any'
+        ]
+        outports: [
+          id: 'out'
+          type: 'any'
+        ]
+      process = (inport, indata, callback) ->
+        return callback 'out', null, indata
+      return new msgflo.participant.Participant client, definition, process, role
+
+    client =  msgflo.transport.getClient 'amqp://localhost'
+    worker = new RepeatParticipant client, 'repeater'
+    worker.start (err) ->
+      throw err if err
+      console.log 'Worker started'
+
+Define how the participants form a network (.FBP DSL)
+
+    # FILE: myservice.fbp
+    readenv(core/ReadEnv) OUT -> IN repeater(Repeat)
+
+Setup the network
+
+    msgflo-setup --graph ./myservice.fbp --broker amqp://localhost
+
+
+...
+
+    # TODO: show how to send/receive data for testing the setup
+    # TODO
 
 
 ## Debugging
