@@ -40,7 +40,7 @@ class Participant:
       return
     self._runtime._send(outport, outdata)
 
-  def process(self, inport, indata):
+  def process(self, inport, inmsg):
     raise NotImplementedError('IParticipant.process()')
 
 def sendParticipantDefinition(channel, d):
@@ -54,6 +54,9 @@ def setupQueue(part, channel, direction, port):
 
   def handleInput(msg):
     print "Received message: %s" % (msg,)
+    sys.stdout.flush()
+
+    msg.data = json.loads(msg.body.decode("utf-8"))
     part.process(port, msg)
     # FIXME: ACK / NACK
     return
@@ -61,8 +64,12 @@ def setupQueue(part, channel, direction, port):
   if 'in' in direction:
     channel.queue.declare(queue)
     channel.basic.consume(queue=queue, consumer=handleInput)
+    print 'subscribed to', queue
+    sys.stdout.flush()
   else:
     channel.exchange.declare(queue, 'fanout')
+    print 'created outqueue', queue
+    sys.stdout.flush()
 
 class GeventEngine(object):
 
@@ -92,12 +99,14 @@ class GeventEngine(object):
     for p in self.participant.definition['outports']:
       setupQueue(self.participant, self._channel, 'out', p)
 
-  def _send(self, inport, indata):
-    msg = haigha_Message(indata)
-    print "Publising message: %s" % (msg,)
-    inports = self.participant.definition['inports']
-    inport = [p for p in inports if inport == inports['id']][0]
-    self._channel.basic.publish(msg, inport['queue'], '')
+  def _send(self, outport, data):
+    ports = self.participant.definition['outports']
+    print "Publising message: %s, %s, %s" % (data,outport,ports)
+    sys.stdout.flush()
+    serialized = json.dumps(data)
+    msg = haigha_Message(serialized)
+    port = [p for p in ports if outport == p['id']][0]
+    self._channel.basic.publish(msg, port['queue'], '')
     return
   
   def _message_pump_greenthread(self):
@@ -135,8 +144,9 @@ class Repeat(Participant):
     }
     Participant.__init__(self, d, role)
 
-  def process(self, inport, data):
-    self.send('out', data)
+  def process(self, inport, msg):
+    self.send('out', msg.data)
+    # TODO> support ACK/NACK
 
 
 def main():
@@ -154,8 +164,6 @@ def main():
   return
 
 if __name__ == '__main__':
-  print 'Starting'
-  sys.stdout.flush()
   logging.basicConfig()
   main()
 

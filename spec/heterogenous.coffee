@@ -69,5 +69,28 @@ describe 'Heterogenous', ->
         broker.subscribeParticipantChange onDiscovery
 
     describe 'sending data on inport queue', ->
-      it.skip 'repeats the same data on outport queue', ->
-        
+      it 'repeats the same data on outport queue', (done) ->
+        input = { bar: 'foo' }
+        onReceive = (msg) ->
+          broker.ackMessage msg
+          chai.expect(msg.data).to.eql input
+          done()
+
+        # TODO: look up in definition
+        receiveQueue = 'test.RECEIVE'
+        inQueue = 'repeat.IN'
+        outQueue = 'repeat.OUT'
+        binding = { type: 'pubsub', src: outQueue, tgt: receiveQueue }
+
+        send = () ->
+          broker.sendTo 'inqueue', inQueue, input, (err) ->
+            chai.expect(err).to.not.exist
+
+        broker.createQueue 'inqueue', receiveQueue, (err) ->
+          chai.expect(err).to.not.exist
+          broker.addBinding binding, (err) ->
+            chai.expect(err).to.not.exist
+            broker.subscribeToQueue receiveQueue, onReceive, (err) ->
+              chai.expect(err).to.not.exist
+              setTimeout send, 1000 # HACK: wait for inqueue to be setup
+
