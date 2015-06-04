@@ -1,5 +1,5 @@
 program = require 'commander'
-msgflo = require '../msgflo'
+msgflo_nodejs = require 'msgflo-nodejs'
 
 onError = (err) ->
   console.log err
@@ -16,7 +16,7 @@ main = ->
     .parse(process.argv)
 
   received = 0
-  messaging = msgflo.transport.getClient program.broker,
+  messaging = msgflo_nodejs.transport.getClient program.broker,
     prefetch: 1
   messaging.connect (err) ->
     return onError err if err
