@@ -7,7 +7,7 @@ child_process = require 'child_process'
 
 python = process.env.PYTHON or 'python'
 foreignParticipants =
-  'PythonRepeat': [python, path.join __dirname, 'fixtures', './repeat.py']
+#  'PythonRepeat': [python, path.join __dirname, 'fixtures', './repeat.py']
 #  'CppRepeat': [python, path.join __dirname, 'fixtures', './repeat-cpp']
 
 startProcess = (args, callback) ->
@@ -34,17 +34,17 @@ startProcess = (args, callback) ->
     return callback new Error data.toString()
   return child
 
-startForeign = (name, callback) ->
-  args = foreignParticipants[name]
+startForeign = (commands, name, callback) ->
+  args = commands[name]
   return startProcess args, callback
 
-testParticipant = (state, name) ->
+exports.testParticipant = testParticipant = (state, name) ->
 
   describe "#{name} participant", ->
     participant = null
     beforeEach (done) ->
       @timeout 4000
-      participant = startForeign name, done
+      participant = startForeign state.commands, name, done
     afterEach (done) ->
       participant.kill()
       done()
@@ -91,11 +91,11 @@ testParticipant = (state, name) ->
               setTimeout send, 1000 # HACK: wait for inqueue to be setup
 
 
-
 describe 'Heterogenous', ->
   address = 'amqp://localhost'
   g =
     broker: null
+    commands: foreignParticipants
 
   beforeEach (done) ->
     g.broker = msgflo.transport.getBroker address
@@ -103,7 +103,7 @@ describe 'Heterogenous', ->
   afterEach (done) ->
     g.broker.disconnect done
 
-  names = Object.keys foreignParticipants
+  names = Object.keys state.commands
   names.forEach (name) ->
     testParticipant g, name
 
