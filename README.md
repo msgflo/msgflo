@@ -1,4 +1,4 @@
-MsgFlo - Flow-Based Programming with Message Queues [![Build Status](https://travis-ci.org/the-grid/msgflo.svg?branch=master)](https://travis-ci.org/the-grid/msgflo)
+MsgFlo - Flow-Based Programming with Message Queues [![Build Status](https://travis-ci.org/msgflo/msgflo.svg?branch=master)](https://travis-ci.org/msgflo/msgflo)
 ===================================================
 
 This is an implementation of the
@@ -6,7 +6,8 @@ This is an implementation of the
 as the communications layer between different processes. Initial message queue transports targeted are
 [AMQP](http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
 and [MQTT](http://mqtt.org).
-It is intended for building robust polyglot FBP systems spanning multiple nodes.
+
+MsgFlo lets you build robust polyglot FBP systems spanning multiple nodes.
 Each node can be implemented in different languages, and be a FBP runtime internally or not.
 
 ## Status
@@ -15,12 +16,12 @@ Each node can be implemented in different languages, and be a FBP runtime intern
 
 * Used at [TheGrid](https://thegrid.io) for all workers using AMQP/RabbitMQ,
 including in [imgflo-server](https://github.com/jonnor/imgflo-server)
+* [msgflo-nodejs](./src/participant.coffee) makes it easy to set up [Node.js](http://nodejs.org/) participants
 * [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo)
 makes it super easy to use NoFlo in the participants
-* [msgflo.Participant](./src/participant.coffee) makes it easy to set up plain [Node.js](http://nodejs.org/) participants
-* Basic support for C++ participants with [msgflo-cpp](https://github.com/the-grid/msgflo-cpp)
-* Basic support for Python participants with [msgflo-python](https://github.com/the-grid/msgflo-python)
-* node.js: Experimental support for MQTT and direct* transports.
+* Basic support for C++ participants with [msgflo-cpp](https://github.com/msgflo/msgflo-cpp)
+* Basic support for Python participants with [msgflo-python](https://github.com/msgflo/msgflo-python)
+* Experimental support for MQTT and direct* transports.
 * Coordinator implements basic [FBP runtime protocol](http://noflojs.org/documentation/protocol/). Can enumerate partipants and connect edges using Flowhub
 
 ## Licence

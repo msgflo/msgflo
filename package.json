@@ -8,12 +8,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/the-grid/msgflo.git"
+    "url": "git://github.com/msgflo/msgflo.git"
   },
   "licenses": [
     {
       "type": "MIT",
-      "url": "undefined/blob/master/LICENSE-MIT"
+      "url": "https://github.com/msgflo/msgflo/blob/master/LICENSE-MIT"
     }
   ],
   "dependencies": {
