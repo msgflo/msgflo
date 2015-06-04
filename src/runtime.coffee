@@ -1,9 +1,9 @@
 
 protocol = require './protocol'
-transport = require './transport'
 coordinator = require './coordinator'
-querystring = require 'querystring'
 
+querystring = require 'querystring'
+transport = require('msgflo-nodejs').transport
 debug = require('debug')('msgflo:runtime')
 http = require 'http'
 EventEmitter = require('events').EventEmitter

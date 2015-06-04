@@ -2,8 +2,8 @@
 debug = require('debug')('msgflo:manager')
 async = require 'async'
 
-participant = require './participant'
-transport = require './transport'
+participant = require('msgflo-nodejs').participant
+transport = require('msgflo-nodejs').transport
 
 startProcesses = (library, address, runtime, processes, callback) ->
   # Loading participants, mostly for testing

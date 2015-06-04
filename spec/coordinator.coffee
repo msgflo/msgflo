@@ -3,7 +3,7 @@ chai = require 'chai' unless chai
 path = require 'path'
 
 Coordinator = require('../src/coordinator').Coordinator
-transport = require '../src/transport'
+transport = require('msgflo-nodejs').transport
 participants = require './fixtures/participants'
 
 # Note: most require running an external broker service

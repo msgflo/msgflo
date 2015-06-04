@@ -1,7 +1,7 @@
 
 common = require './common'
-transport = require './transport'
 
+transport = require('msgflo-nodejs').transport
 fbp = require 'fbp'
 async = require 'async'
 

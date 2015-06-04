@@ -20,10 +20,11 @@ main = () ->
     console.log 'Open in Flowhub: ' + liveUrl
 
 exports.main = main
-exports.transport = require '../src/transport'
+exports.transport = require('msgflo-nodejs').transport
+exports.participant = require('msgflo-nodejs').participant
+
 exports.coordinator = require '../src/coordinator'
 exports.runtime = require '../src/runtime'
-exports.participant = require '../src/participant'
 exports.common = require '../src/common'
 exports.setup = require '../src/setup'
 exports.manager = require '../src/manager'
