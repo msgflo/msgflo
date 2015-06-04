@@ -23,6 +23,9 @@ makes it super easy to use NoFlo in the participants
 * node.js: Experimental support for MQTT and direct* transports.
 * Coordinator implements basic [FBP runtime protocol](http://noflojs.org/documentation/protocol/). Can enumerate partipants and connect edges using Flowhub
 
+## Licence
+
+MIT, see [./LICENSE](./LICENSE)
 
 ## Usecases
 
