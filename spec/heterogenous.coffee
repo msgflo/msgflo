@@ -103,7 +103,7 @@ describe 'Heterogenous', ->
   afterEach (done) ->
     g.broker.disconnect done
 
-  names = Object.keys state.commands
+  names = Object.keys g.commands
   names.forEach (name) ->
     testParticipant g, name
 
