@@ -61,11 +61,11 @@ Typical messaging systems used are MQTT.
 
 ## Usage
 
-Setup a NoFlo participant using noflo-runtime-msgflo
+Setup a NoFlo participant using [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo)
 
     noflo-runtime-msgflo --name readenv --graph core/ReadEnv --broker amqp://localhost
 
-Setup a Node.js participant using msgflo.Participant (CoffeeScript)
+Setup a Node.js participant using [msgflo-nodejs](https://github.com/msgflo/msgflo-nodejs) (CoffeeScript)
 
     msgflo = require 'msgflo'
 
@@ -92,6 +92,7 @@ Setup a Node.js participant using msgflo.Participant (CoffeeScript)
       throw err if err
       console.log 'Worker started'
 
+
 Define how the participants form a network (.FBP DSL)
 
     # FILE: myservice.fbp
@@ -103,9 +104,8 @@ Setup the network
 
 
 ...
-
     # TODO: show how to send/receive data for testing the setup
-    # TODO
+    # TODO: also show Python/C++ examples
 
 
 ## Debugging
