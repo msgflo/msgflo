@@ -127,3 +127,23 @@ ErrorIfParticipant = (client, role) ->
   return new msgflo.participant.Participant client, definition, process, role
 
 exports.ErrorIf = (c, i) -> new ErrorIfParticipant c, i
+
+exports.main = main = () ->
+  throw new Error 'Wrong number of arguments, expected 2: COMPONENT NAME' if process.argv.length != 4
+
+  component = process.argv[2]
+  role = process.argv[3]
+
+  Part = exports[component]
+  throw new Error "No such component #{component}" if not part and part
+
+  broker = process.env['MSGFLO_BROKER']
+  throw new Error 'Missing MSGFLO_BROKER environment variable' if not broker
+
+  part = Part broker, role
+  part.start (err) ->
+    throw err if err
+    console.log "#{role}(#{component}) connected to #{broker}"
+
+main() if not module.parent
+

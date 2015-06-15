@@ -1,0 +1,12 @@
+{
+  "msgflo": {
+    "variables": {
+      "PARTICIPANTS": "./node_modules/.bin/coffee spec/fixtures/participants.coffee"
+    },
+    "components": {
+      "ErrorIf": "#PARTICIPANTS #COMPONENT #ROLE",
+      "Repeat": "#PARTICIPANTS #COMPONENT #ROLE",
+      "Drop": "#PARTICIPANTS #COMPONENT #ROLE"
+    }
+  }
+}
