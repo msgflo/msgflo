@@ -29,8 +29,6 @@ describe 'Setup functions', ->
 
   describe 'Extracting from imgflo-server.fbp', ->
     it 'should have one binding per non-roundrobin connection', () ->
-      console.log graph.connections
-      console.log bindings
       chai.expect(bindings.length).to.equal graph.connections.length-2
     it 'should extract all pubsub bindings', () ->
       pubsubs = bindings.filter (b) -> b.type == 'pubsub'
@@ -99,14 +97,12 @@ describe 'Setup bindings', ->
 
   describe 'Setting up simple FBP graph', ->
     it 'should return bindings made', (done) ->
-      console.log 'return bindings'
       chai.expect(bindings).to.be.an 'array'
       chai.expect(bindings.length).to.equal 4-2
       pretty = msgflo.setup.prettyFormatBindings bindings
       done()
 
     it 'should have set up src->tgt binding', (done) ->
-      console.log 'src->tgt'
       input =
         foo: 'bar'
       onMessage = (msg) ->
