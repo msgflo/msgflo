@@ -1,8 +1,12 @@
-## Next
+## 0.5.0
 
 Released: N/A
 
-* ?
+* Added ability to define component libraries in `.json` file.
+Each compononent has a command which can be used to instantiate such a component.
+By default the key `msgflo.components` in `package.json` is used.
+* Added `msgflo-procfile` for generating [Heroku Procfile](https://devcenter.heroku.com/articles/procfile) stansa, from component library + FBP graph.
+* Added ability for `msgflo-setup` to also start up participants, from component library + FBP graph.
 
 ## 0.4.0
 
