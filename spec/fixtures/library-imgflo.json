@@ -1,0 +1,5 @@
+{
+  "components": {
+    "imgflo-server/ProcessImage": "node worker.js --name #ROLE"
+  }
+}
