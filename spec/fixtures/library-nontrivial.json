@@ -1,0 +1,15 @@
+{
+  "msgflo": {
+    "variables": {
+      "PREFETCH": "--prefetch=1",
+      "NOFLO": "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT",
+      "DEAD": "--deadletter in"
+    },
+    "components": {
+      "api/ConvertDocument": "#NOFLO #PREFETCH --deadletter=in",
+      "api/SendMessageToUser": "#NOFLO --prefetch=10",
+      "api/PropagateItem": "#NOFLO #PREFETCH --deadletter propagate,unpropagate",
+      "api/Router": "#NOFLO #PREFETCH #DEAD"
+    }
+  }
+}
