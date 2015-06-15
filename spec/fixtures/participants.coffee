@@ -1,6 +1,4 @@
 
-chance = require 'chance'
-
 msgflo = require '../..'
 
 
