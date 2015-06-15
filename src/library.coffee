@@ -34,6 +34,7 @@ class Library
 
   componentCommand: (component, role) ->
     cmd = @components[component]
+    throw new Error "No component #{component} defined for role #{role}" if not cmd
     cmd = replaceMarker cmd, 'ROLE', role
     return cmd
 

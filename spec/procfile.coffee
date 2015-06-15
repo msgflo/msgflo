@@ -25,3 +25,14 @@ describe 'msgflo-procfile', ->
         chai.expect(stdout).to.equal expected
         done()
 
+  describe "missing component in library", ->
+    it 'should error with helpful message', (done) ->
+      @timeout 4000
+      options = "--ignore=imgflo_jobs --ignore=imgflo_api --ignore drop --include 'web: node index.js'"
+      msgflo_procfile 'imgflo-server.fbp', options, (err, stdout, stderr) ->
+        chai.expect(err).to.exist
+        chai.expect(stderr).to.contain 'No component'
+        chai.expect(stderr).to.contain 'imgflo-server/ProcessImage'
+        chai.expect(stderr).to.contain 'imgflo_worker'
+        done()
+
