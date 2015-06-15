@@ -45,7 +45,7 @@ describe 'Coordinator', ->
             done()
           first.start (err) -> chai.expect(err).to.be.a 'null'
 
-      describe 'sending data into participant input queue', ->
+      describe.skip 'sending data into participant input queue', ->
         it 'should receive results on output queue', (done) ->
           @timeout 4000
           first = participants.Hello address, 'hello-first'
@@ -57,7 +57,7 @@ describe 'Coordinator', ->
             coordinator.sendTo id, 'name', 'Jon'
           first.start (err) -> chai.expect(err).to.be.a 'null'
 
-      describe 'sending data to participant connected to another', ->
+      describe.skip 'sending data to participant connected to another', ->
         it 'should receive results at end of flow', (done) ->
           @timeout 4000
           first = participants.Hello address, 'hello1'
