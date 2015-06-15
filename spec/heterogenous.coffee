@@ -10,6 +10,7 @@ foreignParticipants =
 #  'PythonRepeat': [python, path.join __dirname, 'fixtures', './repeat.py']
 #  'CppRepeat': [python, path.join __dirname, 'fixtures', './repeat-cpp']
 
+# TODO: use setup.participant + Library code
 startProcess = (args, callback) ->
   prog = args[0]
   args = args.slice(1)

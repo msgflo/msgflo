@@ -2,6 +2,8 @@
 debug = require('debug')('msgflo:manager')
 async = require 'async'
 
+# FIXME: replace completely with setup.participant code
+
 participant = require('msgflo-nodejs').participant
 transport = require('msgflo-nodejs').transport
 
