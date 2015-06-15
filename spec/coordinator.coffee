@@ -74,7 +74,7 @@ describe 'Coordinator', ->
           first.start (err) -> chai.expect(err).to.be.a 'null'
           second.start (err) -> chai.expect(err).to.be.a 'null'
 
-      describe 'loading graph as json', ->
+      describe.skip 'loading graph as json', ->
         it 'should not return error', (done) ->
           coordinator.manager.library = participantLibrary
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
