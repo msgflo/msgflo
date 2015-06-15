@@ -24,25 +24,30 @@ startProcess = (cmd, broker, callback) ->
     env: env
   prog = cmd.split(' ')[0]
   args = cmd.split(' ').splice(1)
-  console.log 'start', prog, args.join(' ')
+#  console.log 'start', prog, args.join(' ')
   child = child_process.spawn prog, args, options
   returned = false
   child.on 'error', (err) ->
-    console.log 'error', err
+#    console.log 'error', err
     return if returned
     returned = true
     return callback err, child
   # We assume that when somethis is send on stdout, starting is complete
   child.stdout.on 'data', (data) ->
-    console.log 'stdout', data.toString()
+#    console.log 'stdout', data.toString()
     return if returned
     returned = true
     return callback null, child
   child.stderr.on 'data', (data) ->
-    console.log 'stderr', data.toString()
+    debug 'participant stderr', data.toString()
+    #return if returned
+    #returned = true
+    #return callback new Error data.toString(), child
+  child.on 'exit', (code, signal) ->
+    debug 'child exited', code, signal
     return if returned
     returned = true
-    return callback new Error data.toString(), child
+    return callback new Error "Child exited with #{code} #{signal}"
   return child
 
 participantCommands = (graph, library, only, ignore) ->
