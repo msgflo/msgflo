@@ -7,6 +7,7 @@ fbp = require 'fbp'
 async = require 'async'
 debug = require('debug')('msgflo:setup')
 child_process = require 'child_process'
+path = require 'path'
 
 addBindings = (broker, bindings, callback) ->
   addBinding = (b, cb) ->
@@ -44,14 +45,17 @@ startProcess = (cmd, broker, callback) ->
     return callback new Error data.toString(), child
   return child
 
-participantCommands = (graph, library) ->
+participantCommands = (graph, library, only, ignore) ->
   isParticipant = (name) ->
     component = graph.processes[name].component
     return component != 'msgflo/RoundRobin'
 
-  participants = Object.keys(graph.processes).filter isParticipant
   commands = {}
+  participants = Object.keys(graph.processes)
+  participants = only if only?.length > 0
+  participants = participants.filter isParticipant
   for name in participants
+    continue if ignore.indexOf(name) != -1
     component = graph.processes[name].component
     cmd = library.componentCommand component, name
     commands[name] = cmd
@@ -79,6 +83,7 @@ exports.killProcesses = (processes, signal, callback) ->
 
   kill = (name, cb) ->
     child = processes[name]
+    return cb null if not child
     child.once 'exit', (code, signal) ->
       return cb null
     child.kill signal
@@ -125,6 +130,11 @@ exports.normalizeOptions = normalize = (options) ->
   options.broker = process.env['CLOUDAMQP_URL'] if not options.broker
   options.libraryfile = path.join(process.cwd(), 'package.json') if not options.libraryfile
 
+  options.only = options.only.split(',') if typeof options.only == 'string'
+  options.ignore = options.ignore.split(',') if typeof options.ignore == 'string'
+  options.only = [] if not options.only
+  options.ignore = [] if not options.ignore
+
   return options
 
 exports.bindings = setupBindings = (options, callback) ->
@@ -146,7 +156,7 @@ exports.participants = setupParticipants = (options, callback) ->
     return callback err if err
 
     lib = new Library { configfile: options.libraryfile }
-    commands = participantCommands graph, lib
+    commands = participantCommands graph, lib, options.only, options.ignore
     startProcesses commands, options.broker, callback
 
 exports.parse = parse = (args) ->
