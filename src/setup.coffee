@@ -169,10 +169,15 @@ exports.parse = parse = (args) ->
   program
     .arguments('<graph.fbp/.json>')
     .option('--broker <URL>', 'URL of broker to connect to', String, null)
+    .option('--participants', 'Also set up participants, not just bindings', Boolean, false)
+    .option('--only', 'Only set up these participants', String, '')
+    .option('--ignore', 'Do not set up these participants', String, '')
+    .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
     .action (gr, env) ->
       graph = gr
     .parse args
 
+  program.libraryfile = program.library
   program.graphfile = graph
   return program
 
@@ -200,8 +205,15 @@ exports.main = main = () ->
     program.help()
     process.exit()
 
-  setupBindings options, (err, bindings) ->
-    throw err if err
+  maybeSetupParticipants = (options, callback) ->
+    return callback null, {}
+  maybeSetupParticipants = setupParticipants if options.participants
 
-    console.log 'Set up bindings:\n', pretty bindings
+  maybeSetupParticipants options, (err, p) ->
+    throw err if err
+    console.log 'Set up participants', p
+
+    setupBindings options, (err, bindings) ->
+      throw err if err
+      console.log 'Set up bindings:\n', pretty bindings
 
