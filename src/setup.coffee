@@ -1,9 +1,12 @@
 
 common = require './common'
+{ Library } = require './library'
 
 transport = require('msgflo-nodejs').transport
 fbp = require 'fbp'
 async = require 'async'
+debug = require('debug')('msgflo:setup')
+child_process = require 'child_process'
 
 addBindings = (broker, bindings, callback) ->
   addBinding = (b, cb) ->
@@ -12,6 +15,78 @@ addBindings = (broker, bindings, callback) ->
 
 queueName = (c) ->
   return common.queueName c.process, c.port
+
+startProcess = (cmd, broker, callback) ->
+  env = process.env
+  env['MSGFLO_BROKER'] = broker
+  options =
+    env: env
+  prog = cmd.split(' ')[0]
+  args = cmd.split(' ').splice(1)
+  console.log 'start', prog, args.join(' ')
+  child = child_process.spawn prog, args, options
+  returned = false
+  child.on 'error', (err) ->
+    console.log 'error', err
+    return if returned
+    returned = true
+    return callback err, child
+  # We assume that when somethis is send on stdout, starting is complete
+  child.stdout.on 'data', (data) ->
+    console.log 'stdout', data.toString()
+    return if returned
+    returned = true
+    return callback null, child
+  child.stderr.on 'data', (data) ->
+    console.log 'stderr', data.toString()
+    return if returned
+    returned = true
+    return callback new Error data.toString(), child
+  return child
+
+participantCommands = (graph, library) ->
+  isParticipant = (name) ->
+    component = graph.processes[name].component
+    return component != 'msgflo/RoundRobin'
+
+  participants = Object.keys(graph.processes).filter isParticipant
+  commands = {}
+  for name in participants
+    component = graph.processes[name].component
+    cmd = library.componentCommand component, name
+    commands[name] = cmd
+  return commands
+
+startProcesses = (commands, broker, callback) ->
+  start = (name, cb) =>
+    cmd = commands[name]
+    startProcess cmd, broker, (err, child) ->
+      return cb err if err
+      return cb err, { name: name, command: cmd, child: child }
+
+  debug 'starting participants', commands
+  names = Object.keys commands
+  async.map names, start, (err, processes) ->
+    return callback err if err
+    processMap = {}
+    for p in processes
+      processMap[p.name] = p.child
+    return callback null, processMap
+
+exports.killProcesses = (processes, signal, callback) ->
+  return callback null if not processes
+  signal = 'SIGTERM' if not signal
+
+  kill = (name, cb) ->
+    child = processes[name]
+    child.once 'exit', (code, signal) ->
+      return cb null
+    child.kill signal
+
+  pids = Object.keys(processes).map (n) -> return processes[n].pid
+  debug 'killing participants', pids
+  names = Object.keys processes
+  return async.map names, kill, callback
 
 # Extact the queue bindings, including types from an FBP graph definition
 exports.graphBindings = graphBindings = (graph) ->
@@ -48,6 +123,8 @@ exports.graphBindings = graphBindings = (graph) ->
 exports.normalizeOptions = normalize = (options) ->
   options.broker = process.env['MSGFLO_BROKER'] if not options.broker
   options.broker = process.env['CLOUDAMQP_URL'] if not options.broker
+  options.libraryfile = path.join(process.cwd(), 'package.json') if not options.libraryfile
+
   return options
 
 exports.bindings = setupBindings = (options, callback) ->
@@ -62,6 +139,15 @@ exports.bindings = setupBindings = (options, callback) ->
 
       addBindings broker, bindings, (err) ->
         return callback err, bindings, graph
+
+exports.participants = setupParticipants = (options, callback) ->
+  options = normalize options
+  common.readGraph options.graphfile, (err, graph) ->
+    return callback err if err
+
+    lib = new Library { configfile: options.libraryfile }
+    commands = participantCommands graph, lib
+    startProcesses commands, options.broker, callback
 
 exports.parse = parse = (args) ->
   graph = null

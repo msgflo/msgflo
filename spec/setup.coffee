@@ -59,32 +59,40 @@ describe 'Setup bindings', ->
   manager = null
   options = null
   client = null
-  broker = null
   bindings = null
+  participants = null
 
   beforeEach (done) ->
+    @timeout 4000
     options =
       graphfile: fixturePath 'simple.fbp'
+      libraryfile: fixturePath 'library-simple.json'
       broker: address
     client = msgflo.transport.getClient address
-    broker = msgflo.transport.getBroker address
-    manager = new msgflo.manager.ParticipantManager address, 'ss'
-    manager.library = participants
 
-    readGraph = (callback) ->
-      msgflo.common.readGraph options.graphfile, (err, graph) ->
-        manager.graph = graph if graph
+    setupParticipants = (callback) ->
+      msgflo.setup.participants options, (err, p) ->
+        participants = p
         return callback err
     setupBindings = (callback) ->
       msgflo.setup.bindings options, (err, b, graph) ->
         bindings = b if b
         return callback err
     async.series [
-      readGraph
-      broker.connect.bind broker
-      manager.start.bind manager
+      setupParticipants
       client.connect.bind client
       setupBindings
+    ], (err) ->
+      chai.expect(err).to.not.exist
+      done()
+
+  afterEach (done) ->
+    @timeout 4000
+    killParticipants = (callback) ->
+      return msgflo.setup.killProcesses participants, 'SIGKILL', callback
+    async.series [
+      client.disconnect.bind client
+      killParticipants
     ], (err) ->
       chai.expect(err).to.not.exist
       done()
@@ -93,7 +101,7 @@ describe 'Setup bindings', ->
     it 'should return bindings made', (done) ->
       console.log 'return bindings'
       chai.expect(bindings).to.be.an 'array'
-      chai.expect(bindings.length).to.equal manager.graph.connections.length-2
+      chai.expect(bindings.length).to.equal 4-2
       pretty = msgflo.setup.prettyFormatBindings bindings
       done()
 
