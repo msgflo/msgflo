@@ -17,28 +17,30 @@ addBindings = (broker, bindings, callback) ->
 queueName = (c) ->
   return common.queueName c.process, c.port
 
-startProcess = (cmd, broker, callback) ->
+startProcess = (cmd, options, callback) ->
   env = process.env
-  env['MSGFLO_BROKER'] = broker
-  options =
+  env['MSGFLO_BROKER'] = options.broker
+  childoptions =
     env: env
   prog = cmd.split(' ')[0]
   args = cmd.split(' ').splice(1)
-#  console.log 'start', prog, args.join(' ')
-  child = child_process.spawn prog, args, options
+  debug 'participant process start', prog, args.join(' ')
+  child = child_process.spawn prog, args, childoptions
   returned = false
   child.on 'error', (err) ->
-#    console.log 'error', err
+    debug 'participant error', prog, args.join(' ')
     return if returned
     returned = true
     return callback err, child
   # We assume that when somethis is send on stdout, starting is complete
   child.stdout.on 'data', (data) ->
-#    console.log 'stdout', data.toString()
+    process.stdout.write(data.toString()) if options.forward.indexOf('stdout') != -1
+    debug 'participant stdout', data.toString()
     return if returned
     returned = true
     return callback null, child
   child.stderr.on 'data', (data) ->
+    process.stderr.write(data.toString()) if options.forward.indexOf('stderr') != -1
     debug 'participant stderr', data.toString()
     #return if returned
     #returned = true
@@ -66,10 +68,10 @@ participantCommands = (graph, library, only, ignore) ->
     commands[name] = cmd
   return commands
 
-startProcesses = (commands, broker, callback) ->
+startProcesses = (commands, options, callback) ->
   start = (name, cb) =>
     cmd = commands[name]
-    startProcess cmd, broker, (err, child) ->
+    startProcess cmd, options, (err, child) ->
       return cb err if err
       return cb err, { name: name, command: cmd, child: child }
 
@@ -137,8 +139,10 @@ exports.normalizeOptions = normalize = (options) ->
 
   options.only = options.only.split(',') if typeof options.only == 'string'
   options.ignore = options.ignore.split(',') if typeof options.ignore == 'string'
+  options.forward = options.forward.split(',') if typeof options.forward == 'string'
   options.only = [] if not options.only
   options.ignore = [] if not options.ignore
+  options.forward = [] if not options.forward
 
   return options
 
@@ -162,7 +166,7 @@ exports.participants = setupParticipants = (options, callback) ->
 
     lib = new Library { configfile: options.libraryfile }
     commands = participantCommands graph, lib, options.only, options.ignore
-    startProcesses commands, options.broker, callback
+    startProcesses commands, options, callback
 
 exports.parse = parse = (args) ->
   graph = null

@@ -66,6 +66,7 @@ describe 'Setup bindings', ->
       graphfile: fixturePath 'simple.fbp'
       libraryfile: fixturePath 'library-simple.json'
       broker: address
+      forward: 'stderr,stdout'
     client = msgflo.transport.getClient address
 
     setupParticipants = (callback) ->
