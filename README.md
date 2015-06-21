@@ -100,7 +100,7 @@ Define how the participants form a network (.FBP DSL)
 
 Setup the network
 
-    msgflo-setup --graph ./myservice.fbp --broker amqp://localhost
+    msgflo-setup ./myservice.fbp --broker amqp://localhost
 
 
 ...
