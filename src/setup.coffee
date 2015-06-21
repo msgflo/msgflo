@@ -8,6 +8,7 @@ async = require 'async'
 debug = require('debug')('msgflo:setup')
 child_process = require 'child_process'
 path = require 'path'
+program = require 'commander'
 
 addBindings = (broker, bindings, callback) ->
   addBinding = (b, cb) ->
