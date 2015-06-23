@@ -1,7 +1,7 @@
 {
   "name": "msgflo",
   "description": "Polyglot FBP runtime based on message queues",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "author": {
     "name": "Jon Nordby",
     "email": "jononor@gmail.com"
@@ -40,6 +40,7 @@
     "msgflo": "./bin/msgflo",
     "msgflo-dump-message": "./bin/msgflo-dump-message",
     "msgflo-send-message": "./bin/msgflo-send-message",
+    "msgflo-procfile": "./bin/msgflo-procfile",
     "msgflo-setup": "./bin/msgflo-setup"
   },
   "scripts": {
