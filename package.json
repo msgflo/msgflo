@@ -39,6 +39,7 @@
   "bin": {
     "msgflo": "./bin/msgflo",
     "msgflo-dump-message": "./bin/msgflo-dump-message",
+    "msgflo-send-message": "./bin/msgflo-send-message",
     "msgflo-setup": "./bin/msgflo-setup"
   },
   "scripts": {

@@ -38,6 +38,11 @@ exports.readGraph = (filepath, callback) ->
       return callback e
     return callback null, graph
 
+exports.normalizeOptions = (options) ->
+  options.broker = process.env['MSGFLO_BROKER'] if not options.broker
+  options.broker = process.env['CLOUDAMQP_URL'] if not options.broker
+  options.broker = 'amqp://localhost' if not options.broker
+  return options
 
 # Note: relies on convention
 exports.queueName = (role, port) ->

@@ -134,8 +134,7 @@ exports.graphBindings = graphBindings = (graph) ->
   return bindings
 
 exports.normalizeOptions = normalize = (options) ->
-  options.broker = process.env['MSGFLO_BROKER'] if not options.broker
-  options.broker = process.env['CLOUDAMQP_URL'] if not options.broker
+  common.normalizeOptions options
   options.libraryfile = path.join(process.cwd(), 'package.json') if not options.libraryfile
 
   options.only = options.only.split(',') if typeof options.only == 'string'
