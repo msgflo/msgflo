@@ -61,51 +61,37 @@ Typical messaging systems used are MQTT.
 
 ## Usage
 
-Setup a NoFlo participant using [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo)
+Install MsgFlo and some participant libraries
 
-    noflo-runtime-msgflo --name readenv --graph core/ReadEnv --broker amqp://localhost
+    npm install msgflo msgflo-nodejs
+    npm install noflo-runtime-msgflo noflo-core
+    export PATH=./node_modules/.bin:$PATH
 
 Setup a Node.js participant using [msgflo-nodejs](https://github.com/msgflo/msgflo-nodejs) (CoffeeScript)
 
-    msgflo = require 'msgflo'
+    msgflo-nodejs --name repeater ./node_modules/msgflo-nodejs/examples/Repeat.coffee
 
-    RepeatParticipant = (client, role) ->
-      definition =
-        component: 'Repeat'
-        icon: 'file-word-o'
-        label: 'Repeats in data without changes'
-        inports: [
-          id: 'in'
-          type: 'any'
-        ]
-        outports: [
-          id: 'out'
-          type: 'any'
-        ]
-      process = (inport, indata, callback) ->
-        return callback 'out', null, indata
-      return new msgflo.participant.Participant client, definition, process, role
+Setup a NoFlo participant using [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo)
 
-    client =  msgflo.transport.getClient 'amqp://localhost'
-    worker = new RepeatParticipant client, 'repeater'
-    worker.start (err) ->
-      throw err if err
-      console.log 'Worker started'
-
+    noflo-runtime-msgflo --name out --graph core/Output --broker amqp://localhost
 
 Define how the participants form a network (.FBP DSL)
 
     # FILE: myservice.fbp
-    readenv(core/ReadEnv) OUT -> IN repeater(Repeat)
+    first(core/Repeat) OUT -> IN repeater(Repeat) OUT -> IN out(Output)
 
 Setup the network
 
     msgflo-setup ./myservice.fbp --broker amqp://localhost
 
+Send some data to input
 
-...
-    # TODO: show how to send/receive data for testing the setup
-    # TODO: also show Python/C++ examples
+    msgflo-send-message --queue first.IN --json '{ "foo": "bar" }'
+    # Should now see output from 'out' participant
+    # having traveled through NoFlo and node.js participants
+
+TODO: also show Python example
+TODO: also show C++ examples
 
 
 ## Debugging
