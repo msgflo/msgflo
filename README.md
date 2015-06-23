@@ -78,7 +78,7 @@ Setup a NoFlo participant using [noflo-runtime-msgflo](https://github.com/noflo/
 Define how the participants form a network (.FBP DSL)
 
     # FILE: myservice.fbp
-    first(core/Repeat) OUT -> IN repeater(Repeat) OUT -> IN out(Output)
+    repeater(Repeat) OUT -> IN out(Output)
 
 Setup the network
 
@@ -86,9 +86,9 @@ Setup the network
 
 Send some data to input
 
-    msgflo-send-message --queue first.IN --json '{ "foo": "bar" }'
+    msgflo-send-message --queue repeater.IN --json '{ "foo": "bar" }'
     # Should now see output from 'out' participant
-    # having traveled through NoFlo and node.js participants
+    # after having traveled through NoFlo and node.js participants
 
 TODO: also show Python example
 TODO: also show C++ examples
