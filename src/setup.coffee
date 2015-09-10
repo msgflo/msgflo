@@ -55,8 +55,7 @@ startProcess = (cmd, options, callback) ->
 
 participantCommands = (graph, library, only, ignore) ->
   isParticipant = (name) ->
-    component = graph.processes[name].component
-    return component != 'msgflo/RoundRobin'
+    return common.isParticipant graph.processes[name]
 
   commands = {}
   participants = Object.keys(graph.processes)
@@ -121,12 +120,14 @@ exports.graphBindings = graphBindings = (graph) ->
     else if conn.tgt.process in roundRobinNames
       binding = roundRobins[conn.tgt.process]
       binding.src = queueName conn.src
-    else
+    else if common.isParticipant conn.tgt and common.isParticipant conn.src
       # ordinary connection
       bindings.push
         type: 'pubsub'
         src: queueName conn.src
         tgt: queueName conn.tgt
+    else
+      debug 'no binding for', queueName conn.src, queueName conn.tgt
 
   for n, binding of roundRobins
     bindings.push binding

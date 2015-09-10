@@ -47,3 +47,7 @@ exports.normalizeOptions = (options) ->
 # Note: relies on convention
 exports.queueName = (role, port) ->
   return "#{role}.#{port.toUpperCase()}"
+
+exports.isParticipant = (p) ->
+  return p.component? and p.component != 'msgflo/RoundRobin' and p.component != 'msgflo/PubSub'
+

@@ -4,6 +4,7 @@ async = require 'async'
 
 # FIXME: replace completely with setup.participant code
 
+common = require './common'
 participant = require('msgflo-nodejs').participant
 transport = require('msgflo-nodejs').transport
 
@@ -20,8 +21,7 @@ startProcesses = (library, address, runtime, processes, callback) ->
       return cb err, part
 
   isParticipant = (name) ->
-    component = processes[name].component
-    return component != 'msgflo/RoundRobin'
+    return common.isParticipant processes[name].component
 
   participants = Object.keys(processes).filter isParticipant
   debug 'starting participants', participants
