@@ -105,12 +105,16 @@ exports.graphBindings = graphBindings = (graph) ->
   bindings = []
   roundRobins = {}
   for name, process of graph.processes
-    continue if process.component != 'msgflo/RoundRobin'
-    roundRobins[name] =
-      type: 'roundrobin'
+    if process.component == 'msgflo/RoundRobin'
+      roundRobins[name] =
+        type: 'roundrobin'
+
+  isParticipant = (node) ->
+    return common.isParticipant graph.processes[node]
 
   roundRobinNames = Object.keys roundRobins
   for conn in graph.connections
+
     if conn.src.process in roundRobinNames
       binding = roundRobins[conn.src.process]
       if conn.src.port == 'deadletter'
@@ -120,7 +124,7 @@ exports.graphBindings = graphBindings = (graph) ->
     else if conn.tgt.process in roundRobinNames
       binding = roundRobins[conn.tgt.process]
       binding.src = queueName conn.src
-    else if common.isParticipant conn.tgt and common.isParticipant conn.src
+    else if isParticipant(conn.tgt.process) and isParticipant(conn.src.process)
       # ordinary connection
       bindings.push
         type: 'pubsub'

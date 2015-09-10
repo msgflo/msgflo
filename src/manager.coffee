@@ -21,7 +21,7 @@ startProcesses = (library, address, runtime, processes, callback) ->
       return cb err, part
 
   isParticipant = (name) ->
-    return common.isParticipant processes[name].component
+    return common.isParticipant processes[name]
 
   participants = Object.keys(processes).filter isParticipant
   debug 'starting participants', participants
