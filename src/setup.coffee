@@ -143,6 +143,7 @@ exports.normalizeOptions = normalize = (options) ->
   options.only = [] if not options.only
   options.ignore = [] if not options.ignore
   options.forward = [] if not options.forward
+  options.extrabindings = [] if not options.extrabindings
 
   return options
 
@@ -151,6 +152,7 @@ exports.bindings = setupBindings = (options, callback) ->
   common.readGraph options.graphfile, (err, graph) ->
     return callback err if err
     bindings = graphBindings graph
+    bindings = bindings.concat options.extrabindings
 
     broker = transport.getBroker options.broker
     broker.connect (err) ->
