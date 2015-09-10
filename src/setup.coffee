@@ -177,6 +177,7 @@ exports.parse = parse = (args) ->
     .option('--only', 'Only set up these participants', String, '')
     .option('--ignore', 'Do not set up these participants', String, '')
     .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
+    .option('--forward', 'Forward child process stdout and/or stderr', String, '')
     .action (gr, env) ->
       graph = gr
     .parse args
