@@ -1,7 +1,7 @@
 {
   "name": "msgflo",
   "description": "Polyglot FBP runtime based on message queues",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "author": {
     "name": "Jon Nordby",
     "email": "jononor@gmail.com"
@@ -17,7 +17,7 @@
     }
   ],
   "dependencies": {
-    "msgflo-nodejs": "^0.4.8",
+    "msgflo-nodejs": "^0.4.9",
     "async": "^0.9.0",
     "coffee-script": "^1.8.0",
     "commander": "^2.6.0",
