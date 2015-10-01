@@ -19,3 +19,11 @@ before_script:
 - npm install -g grunt-cli
 script:
 - npm test
+deploy:
+  provider: npm
+  email: jononor@gmail.com
+  api_key:
+    secure: IjpnbaVyo6CKmaO08hIGVKZEGObu5Pybc1SdSgUP0Q6TVs+PxrYqtWL8CnZWMo8FxeQqLXcVNjf0p2LKARDZLOphKxZT//jRql4SpowCE5avvrSPDuF2Sv9QFtrS2s3iO49Faj39qWK4Vkqi7CjBbc48Llnz5uy9Otv/c294UoY=
+  on:
+    tags: true
+    repo: msgflo/msgflo
