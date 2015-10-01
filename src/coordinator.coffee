@@ -148,10 +148,10 @@ class Coordinator extends EventEmitter
           @connect e[0], e[1], e[2], e[3] if not isConnected e
 
     else if action == 'removed'
-      # TODO: implement
+      null # TODO: implement
 
     else
-      # ignored
+      null # ignored
 
   addInitial: (partId, portId, data) ->
     id = iipId partId, portId
