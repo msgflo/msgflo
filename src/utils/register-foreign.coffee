@@ -28,6 +28,8 @@ main = ->
       return onError e
     definition.id = path.basename defPath, path.extname defPath unless definition.id
     definition.role = path.basename defPath, path.extname defPath unless definition.role
+    definition.id = cleanName definition.id
+    definition.role = cleanName definition.role
 
     definition = foreigner.mapPorts definition
     messaging = msgflo_nodejs.transport.getClient program.broker
