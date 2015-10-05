@@ -261,9 +261,7 @@ exports.bindings = setupBindings = (options, callback) ->
         return callback err if err
 
         bindings = bindings.concat options.extrabindings
-        console.log 'adding bindings'
         addBindings broker, bindings, (err) ->
-          console.log 'bindings added'
           return callback err, bindings, graph
 
 exports.participants = setupParticipants = (options, callback) ->
@@ -284,7 +282,7 @@ exports.parse = parse = (args) ->
     .option('--only', 'Only set up these participants', String, '')
     .option('--ignore', 'Do not set up these participants', String, '')
     .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
-    .option('--forward', 'Forward child process stdout and/or stderr', String, '')
+    .option('--forward [stderr,stdout]', 'Forward child process stdout and/or stderr', String, '')
     .option('--discover [BOOL]', 'Whether to wait for FBP discovery messages for queue info', Boolean, false)
     .option('--forever [BOOL]', 'Keep running until killed by signal', Boolean, false)
     .action (gr, env) ->
