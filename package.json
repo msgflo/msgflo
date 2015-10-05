@@ -39,6 +39,7 @@
   "keywords": [],
   "bin": {
     "msgflo": "./bin/msgflo",
+    "msgflo-register-foreign": "./bin/msgflo-register-foreign",
     "msgflo-dump-message": "./bin/msgflo-dump-message",
     "msgflo-send-message": "./bin/msgflo-send-message",
     "msgflo-procfile": "./bin/msgflo-procfile",
