@@ -22,6 +22,7 @@ main = () ->
 exports.main = main
 exports.transport = require('msgflo-nodejs').transport
 exports.participant = require('msgflo-nodejs').participant
+exports.foreignParticipant = require '../src/foreign-participant'
 
 exports.coordinator = require '../src/coordinator'
 exports.runtime = require '../src/runtime'
