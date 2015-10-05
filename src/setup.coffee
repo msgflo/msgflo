@@ -325,7 +325,7 @@ exports.main = main = () ->
 
   maybeSetupParticipants options, (err, p) ->
     throw err if err
-    console.log 'Set up participants', p
+    console.log 'Set up participants', Object.keys(p)
 
     setupBindings options, (err, bindings) ->
       throw err if err
