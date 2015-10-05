@@ -6,6 +6,7 @@ class ForeignParticipant extends EventEmitter
   constructor: (client, def) ->
     client = msgflo_nodejs.transport.getClient(client) if typeof client == 'string'
     @messaging = client
+    @definition = def
 
   register: (callback) ->
     @messaging.registerParticipant @definition, (err) ->
