@@ -8,9 +8,7 @@ class ForeignParticipant extends EventEmitter
     @messaging = client
 
   register: (callback) ->
-    debug 'foreign_register'
     @messaging.registerParticipant @definition, (err) ->
-      debug 'foreign_registered', err
       return callback err
 
 exports.ForeignParticipant = ForeignParticipant
