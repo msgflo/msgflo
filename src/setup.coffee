@@ -280,7 +280,7 @@ exports.parse = parse = (args) ->
   program
     .arguments('<graph.fbp/.json>')
     .option('--broker <URL>', 'URL of broker to connect to', String, null)
-    .option('--participants', 'Also set up participants, not just bindings', Boolean, false)
+    .option('--participants [BOOL]', 'Also set up participants, not just bindings', Boolean, false)
     .option('--only', 'Only set up these participants', String, '')
     .option('--ignore', 'Do not set up these participants', String, '')
     .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
