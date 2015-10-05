@@ -144,6 +144,7 @@ describe 'foreign MQTT participants', () ->
     options =
       graphfile: fixturePath 'mqtt-switch.fbp'
       broker: address
+      discover: true
 
     msgflo.setup.bindings options, (err, b) ->
       chai.expect(err).to.not.exist

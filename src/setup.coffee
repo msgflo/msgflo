@@ -138,6 +138,9 @@ exports.graphBindings = graphBindings = (graph) ->
 
   return bindings
 
+staticGraphBindings = (broker, graph, callback) ->
+  bindings = graphBindings graph
+  return callback null, bindings
 
 # callbacks with bindings
 discoverParticipantQueues = (broker, graph, callback) ->
@@ -231,24 +234,34 @@ exports.normalizeOptions = normalize = (options) ->
   options.ignore = [] if not options.ignore
   options.forward = [] if not options.forward
   options.extrabindings = [] if not options.extrabindings
+  options.discover = false if not options.discover?
 
   return options
 
 exports.bindings = setupBindings = (options, callback) ->
   options = normalize options
+
+  getBindings = staticGraphBindings # use queue name convention, read directly from graph file
+  if options.discover
+    # wait for FBP discovery messsages, use queues from there
+    getBindings = (broker, graph, cb) ->
+      discoverParticipantQueues options.broker, graph, (err, defs) ->
+        #console.log 'got defs', definitions
+        bindings = bindingsFromDefinitions graph, defs
+        return cb null, bindings
+
+  throw new Error 'ffss' if not callback
   common.readGraph options.graphfile, (err, graph) ->
     return callback err if err
-    #bindings = graphBindings graph
 
     broker = transport.getBroker options.broker
     broker.connect (err) ->
       return callback err if err
+      getBindings broker, graph, (err, bindings) ->
+        return callback err if err
 
-      discoverParticipantQueues options.broker, graph, (err, definitions) ->
-        #console.log 'got defs', definitions
-        bindings = bindingsFromDefinitions graph, definitions
         bindings = bindings.concat options.extrabindings
-        console.log 'adading bindings'
+        console.log 'adding bindings'
         addBindings broker, bindings, (err) ->
           console.log 'bindings added'
           return callback err, bindings, graph
@@ -272,6 +285,7 @@ exports.parse = parse = (args) ->
     .option('--ignore', 'Do not set up these participants', String, '')
     .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
     .option('--forward', 'Forward child process stdout and/or stderr', String, '')
+    .option('--discover', 'Whether to wait for FBP discovery messages for queue info', Boolean, false)
     .action (gr, env) ->
       graph = gr
     .parse args
