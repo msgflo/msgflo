@@ -3,6 +3,7 @@ msgflo_nodejs = require 'msgflo-nodejs'
 fs = require 'fs'
 path = require 'path'
 foreigner = require '../foreign-participant'
+common = require '../common'
 yaml = require 'js-yaml'
 
 onError = (err) ->
@@ -14,9 +15,10 @@ onComplete = ->
 
 main = ->
   program
-    .option('--broker <uri>', 'Broker address', String, 'amqp://localhost')
+    .option('--broker <uri>', 'Broker address', String, '')
     .usage('[options] <definition>')
     .parse(process.argv)
+  program = common.normalizeOptions program
 
   defPath = path.resolve process.cwd(), program.args[0]
   fs.readFile defPath, 'utf-8', (err, contents) ->
