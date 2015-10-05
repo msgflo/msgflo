@@ -16,10 +16,6 @@ exports.ForeignParticipant = ForeignParticipant
 exports.register = (client, definition, callback) ->
   participant = new ForeignParticipant client, definition
   participant.register callback
-
-exports.cleanName = (name) ->
-  name.replace /-/g, ''
-
 exports.mapPorts = (definition) ->
   inPorts = definition.inports or {}
   definition.inports = Object.keys(inPorts).map (id) ->
