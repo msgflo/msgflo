@@ -235,6 +235,7 @@ exports.normalizeOptions = normalize = (options) ->
   options.forward = [] if not options.forward
   options.extrabindings = [] if not options.extrabindings
   options.discover = false if not options.discover?
+  options.forever = false if not options.forever?
 
   return options
 
@@ -285,7 +286,8 @@ exports.parse = parse = (args) ->
     .option('--ignore', 'Do not set up these participants', String, '')
     .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
     .option('--forward', 'Forward child process stdout and/or stderr', String, '')
-    .option('--discover', 'Whether to wait for FBP discovery messages for queue info', Boolean, false)
+    .option('--discover [BOOL]', 'Whether to wait for FBP discovery messages for queue info', Boolean, false)
+    .option('--forever [BOOL]', 'Keep running until killed by signal', Boolean, false)
     .action (gr, env) ->
       graph = gr
     .parse args
@@ -329,4 +331,10 @@ exports.main = main = () ->
     setupBindings options, (err, bindings) ->
       throw err if err
       console.log 'Set up bindings:\n', pretty bindings
+
+      if options.forever
+        console.log '--forever enabled, keeping alive'
+        setInterval () ->
+          null # just keep alive
+        , 1000
 
