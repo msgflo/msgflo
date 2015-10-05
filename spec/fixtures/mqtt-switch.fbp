@@ -1,0 +1,2 @@
+# !runtime msgflo
+myswitch(my/ToggleSwitch) STATE -> ENABLE mybulb(LightBulb)

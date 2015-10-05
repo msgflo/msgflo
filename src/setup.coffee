@@ -138,6 +138,88 @@ exports.graphBindings = graphBindings = (graph) ->
 
   return bindings
 
+
+# callbacks with bindings
+discoverParticipantQueues = (broker, graph, callback) ->
+  foundParticipantsByRole = {}
+
+  broker = transport.getBroker broker if typeof broker == 'string'
+  broker.connect (err) ->
+    return callback err if err
+
+    addParticipant = (definition) ->
+      foundParticipantsByRole[definition.role] = definition
+
+      #console.log 'addparticipant', definition
+
+      # determine if we are still lacking any definitions
+      wantedRoles = []
+      for name, proc of graph.processes
+        wantedRoles.push name
+      foundRoles = Object.keys foundParticipantsByRole
+      missingRoles = []
+      for wanted in wantedRoles
+        idx = foundRoles.indexOf wanted
+        found = idx != -1
+        #console.log 'found?', wanted, found
+        missingRoles.push wanted if not found
+
+      #console.log 'wanted, found, missing', wantedRoles, foundRoles, missingRoles
+
+      if missingRoles.length == 0
+        return if not callback
+        callback null, foundParticipantsByRole
+        callback = null
+        return
+
+    onTimeout = () =>
+      return if not callback
+      callback new Error 'setup: Participant discovery timed out'
+      callback = null
+      return
+    timeout = setTimeout onTimeout, 10000
+
+    broker.subscribeParticipantChange (msg) =>
+      data = msg.data
+      if data.protocol == 'discovery' and data.command == 'participant'
+        addParticipant data.payload
+        broker.ackMessage msg
+      else
+        broker.nackMessage msg
+        throw new Error 'Unknown FBP message'
+
+bindingsFromDefinitions = (graph, definitions) ->
+  bindings = []
+  isParticipant = (node) ->
+    return common.isParticipant graph.processes[node]
+
+  findQueue = (ports, portname) ->
+    found = null
+    for port in ports
+      #console.log 'port', port.id, portname, port.id == portname, port.queue
+      if port.id == portname
+        found = port.queue
+    throw new Error "Could not find #{portname} in #{JSON.stringify(ports)}" if not found
+    return found
+
+  for conn in graph.connections
+    if isParticipant(conn.tgt.process) and isParticipant(conn.src.process)
+      # ordinary connection
+      srcDef = definitions[conn.src.process]
+      tgtDef = definitions[conn.tgt.process]
+      srcQueue = findQueue srcDef.outports, conn.src.port
+      tgtQueue = findQueue tgtDef.inports, conn.tgt.port
+      console
+      bindings.push
+        type: 'pubsub'
+        src: srcQueue
+        tgt: tgtQueue
+    else
+      debug 'no binding for', queueName conn.src, queueName conn.tgt
+
+  return bindings
+
+
 exports.normalizeOptions = normalize = (options) ->
   common.normalizeOptions options
   options.libraryfile = path.join(process.cwd(), 'package.json') if not options.libraryfile
@@ -156,15 +238,20 @@ exports.bindings = setupBindings = (options, callback) ->
   options = normalize options
   common.readGraph options.graphfile, (err, graph) ->
     return callback err if err
-    bindings = graphBindings graph
-    bindings = bindings.concat options.extrabindings
+    #bindings = graphBindings graph
 
     broker = transport.getBroker options.broker
     broker.connect (err) ->
       return callback err if err
 
-      addBindings broker, bindings, (err) ->
-        return callback err, bindings, graph
+      discoverParticipantQueues options.broker, graph, (err, definitions) ->
+        #console.log 'got defs', definitions
+        bindings = bindingsFromDefinitions graph, definitions
+        bindings = bindings.concat options.extrabindings
+        console.log 'adading bindings'
+        addBindings broker, bindings, (err) ->
+          console.log 'bindings added'
+          return callback err, bindings, graph
 
 exports.participants = setupParticipants = (options, callback) ->
   options = normalize options
