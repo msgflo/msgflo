@@ -153,8 +153,6 @@ discoverParticipantQueues = (broker, graph, callback) ->
     addParticipant = (definition) ->
       foundParticipantsByRole[definition.role] = definition
 
-      #console.log 'addparticipant', definition
-
       # determine if we are still lacking any definitions
       wantedRoles = []
       for name, proc of graph.processes
@@ -167,6 +165,7 @@ discoverParticipantQueues = (broker, graph, callback) ->
         #console.log 'found?', wanted, found
         missingRoles.push wanted if not found
 
+      debug 'addparticipant', definition.role, missingRoles
       #console.log 'wanted, found, missing', wantedRoles, foundRoles, missingRoles
 
       if missingRoles.length == 0
