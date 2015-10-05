@@ -319,21 +319,20 @@ exports.main = main = () ->
     program.help()
     process.exit()
 
+  setupBindings options, (err, bindings) ->
+    throw err if err
+    console.log 'Set up bindings:\n', pretty bindings
+
+    if options.forever
+      console.log '--forever enabled, keeping alive'
+      setInterval () ->
+        null # just keep alive
+      , 1000
+
   maybeSetupParticipants = (options, callback) ->
     return callback null, {}
   maybeSetupParticipants = setupParticipants if options.participants
-
   maybeSetupParticipants options, (err, p) ->
     throw err if err
     console.log 'Set up participants', Object.keys(p)
-
-    setupBindings options, (err, bindings) ->
-      throw err if err
-      console.log 'Set up bindings:\n', pretty bindings
-
-      if options.forever
-        console.log '--forever enabled, keeping alive'
-        setInterval () ->
-          null # just keep alive
-        , 1000
 
