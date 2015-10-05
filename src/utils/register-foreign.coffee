@@ -40,8 +40,11 @@ main = ->
       def.id = id
       def
 
-    foreigner.register program.broker, definition, (err) ->
+    messaging = msgflo_nodejs.transport.getClient program.broker
+    messaging.connect (err) ->
       return onError err if err
-      onComplete()
+      foreigner.register messaging, definition, (err) ->
+        return onError err if err
+        onComplete()
 
 exports.main = main
