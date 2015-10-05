@@ -29,17 +29,7 @@ main = ->
     definition.id = path.basename defPath, path.extname defPath unless definition.id
     definition.role = path.basename defPath, path.extname defPath unless definition.role
 
-    inPorts = definition.inports or {}
-    definition.inports = Object.keys(inPorts).map (id) ->
-      def = inPorts[id]
-      def.id = id
-      def
-    outPorts = definition.outports or {}
-    definition.outports = Object.keys(outPorts).map (id) ->
-      def = outPorts[id]
-      def.id = id
-      def
-
+    definition = foreigner.mapPorts definition
     messaging = msgflo_nodejs.transport.getClient program.broker
     messaging.connect (err) ->
       return onError err if err
