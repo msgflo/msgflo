@@ -17,9 +17,9 @@ getJobStats = (options, callback) ->
       out = results[facet.name] = {}
 
       for res in facet.results
-        out['average'] = res['average'] if res['average']?
-        out['stddev'] = res['standardDeviation'] if res['standardDeviation']?
-        out['percentile'] = res['percentile'] if res['percentile']?
+        out['average'] = res['average']/1000 if res['average']?
+        out['stddev'] = res['standardDeviation']/1000 if res['standardDeviation']?
+        out['percentile'] = res['percentile']/1000 if res['percentile']?
     return callback null, results
 
 parse = (args) ->
@@ -41,7 +41,7 @@ exports.main = main = () ->
 
   getJobStats options, (err, results) ->
     throw err if err
-    console.log results
+    console.log JSON.stringify(results, null, 2)
 
 
 main() if not module.parent
