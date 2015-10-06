@@ -23,7 +23,7 @@ getJobStats = (options, app, callback) ->
 
 getJobStatsApps = (options, apps, callback) ->
   getStats = (app, cb) ->
-    return getJobStats options, app, cb 
+    return getJobStats options, app, cb
 
   async.map apps, getStats, (err, resultList) ->
     return callback err if err
