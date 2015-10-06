@@ -24,6 +24,7 @@
     "fbp": "^1.1.4",
     "js-yaml": "^3.4.2",
     "msgflo-nodejs": "^0.4.9",
+    "node-insights": "^1.0.14",
     "uuid": "^2.0.1",
     "websocket": "^1.0.17"
   },
@@ -39,6 +40,7 @@
   "keywords": [],
   "bin": {
     "msgflo": "./bin/msgflo",
+    "msgflo-jobstats-newrelic": "./bin/msgflo-jobstats-newrelic",
     "msgflo-register-foreign": "./bin/msgflo-register-foreign",
     "msgflo-dump-message": "./bin/msgflo-dump-message",
     "msgflo-send-message": "./bin/msgflo-send-message",
