@@ -31,3 +31,5 @@ exports.setup = require '../src/setup'
 exports.manager = require '../src/manager'
 exports.library = require '../src/library'
 exports.procfile = require '../src/procfile'
+exports.utils
+  spy: require '../src/utils/spy'
