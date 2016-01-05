@@ -23,11 +23,13 @@ startProcess = (cmd, options, callback) ->
   env['MSGFLO_BROKER'] = options.broker
   childoptions =
     env: env
-  debug 'participant process start', cmd
-  child = child_process.exec cmd, childoptions
+  prog = cmd.split(' ')[0]
+  args = cmd.split(' ').splice(1)
+  debug 'participant process start', prog, args.join(' ')
+  child = child_process.spawn prog, args, childoptions
   returned = false
   child.on 'error', (err) ->
-    debug 'participant error', cmd
+    debug 'participant error', prog, args.join(' ')
     return if returned
     returned = true
     return callback err, child
