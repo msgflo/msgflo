@@ -26,7 +26,7 @@ startProcess = (cmd, options, callback) ->
     args = ['-c', cmd]
   else
     prog = cmd.split(' ')[0]
-    args = cmd.split(' ')
+    args = cmd.split(' ').splice(1)
 
   childoptions =
     env: env
