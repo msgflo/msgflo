@@ -21,10 +21,15 @@ queueName = (c) ->
 startProcess = (cmd, options, callback) ->
   env = process.env
   env['MSGFLO_BROKER'] = options.broker
+  if options.shell
+    prog = options.shell
+    args = ['-c', cmd]
+  else
+    prog = cmd.split(' ')[0]
+    args = cmd.split(' ')
+
   childoptions =
     env: env
-  prog = cmd.split(' ')[0]
-  args = cmd.split(' ').splice(1)
   debug 'participant process start', prog, args.join(' ')
   child = child_process.spawn prog, args, childoptions
   returned = false
