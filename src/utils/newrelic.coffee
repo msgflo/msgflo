@@ -7,7 +7,7 @@ getJobStats = (options, app, callback) ->
   insights = new Insights options
   return callback new Error 'Missing app name' if not app
 
-  q = "SELECT average(duration), stddev(duration), percentile(duration, 90) FROM MsgfloJobCompleted FACET role SINCE 1 week ago WHERE outport != 'error' AND appName = '#{app}'"
+  q = "SELECT average(duration), stddev(duration), percentile(duration, 90) FROM MsgfloJobCompleted FACET role SINCE #{options.since} ago WHERE outport != 'error' AND appName = '#{app}'"
   insights.query q, (err, body) ->
     return callback err if err
 
@@ -43,6 +43,7 @@ parse = (args) ->
     .option('--query-key <hostname>', 'Query Key to access New Relic Insights API', String, '')
     .option('--account-id <port>', 'Account ID used to access New Relic Insights API', String, '')
     .option('--app <app>', 'App name in New Relic. Can be specified multiple times', addApp, [])
+    .option('--since <datetime>', 'Timeperiod to extract metrics for', String, '1 week')
     .parse(args)
 
 normalize = (options) ->
