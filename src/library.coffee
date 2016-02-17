@@ -32,10 +32,14 @@ class Library
 
     @components = componentsFromConfig options.config
 
-  componentCommand: (component, role) ->
+  componentCommand: (component, role, iips={}) ->
     cmd = @components[component]
     throw new Error "No component #{component} defined for role #{role}" if not cmd
-    cmd = replaceMarker cmd, 'ROLE', role
+
+    vars =
+      'ROLE': role
+      'IIPS': "'#{JSON.stringify(iips)}'"
+    cmd = replaceVariables cmd, vars
     return cmd
 
 exports.Library = Library

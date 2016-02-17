@@ -1,0 +1,7 @@
+# !runtime msgflo
+
+web(api/Web) FAST -> IN fast(api/Worker)
+web SLOW -> IN slow(api/Worker)
+
+# includes IIPs for per-role settings
+'8081' -> PORT slow, '8082' -> PORT fast

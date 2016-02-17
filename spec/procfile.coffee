@@ -25,6 +25,22 @@ describe 'msgflo-procfile', ->
         chai.expect(stdout).to.equal expected
         done()
 
+  describe ".fbp with IIPs", ->
+    it 'outputs a Procfile to stdout', (done) ->
+      @timeout 4000
+      expected = """
+      fast: node ./node_modules/.bin/noflo-runtime-msgflo --name fast --graph api/Worker --cache true --iips '{\"port\":\"8082\"}' --prefetch 1
+      slow: node ./node_modules/.bin/noflo-runtime-msgflo --name slow --graph api/Worker --cache true --iips '{\"port\":\"8081\"}' --prefetch 1
+      web: node index.js
+      
+      """
+      lib = path.join __dirname, 'fixtures', 'library-noflo.json'
+      options = "--library #{lib} --ignore web --include 'web: node index.js'"
+      msgflo_procfile 'iips.fbp', options, (err, stdout) ->
+        chai.expect(err).to.not.exist
+        chai.expect(stdout).to.equal expected
+        done()
+
   describe "missing component in library", ->
     it 'should error with helpful message', (done) ->
       @timeout 4000

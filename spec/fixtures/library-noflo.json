@@ -1,0 +1,13 @@
+{
+  "msgflo": {
+    "variables": {
+      "PREFETCH": "--prefetch 1",
+      "NOFLO": "node ./node_modules/.bin/noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --cache true --iips #IIPS",
+      "DEAD": "--deadletter in"
+    },
+    "components": {
+      "api/Web": "node web.js",
+      "api/Worker": "#NOFLO #PREFETCH"
+    }
+  }
+}

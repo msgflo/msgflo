@@ -3,6 +3,7 @@ fbp = require 'fbp'
 path = require 'path'
 fs = require 'fs'
 library = require './library'
+common = require './common'
 
 readGraph = (filepath, callback) ->
   ext = path.extname filepath
@@ -30,7 +31,8 @@ exports.generate = generate = (graph, options) ->
   for name, proc of graph.processes
     continue if name in options.ignore
     component = proc.component
-    cmd = lib.componentCommand component, name
+    iips = common.iipsForRole graph, name
+    cmd = lib.componentCommand component, name, iips
     lines.push "#{name}: #{cmd}"
 
   includes = options.include.join '\n'

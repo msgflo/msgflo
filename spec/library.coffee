@@ -33,8 +33,11 @@ describe 'Library', ->
       cmd = lib.componentCommand 'project/Foo', 'myrole'
       chai.expect(cmd).to.equal "msgflo-nodejs --name myrole --file api/Foo.js --option 1"
 
-
-
-
-
-
+    it '#IIPS in command is replaced', () ->
+      options =
+        config:
+          components:
+            'project/Foo': "msgflo-nodejs --name #ROLE --file api/#COMPONENTNAME.js --option 1 --iips #IIPS"
+      lib = new msgflo.library.Library options
+      cmd = lib.componentCommand 'project/Foo', 'myrole', { 'portA': 'valueA', 'portB': 3.14 }
+      chai.expect(cmd).to.equal "msgflo-nodejs --name myrole --file api/Foo.js --option 1 --iips '{\"portA\":\"valueA\",\"portB\":3.14}'"

@@ -51,3 +51,10 @@ exports.queueName = (role, port) ->
 exports.isParticipant = (p) ->
   return p.component? and p.component != 'msgflo/RoundRobin' and p.component != 'msgflo/PubSub'
 
+exports.iipsForRole = (graph, role) ->
+  iips = {}
+  for conn in graph.connections
+    continue if not conn.data?
+    continue if conn.tgt.process != role
+    iips[conn.tgt.port] = conn.data
+  return iips

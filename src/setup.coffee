@@ -69,7 +69,8 @@ participantCommands = (graph, library, only, ignore) ->
   for name in participants
     continue if ignore.indexOf(name) != -1
     component = graph.processes[name].component
-    cmd = library.componentCommand component, name
+    iips = common.iipsForRole graph, name
+    cmd = library.componentCommand component, name, iips
     commands[name] = cmd
   return commands
 
