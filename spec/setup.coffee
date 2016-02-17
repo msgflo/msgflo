@@ -29,8 +29,8 @@ describe 'Setup functions', ->
       done()
 
   describe 'Extracting from imgflo-server.fbp', ->
-    it 'should have one binding per non-roundrobin connection', () ->
-      chai.expect(bindings.length).to.equal graph.connections.length-2
+    it 'should have one binding per non-roundrobin connection or IIP', () ->
+      chai.expect(bindings.length).to.equal graph.connections.length-3
     it 'should extract all pubsub bindings', () ->
       pubsubs = bindings.filter (b) -> b.type == 'pubsub'
       chai.expect(pubsubs).to.have.length 1

@@ -121,7 +121,9 @@ exports.graphBindings = graphBindings = (graph) ->
   roundRobinNames = Object.keys roundRobins
   for conn in graph.connections
 
-    if conn.src.process in roundRobinNames
+    if conn.data
+        # IIP
+    else if conn.src.process in roundRobinNames
       binding = roundRobins[conn.src.process]
       if conn.src.port == 'deadletter'
         binding.deadletter = queueName conn.tgt
