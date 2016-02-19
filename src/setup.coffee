@@ -293,6 +293,7 @@ exports.parse = parse = (args) ->
     .option('--forward [stderr,stdout]', 'Forward child process stdout and/or stderr', String, '')
     .option('--discover [BOOL]', 'Whether to wait for FBP discovery messages for queue info', Boolean, false)
     .option('--forever [BOOL]', 'Keep running until killed by signal', Boolean, false)
+    .option('--shell [shell]', 'Run participant commands in a shell', String, '')
     .action (gr, env) ->
       graph = gr
     .parse args
