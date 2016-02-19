@@ -254,6 +254,7 @@ exports.bindings = setupBindings = (options, callback) ->
     # wait for FBP discovery messsages, use queues from there
     getBindings = (broker, graph, cb) ->
       discoverParticipantQueues options.broker, graph, (err, defs) ->
+        return cb err if err
         #console.log 'got defs', definitions
         bindings = bindingsFromDefinitions graph, defs
         return cb null, bindings
