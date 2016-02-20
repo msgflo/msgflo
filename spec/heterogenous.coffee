@@ -57,7 +57,7 @@ exports.testParticipant = testParticipant = (state, name) ->
         onDiscovery = (msg) ->
           def = msg.data
           chai.expect(def).to.be.an 'object'
-          chai.expect(def).to.have.keys ['id', 'icon', 'component', 'label', 'inports', 'outports']
+          chai.expect(def).to.have.keys ['id', 'icon', 'role', 'component', 'label', 'inports', 'outports']
           state.broker.ackMessage msg
           return if def.component != name
           done()
