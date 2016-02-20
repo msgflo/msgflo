@@ -213,6 +213,7 @@ bindingsFromDefinitions = (graph, definitions) ->
     return found
 
   for conn in graph.connections
+    continue unless conn.src # IIP
     if isParticipant(conn.tgt.process) and isParticipant(conn.src.process)
       # ordinary connection
       srcDef = definitions[conn.src.process]
