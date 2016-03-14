@@ -7,7 +7,8 @@ getJobStats = (options, app, callback) ->
   insights = new Insights options
   return callback new Error 'Missing app name' if not app
 
-  q = "SELECT average(duration), stddev(duration), percentile(duration, 90) FROM MsgfloJobCompleted FACET role SINCE #{options.since} ago WHERE outport != 'error' AND appName = '#{app}'"
+  limit = 100 # maximum number of role supported
+  q = "SELECT average(duration), stddev(duration), percentile(duration, 90) FROM MsgfloJobCompleted FACET role SINCE #{options.since} ago WHERE outport != 'error' AND appName = '#{app}' LIMIT #{limit}"
   insights.query q, (err, body) ->
     return callback err if err
 
