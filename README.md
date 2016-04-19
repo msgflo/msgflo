@@ -14,14 +14,15 @@ Each node can be implemented in different languages, and be a FBP runtime intern
 
 **Production**
 
-* Used at [TheGrid](https://thegrid.io) for all workers using AMQP/RabbitMQ,
+* Used in production at [TheGrid](https://thegrid.io) for all workers using AMQP/RabbitMQ,
 including in [imgflo-server](https://github.com/jonnor/imgflo-server)
 * [msgflo-nodejs](./src/participant.coffee) makes it easy to set up [Node.js](http://nodejs.org/) participants
 * [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo)
 makes it super easy to use NoFlo in the participants
-* Basic support for C++ participants with [msgflo-cpp](https://github.com/msgflo/msgflo-cpp)
+* Basic support for C++ participants with [msgflo-cpp](https://github.com/msgflo/msgflo-cpp) and [MicroFlo](https://github.com/microflo/microflo)
 * Basic support for Python participants with [msgflo-python](https://github.com/msgflo/msgflo-python)
-* Experimental support for MQTT and direct* transports.
+* Basic support for MQTT transport
+* Experimental support for Rust participants with [msgflo-rust](https://github.com/msgflo/msgflo-rust)
 * Coordinator implements basic [FBP runtime protocol](http://noflojs.org/documentation/protocol/). Can enumerate partipants and connect edges using Flowhub
 
 ## Licence
