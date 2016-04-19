@@ -5,6 +5,8 @@ path = require 'path'
 chai = require 'chai' unless chai
 child_process = require 'child_process'
 
+debug = require('debug')('msgflo:spec:heterogenous')
+
 python = process.env.PYTHON or 'python'
 foreignParticipants =
 #  'PythonRepeat': [python, path.join __dirname, 'fixtures', './repeat.py']
@@ -14,22 +16,23 @@ foreignParticipants =
 startProcess = (args, callback) ->
   prog = args[0]
   args = args.slice(1)
-#  console.log 'start', prog, args.join(' ')
+  debug 'starting', prog, args.join(' ')
   child = child_process.spawn prog, args
+  debug 'started PID', child.pid
   returned = false
   child.on 'error', (err) ->
-#    console.log 'error', err
+    debug 'error', err
     return if returned
     returned = true
     return callback err
   # We assume that when somethis is send on stdout, starting is complete
   child.stdout.on 'data', (data) ->
-#    console.log 'stdout', data.toString()
+    debug 'stdout', data.toString()
     return if returned
     returned = true
     return callback null
   child.stderr.on 'data', (data) ->
-#    console.log 'stderr', data.toString()
+    debug 'stderr', data.toString()
     return if returned
     returned = true
     return callback new Error data.toString()
