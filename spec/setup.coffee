@@ -62,7 +62,7 @@ describe 'Setup bindings', ->
   participants = null
 
   beforeEach (done) ->
-    @timeout 4000
+    @timeout 8000
     options =
       graphfile: fixturePath 'simple.fbp'
       libraryfile: fixturePath 'library-simple.json'
