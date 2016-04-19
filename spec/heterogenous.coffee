@@ -43,11 +43,34 @@ startForeign = (commands, name, callback) ->
   return startProcess args, callback
 
 exports.testParticipant = testParticipant = (state, name) ->
+  state.repeat = { bar: 'foo' } if typeof state.repeat == 'undefined'
 
   describe "#{name} participant", ->
     participant = null
+    definitions = null
+    onParticipantDiscovered = null
+
+    waitDefinition = (waitForComponent, cb) ->
+      checkAndCallback = () ->
+        console.log 'disc', definitions.length, waitForComponent, definitions
+        for def in definitions
+          if def.component == waitForComponent
+            return cb def
+      checkAndCallback()
+      onParticipantDiscovered = checkAndCallback
+
     beforeEach (done) ->
       @timeout 4000
+      definitions = []
+
+      onDiscovery = (msg) ->
+        def = msg.data
+        definitions.push def
+        state.broker.ackMessage msg
+        if typeof onParticipantDiscovered == 'function'
+          onParticipantDiscovered def, definitions
+      state.broker.subscribeParticipantChange onDiscovery
+
       participant = startForeign state.commands, name, done
     afterEach (done) ->
       participant.kill()
@@ -55,44 +78,46 @@ exports.testParticipant = testParticipant = (state, name) ->
 
     describe 'when started', ->
       it 'sends definition on fbp queue', (done) ->
-        broker = state.broker
 
-        onDiscovery = (msg) ->
-          def = msg.data
+        waitDefinition name, (def) ->
           chai.expect(def).to.be.an 'object'
           chai.expect(def).to.have.keys ['id', 'icon', 'role', 'component', 'label', 'inports', 'outports']
-          state.broker.ackMessage msg
-          return if def.component != name
           done()
-        state.broker.subscribeParticipantChange onDiscovery
 
     describe 'sending data on inport queue', ->
+      @timeout 4000
       it 'repeats the same data on outport queue', (done) ->
         broker = state.broker
 
-        input = { bar: 'foo' }
         onReceive = (msg) ->
           broker.ackMessage msg
-          chai.expect(msg.data).to.eql input
+          chai.expect(msg.data).to.eql state.repeat
           done()
 
         # TODO: look up in definition
-        receiveQueue = 'test.RECEIVE'
-        inQueue = 'repeat.IN'
-        outQueue = 'repeat.OUT'
-        binding = { type: 'pubsub', src: outQueue, tgt: receiveQueue }
+        waitDefinition name, (def) ->
 
-        send = () ->
-          broker.sendTo 'inqueue', inQueue, input, (err) ->
-            chai.expect(err).to.not.exist
+          inQueue = null
+          outQueue = null
+          for port in def.inports
+            inQueue = port.queue if port.id == 'in'
+          for port in def.outports
+            outQueue = port.queue if port.id == 'out'
 
-        broker.createQueue 'inqueue', receiveQueue, (err) ->
-          chai.expect(err).to.not.exist
-          broker.addBinding binding, (err) ->
-            chai.expect(err).to.not.exist
-            broker.subscribeToQueue receiveQueue, onReceive, (err) ->
+          receiveQueue = 'test.RECEIVE'
+          binding = { type: 'pubsub', src: outQueue, tgt: receiveQueue }
+
+          send = () ->
+            broker.sendTo 'inqueue', inQueue, state.repeat, (err) ->
               chai.expect(err).to.not.exist
-              setTimeout send, 1000 # HACK: wait for inqueue to be setup
+
+          broker.createQueue 'inqueue', receiveQueue, (err) ->
+            chai.expect(err).to.not.exist
+            broker.addBinding binding, (err) ->
+              chai.expect(err).to.not.exist
+              broker.subscribeToQueue receiveQueue, onReceive, (err) ->
+                chai.expect(err).to.not.exist
+                setTimeout send, 1000 # HACK: wait for inqueue to be setup
 
 
 describe 'Heterogenous', ->
@@ -100,6 +125,7 @@ describe 'Heterogenous', ->
   g =
     broker: null
     commands: foreignParticipants
+    repeat: undefined # default
 
   beforeEach (done) ->
     g.broker = msgflo.transport.getBroker address
