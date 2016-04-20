@@ -29,6 +29,7 @@ class Library
     options.config = JSON.parse(fs.readFileSync options.configfile, 'utf-8') if options.configfile
     options.config = {} if not options.config
     options.config = options.config.msgflo if options.config.msgflo
+    @options = options
 
     @components = componentsFromConfig options.config
 
