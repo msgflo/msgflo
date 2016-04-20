@@ -35,20 +35,35 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         out.push m
       return out
 
-    debug 'attempting to list componenents'
-
+    debug 'attempting to list components'
     components = []
     for name, part of proto.coordinator.participants
       return if part.component in components # Avoid duplicates
       components.push part.component
-      component =
+      info =
         name: part.component
         description: part.label or "" # FIXME: should be .description instead?
         icon: part.icon
         subgraph: false # TODO: implement
         inPorts: getPorts part, 'inports'
         outPorts: getPorts part, 'outports'
-      proto.transport.send 'component', 'component', component, ctx
+      proto.transport.send 'component', 'component', info, ctx
+
+    for name, cmd of proto.coordinator.library.components
+      # XXX: we don't know anything about these apart from the name and command
+      # when it has been instantiated first time we'll know the correct values, and should re-send
+      return if name in components
+      components.push name
+      info =
+        name: name
+        description: cmd
+        icon: null
+        subgraph: false
+        inPorts: []
+        outPorts: []
+
+    proto.transport.send 'component', 'componentsready', components.length, ctx
+    debug 'sent components', components.length
 
   else if sub == 'component' and cmd == 'getsource'
     return debug 'ERROR: cannot get source for #{payload.name}' if payload.name != defaultGraph
