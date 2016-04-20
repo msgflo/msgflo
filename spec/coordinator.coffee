@@ -12,9 +12,6 @@ transports =
   'MQTT': 'mqtt://localhost'
   'AMQP': 'amqp://localhost'
 
-participantLibrary =
-  Hello: participants.Hello
-
 describe 'Coordinator', ->
 
   Object.keys(transports).forEach (type) =>
@@ -76,14 +73,12 @@ describe 'Coordinator', ->
 
       describe.skip 'loading graph as json', ->
         it 'should not return error', (done) ->
-          coordinator.manager.library = participantLibrary
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
             chai.expect(err).to.be.a 'null'
             done()
 
         it 'should set up participants', (done) ->
           participantsNumber = 0
-          coordinator.manager.library = participantLibrary
           coordinator.on 'participant-added', (participant) ->
             participantsNumber = participantsNumber+1
             return if participantsNumber != 3
@@ -93,7 +88,6 @@ describe 'Coordinator', ->
 
         it 'should set up connections', (done) ->
           @timeout 4000
-          coordinator.manager.library = participantLibrary
           coordinator.loadGraphFile 'graphs/hello.json', (err) ->
             chai.expect(err).to.be.a 'null'
             helloCs = coordinator.participantsByRole 'helloC'

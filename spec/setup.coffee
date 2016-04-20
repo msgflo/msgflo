@@ -55,7 +55,6 @@ describe 'Setup functions', ->
 
 describe 'Setup bindings', ->
   address = 'amqp://localhost'
-  manager = null
   options = null
   client = null
   bindings = null

@@ -4,7 +4,7 @@ EventEmitter = require('events').EventEmitter
 fs = require 'fs'
 async = require 'async'
 
-ParticipantManager = require('./manager').ParticipantManager
+setup = require './setup'
 
 findPort = (def, type, portName) ->
   ports = if type == 'inport' then def.inports else def.outports
@@ -29,8 +29,7 @@ class Coordinator extends EventEmitter
     @connections = {} # connId -> { queue: opt String, handler: opt function }
     @iips = {} # iipId -> value
     @started = false
-    @manager = new ParticipantManager @broker.address
-
+    @processes = null
     @on 'participant', @checkParticipantConnections
 
   start: (callback) ->
@@ -48,11 +47,7 @@ class Coordinator extends EventEmitter
     @started = false
     @broker.disconnect (err) =>
       return callback err if err
-      if @manager
-        @manager.stop callback
-      else
-        return callback null
-
+      setup.killProcesses @processes, 'SIGTERM', callback
 
   handleFbpMessage: (data) ->
     if data.protocol == 'discovery' and data.command == 'participant'
@@ -188,13 +183,13 @@ class Coordinator extends EventEmitter
     return graph
 
   loadGraphFile: (path, callback) ->
-    fs.readFile path, {encoding:'utf-8'}, (err, contents) =>
+    options =
+      graphfile: path
+      libraryfile: @library.configfile
+    setup.participants options, (err, proc) =>
       return callback err if err
-      try
-        graph = JSON.parse contents
-      catch e
-        return callback e if e
-      @loadGraph graph, callback
+      @processes = proc
+      setup.bindings options, callback
 
   participantsByRole: (role) ->
     matchRole = (id) =>
@@ -203,65 +198,6 @@ class Coordinator extends EventEmitter
 
     m = Object.keys(@participants).filter matchRole
     return m
-
-  loadGraph: (graph, callback) ->
-    # TODO: clear existing state?
-
-    # Waiting until all participants have registerd
-    waitForParticipant = (processId, callback) =>
-      existing = @participantsByRole processId
-      return callback null, @participants[existing[0]] if existing.length
-
-      onTimeout = () =>
-        return callback new Error 'Participant discovery timeout'
-      timeout = setTimeout onTimeout, 10000
-
-      onParticipantAdded = (part) =>
-        if part.role == processId
-          debug 'onParticipant', part.role # FIXME: take into account multiple participants with same role
-          clearTimeout timeout
-          @removeListener 'participant-added', onParticipantAdded
-          return callback null
-      @on 'participant-added', onParticipantAdded
-
-    # Connecting edges
-    connectEdge = (edge, callback) =>
-      src = @participantsByRole edge.src.process
-      tgt = @participantsByRole edge.tgt.process
-      @connect src, edge.src.port, tgt, edge.tgt.port
-      return callback null
-
-    # Sending IIPs
-    sendInitial = (iip, callback) =>
-      tgt = @participantsByRole iip.tgt.process
-      @addInitial tgt[0], iip.tgt.port, iip.data
-      return callback null
-
-    async.map Object.keys(graph.processes), waitForParticipant, (err) =>
-      @started = err != null
-      debug 'participants loaded', err
-      return callback err if err
-
-      edges = []
-      iips = []
-      for conn in graph.connections
-        target = if conn.src then edges else iips
-        target.push conn
-
-      async.map edges, connectEdge, (err) =>
-        debug 'edges connected', err
-        return callback err if err
-
-        async.map iips, sendInitial, (err) =>
-          debug 'IIPs sent'
-          @started = (err != null)
-          return callback err if err
-          return callback null
-
-    # For testing, start participants
-    @manager.graph = graph
-    @manager.start (err) ->
-      throw err if err
 
 
 exports.Coordinator = Coordinator

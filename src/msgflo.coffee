@@ -28,7 +28,6 @@ exports.coordinator = require '../src/coordinator'
 exports.runtime = require '../src/runtime'
 exports.common = require '../src/common'
 exports.setup = require '../src/setup'
-exports.manager = require '../src/manager'
 exports.library = require '../src/library'
 exports.procfile = require '../src/procfile'
 exports.utils =
