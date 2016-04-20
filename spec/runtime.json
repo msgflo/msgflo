@@ -1,0 +1,10 @@
+{
+  "label": "MsgFlo coordinator",
+  "description": "Distributed madness",
+  "type": "msgflo",
+  "protocol": "websocket",
+  "address": "ws://localhost:3335",
+  "secret": "msgflo44",
+  "id": "2ef763ff-1f28-49b8-b58f-5c6a5c23af29",
+  "command": "./bin/msgflo --port 3335 --library spec/fixtures/library-simple.json"
+}

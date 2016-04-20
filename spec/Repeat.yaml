@@ -1,0 +1,20 @@
+name: 'Repeating data different datatypes (fbp-spec)'
+topic: Repeat
+fixture: # TODO: support what is needed for synthezizing fixture
+  type: fbp
+  data: |
+    INPORT=a.IN:IN
+    OUTPORT=b.OUT:OUT
+    
+    a(Repeat) OUT -> IN b(Repeat)
+
+timeout: 8000
+cases:
+-
+  name: 'a simple JSON object'
+  assertion: 'should be repeated unchanged'
+  inputs:
+    in: { hello: 'fbpspec' }
+  expect:
+    out:
+     equals: { hello: 'fbpspec' }
