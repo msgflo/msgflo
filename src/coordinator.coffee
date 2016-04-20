@@ -24,7 +24,7 @@ fromIipId = (id) ->
 
 
 class Coordinator extends EventEmitter
-  constructor: (@broker, @initialGraph) ->
+  constructor: (@broker, @initialGraph, @library) ->
     @participants = {}
     @connections = {} # connId -> { queue: opt String, handler: opt function }
     @iips = {} # iipId -> value
