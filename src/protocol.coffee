@@ -45,7 +45,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     debug 'attempting to list components'
     components = []
     for name, part of proto.coordinator.participants
-      return if part.component in components # Avoid duplicates
+      continue if part.component in components # Avoid duplicates
       components.push part.component
       info =
         name: part.component
@@ -59,7 +59,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     for name, cmd of proto.coordinator.library.components
       # XXX: we don't know anything about these apart from the name and command
       # when it has been instantiated first time we'll know the correct values, and should re-send
-      return if name in components
+      continue if name in components
       components.push name
       info =
         name: name
