@@ -1,6 +1,18 @@
+## 0.6.0 | released 21.04.2016
+
+* Initial support for [fbp-spec](https://github.com/flowbased/fbp-spec), a data-driven testing tool
+
+## 0.5.1 - 0.5.33
+
+* Added `msgflo-send-message` utility program, send message to MQTT/AMQP queues
+* Added `msgflo-register-foreign` utility, allows to declare MsgFlo participant discovery data
+for existing systems which don't have native MsgFlo support.
+* Added `msgflo-jobstats-newrelic` tool, for downloading statistics from the New Relic integration
+about how long it takes to execute jobs. Can for instance be used to tune an autoscaler like [guv](https://github.com/the-grid/guv)
+
 ## 0.5.0
 
-Released: N/A
+Released: 15 June, 2016
 
 * Added ability to define component libraries in `.json` file.
 Each compononent has a command which can be used to instantiate such a component.
