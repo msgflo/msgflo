@@ -220,6 +220,11 @@ class Coordinator extends EventEmitter
 
   unexportPort: () -> # FIXME: implement
 
+
+  startNetwork: (networkId, callback) ->
+    # Don't have a concept of started/stopped so far, no-op
+    setTimeout callback, 10
+
   serializeGraph: (name) ->
     graph =
       properties:

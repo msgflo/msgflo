@@ -79,6 +79,15 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
     setTimeout sendSource, 0
 
+  else if sub == 'network' and cmd == 'start'
+    proto.coordinator.startNetwork payload.graph, (err) ->
+      return proto.transport.sendAll 'network', 'error', err if err
+      proto.transport.sendAll 'network', 'started',
+        running: true
+        started: true
+        graph: payload.graph
+        time: new Date()
+
   else if sub == 'graph'
     handleGraphMessage proto, cmd, payload, ctx
 
