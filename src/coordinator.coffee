@@ -225,6 +225,10 @@ class Coordinator extends EventEmitter
     # Don't have a concept of started/stopped so far, no-op
     setTimeout callback, 10
 
+  stopNetwork: (networkId, callback) ->
+    # Don't have a concept of started/stopped so far, no-op
+    setTimeout callback, 10
+  
   serializeGraph: (name) ->
     graph =
       properties:

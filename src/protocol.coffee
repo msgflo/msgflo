@@ -88,6 +88,15 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         graph: payload.graph
         time: new Date()
 
+  else if sub == 'network' and cmd == 'stop'
+    proto.coordinator.stopNetwork payload.graph, (err) ->
+      return proto.transport.sendAll 'network', 'error', err if err
+      proto.transport.sendAll 'network', 'stopped',
+        running: false
+        started: true
+        graph: payload.graph
+        time: new Date()
+
   else if sub == 'graph'
     handleGraphMessage proto, cmd, payload, ctx
 
