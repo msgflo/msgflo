@@ -23,7 +23,9 @@ makes it super easy to use NoFlo in the participants
 * Basic support for Python participants with [msgflo-python](https://github.com/msgflo/msgflo-python)
 * Basic support for MQTT transport
 * Experimental support for Rust participants with [msgflo-rust](https://github.com/msgflo/msgflo-rust)
-* Coordinator implements basic [FBP runtime protocol](http://noflojs.org/documentation/protocol/). Can enumerate partipants and connect edges using Flowhub
+* `msgflo` executable implements basic [FBP runtime protocol](http://noflojs.org/documentation/protocol/).
+* Initial support for automated testing using [fbp-spec](https://github.com/flowbased/fbp-spec)
+* Experimental support for visually building networks using [Flowhub](https://flowhub.io/)
 
 ## Licence
 
