@@ -163,16 +163,16 @@ class Coordinator extends EventEmitter
       for port in part[dir]
         return port.queue if port.id == portName
 
-    # TODO: only adding this when binding has been made. Causes complications for checkParticipantConnections logic though..
-    id = connId fromId, fromPort, toId, toName
+    # NOTE: adding partial connection info to make checkParticipantConnections logic work
+    edgeId = connId fromId, fromPort, toId, toName
     edge =
       fromId: fromId
       fromPort: fromPort
       toId: toId
       toName: toName
-      srcQueue: findQueue fromId, 'outports', fromPort
-      tgtQueue: findQueue toId, 'inports', toName
-    @connections[id] = edge
+      srcQueue: null
+      tgtQueue: null
+    @connections[edgeId] = edge
 
     # might be that it was just added/started, not yet discovered
     waitForParticipant @, fromId, (err) =>
@@ -180,6 +180,8 @@ class Coordinator extends EventEmitter
       waitForParticipant @, toId, (err) =>
         return callback err if err
         # TODO: support roundtrip
+        @connections[edgeId].srcQueue = findQueue fromId, 'outports', fromPort
+        @connections[edgeId].tgtQueue = findQueue toId, 'inports', toName
         @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
           return callback err
 
