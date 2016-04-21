@@ -22,6 +22,13 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       ]
       graph: defaultGraph
     proto.transport.send 'runtime', 'runtime', runtime, ctx
+
+  else if sub == 'runtime' and cmd == 'packet'
+    proto.coordinator.sendToExportedPort payload.port, payload.payload, (err) ->
+      return proto.transport.send 'runtime', 'error', err if err
+      # No ACK in this case apparently, as it is interpreted as output
+
+  # Component
   else if sub == 'component' and cmd == 'list'
     getPorts = (participant, type) ->
       out = []
@@ -79,6 +86,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
     setTimeout sendSource, 0
 
+  # Network
   else if sub == 'network' and cmd == 'start'
     proto.coordinator.startNetwork payload.graph, (err) ->
       return proto.transport.sendAll 'network', 'error', err if err
@@ -97,6 +105,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         graph: payload.graph
         time: new Date()
 
+  # Graph
   else if sub == 'graph'
     handleGraphMessage proto, cmd, payload, ctx
 

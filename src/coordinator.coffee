@@ -49,6 +49,10 @@ class Coordinator extends EventEmitter
     @started = false
     @processes = {}
     @library = new library.Library { configfile: @options.library }
+    @exported =
+      inports: {}
+      outports: {}
+
     @on 'participant', @checkParticipantConnections
 
   start: (callback) ->
@@ -111,12 +115,16 @@ class Coordinator extends EventEmitter
         delete @process[k]
       return callback null, processes
 
-  sendTo: (participantId, inport, message) ->
+  sendTo: (participantId, inport, message, callback) ->
     debug 'sendTo', participantId, inport, message
-    part = @participants[participantId]
-    port = findPort part, 'inport', inport
-    @broker.sendTo 'inqueue', port.queue, message, (err) ->
+    defaultCallback = (err) ->
       throw err if err
+    callback = defaultCallback if not callback
+
+    part = @participants[participantId]
+    part = @participants[@participantsByRole(participantId)] if not part?
+    port = findPort part, 'inport', inport
+    return @broker.sendTo 'inqueue', port.queue, message, callback
 
   subscribeTo: (participantId, outport, handler) ->
     part = @participants[participantId]
@@ -214,12 +222,22 @@ class Coordinator extends EventEmitter
     # Do we need to remove it from the queue??
 
   exportPort: (direction, external, node, internal, callback) ->
-    # Don't have a concept of exported ports yet, so just wait for target node to exist
+    target = if direction.indexOf("in") == 0 then @exported.inports else @exported.outports
+    target[external] =
+      role: node
+      port: internal
+    # Wait for target node to exist
     waitForParticipant @, node, (err) =>
       return callback err
 
   unexportPort: () -> # FIXME: implement
 
+  sendToExportedPort: (port, data, callback) ->
+    # FIXME lookup which node, port this corresponds to
+    internal = @exported.inports[port]
+    debug 'sendToExportedPort', port, internal
+    return callback new Error "Cannot find exported port #{port}" if not internal
+    @sendTo internal.role, internal.port, data, callback
 
   startNetwork: (networkId, callback) ->
     # Don't have a concept of started/stopped so far, no-op
