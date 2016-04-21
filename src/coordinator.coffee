@@ -126,17 +126,32 @@ class Coordinator extends EventEmitter
     port = findPort part, 'inport', inport
     return @broker.sendTo 'inqueue', port.queue, message, callback
 
-  subscribeTo: (participantId, outport, handler) ->
+  subscribeTo: (participantId, outport, handler, callback) ->
+    defaultCallback = (err) ->
+      throw err if err
+    callback = defaultCallback if not callback
+
     part = @participants[participantId]
+    part = @participants[@participantsByRole(participantId)] if not part?
+
     debug 'subscribeTo', participantId, outport
 #    console.log part.outports, outport
     port = findPort part, 'outport', outport
+    console.log 'subscribing to exported outport', part, outport, port
     ackHandler = (msg) =>
       return if not @started
       handler msg
       @broker.ackMessage msg
-    @broker.subscribeToQueue port.queue, ackHandler, (err) ->
-      throw err if err
+
+    # Cannot subscribe directly to an outqueue, must create and bind an inqueue
+    readQueue = 'msgflo-export-' + Math.floor(Math.random()*999999)
+    @broker.createQueue 'inqueue', readQueue, (err) =>
+      return callback err if err
+      @broker.addBinding {type: 'pubsub', src: port.queue, tgt: readQueue}, (err) =>
+        return callback err if err
+        @broker.subscribeToQueue readQueue, ackHandler, (err) ->
+          console.log '!! subscribed'
+          return callback err, readQueue # caller should teardown readQueue
 
   unsubscribeFrom: () -> # FIXME: implement
 
@@ -226,9 +241,24 @@ class Coordinator extends EventEmitter
     target[external] =
       role: node
       port: internal
+      subscriber: null
+      queue: null
+    graph = null # FIXME: capture
     # Wait for target node to exist
     waitForParticipant @, node, (err) =>
-      return callback err
+      return callback err if err
+
+      if direction.indexOf('out') == 0
+        handler = (msg) =>
+          console.log 'got exported outport data on', external
+          @emit 'exported-port-data', external, msg.data, graph
+        @subscribeTo node, internal, handler, (err, readQueue) ->
+          return callback err if err
+          target[external].subscriber = handler
+          target[external].queue = readQueue
+          return callback null
+      else
+        return callback null
 
   unexportPort: () -> # FIXME: implement
 

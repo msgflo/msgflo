@@ -164,6 +164,13 @@ class Protocol
   constructor: (@transport, @coordinator) ->
     throw Error 'Protocol' if not @coordinator
 
+    @coordinator.on 'exported-port-data', (port, data, graph) =>
+      @transport.sendAll 'runtime', 'packet',
+        port: port
+        event: 'data'
+        payload: data
+        graph: graph
+
     @transport.on 'message', (protocol, command, payload, ctx) =>
       handleMessage @, protocol, command, payload, ctx
 
