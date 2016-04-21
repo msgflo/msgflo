@@ -24,6 +24,23 @@ fromIipId = (id) ->
   return id.split ' '
 
 
+waitForParticipant = (coordinator, role, callback) ->
+  existing = coordinator.participantsByRole role
+  return callback null, coordinator.participants[existing[0]] if existing.length
+
+  onTimeout = () =>
+    return callback new Error "Waiting for participant #{role} timed out"
+  timeout = setTimeout onTimeout, 10000
+
+  onParticipantAdded = (part) =>
+    if part.role == role
+      debug 'onParticipantAdded', part.role # FIXME: take into account multiple participants with same role
+      clearTimeout timeout
+      coordinator.removeListener 'participant-added', onParticipantAdded
+      return callback null
+  coordinator.on 'participant-added', onParticipantAdded
+
+
 class Coordinator extends EventEmitter
   constructor: (@broker, @options = {}) ->
     @participants = {}
@@ -73,12 +90,15 @@ class Coordinator extends EventEmitter
     cmd = @library.componentCommand component, node, iips
     commands = {}
     commands[node] = cmd
-    options = {}
-    setup.startProcesses commands, options, (err, processes) ->
+    options =
+      broker: @options.broker
+      forward: '' # whether to forward subprocess communication
+    setup.startProcesses commands, options, (err, processes) =>
       return callback err if err
       for k, v of processes
         @processes[k] = v
-      return callback null, processes
+      waitForParticipant @, node, (err) ->
+        return callback err, processes
 
   stopParticipant: (node, component, callback) ->
     processes = {}
@@ -112,12 +132,19 @@ class Coordinator extends EventEmitter
 
   unsubscribeFrom: () -> # FIXME: implement
 
-  connect: (fromId, fromPort, toId, toName) ->
+  connect: (fromId, fromPort, toId, toName, callback) ->
+    callback = ((err) ->) if not callback
+ 
+    # XXX: there is now a mixture of participant id and role used here
+
     findQueue = (partId, dir, portName) =>
       part = @participants[partId]
+      part = @participants[@participantsByRole(partId)] if not part?
       for port in part[dir]
         return port.queue if port.id == portName
 
+    # TODO: only adding this when binding has been made. Causes complications for checkParticipantConnections logic though..
+    id = connId fromId, fromPort, toId, toName
     edge =
       fromId: fromId
       fromPort: fromPort
@@ -125,11 +152,16 @@ class Coordinator extends EventEmitter
       toName: toName
       srcQueue: findQueue fromId, 'outports', fromPort
       tgtQueue: findQueue toId, 'inports', toName
+    @connections[id] = edge
 
-    # TODO: support roundtrip
-    @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
-      id = connId fromId, fromPort, toId, toName
-      @connections[id] = edge
+    # might be that it was just added/started, not yet discovered
+    waitForParticipant @, fromId, (err) =>
+      return callback err if err
+      waitForParticipant @, toId, (err) =>
+        return callback err if err
+        # TODO: support roundtrip
+        @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
+          return callback err
 
     # TODO: introduce some "spying functionality" to provide edge messages, add tests
 

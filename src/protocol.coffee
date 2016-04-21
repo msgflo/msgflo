@@ -106,8 +106,9 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
   else if cmd == 'addedge'
     debug 'addedge', payload
     p = payload
-    proto.coordinator.connect p.src.node, p.src.port, p.tgt.node, p.tgt.port
-    proto.transport.sendAll 'graph', 'addedge', payload
+    proto.coordinator.connect p.src.node, p.src.port, p.tgt.node, p.tgt.port, (err) ->
+      return proto.transport.send 'graph', 'error', err, ctx if err
+      proto.transport.sendAll 'graph', 'addedge', payload
   else if cmd == 'removeedge'
     p = payload
     proto.coordinator.disconnect p.src.node, p.src.port, p.tgt.node, p.tgt.port
