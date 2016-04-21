@@ -1,7 +1,7 @@
 {
   "name": "msgflo",
   "description": "Polyglot FBP runtime based on message queues",
-  "version": "0.5.33",
+  "version": "0.5.34",
   "author": {
     "name": "Jon Nordby",
     "email": "jononor@gmail.com"
