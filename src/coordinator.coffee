@@ -135,9 +135,7 @@ class Coordinator extends EventEmitter
     part = @participants[@participantsByRole(participantId)] if not part?
 
     debug 'subscribeTo', participantId, outport
-#    console.log part.outports, outport
     port = findPort part, 'outport', outport
-    console.log 'subscribing to exported outport', part, outport, port
     ackHandler = (msg) =>
       return if not @started
       handler msg
@@ -150,7 +148,6 @@ class Coordinator extends EventEmitter
       @broker.addBinding {type: 'pubsub', src: port.queue, tgt: readQueue}, (err) =>
         return callback err if err
         @broker.subscribeToQueue readQueue, ackHandler, (err) ->
-          console.log '!! subscribed'
           return callback err, readQueue # caller should teardown readQueue
 
   unsubscribeFrom: () -> # FIXME: implement
@@ -250,7 +247,6 @@ class Coordinator extends EventEmitter
 
       if direction.indexOf('out') == 0
         handler = (msg) =>
-          console.log 'got exported outport data on', external
           @emit 'exported-port-data', external, msg.data, graph
         @subscribeTo node, internal, handler, (err, readQueue) ->
           return callback err if err
