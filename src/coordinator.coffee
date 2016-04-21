@@ -213,6 +213,13 @@ class Coordinator extends EventEmitter
   removeInitial: (partId, portId) -> # FIXME: implement
     # Do we need to remove it from the queue??
 
+  exportPort: (direction, external, node, internal, callback) ->
+    # Don't have a concept of exported ports yet, so just wait for target node to exist
+    waitForParticipant @, node, (err) =>
+      return callback err
+
+  unexportPort: () -> # FIXME: implement
+
   serializeGraph: (name) ->
     graph =
       properties:

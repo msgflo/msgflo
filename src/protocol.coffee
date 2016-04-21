@@ -111,12 +111,25 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
     p = payload
     proto.coordinator.disconnect p.src.node, p.src.port, p.tgt.node, p.tgt.port
     proto.transport.sendAll 'graph', 'removeedge', payload
+
+  # IIPs
   else if cmd == 'addinitial'
     proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data
     proto.transport.sendAll 'graph', 'addinitial', payload
   else if cmd == 'removeinitial'
     proto.coordinator.removeInitial payload.tgt.node, payload.tgt.port
     proto.transport.sendAll 'graph', 'removeinitial', payload
+
+  # exported ports
+  else if cmd == 'addinport'
+    proto.coordinator.exportPort 'inport', payload.public, payload.node, payload.port, (err) ->
+      return proto.transport.send 'graph', 'error', err, ctx if err
+      proto.transport.sendAll 'graph', 'addinport', payload
+  else if cmd == 'addoutport'
+    proto.coordinator.exportPort 'outport', payload.public, payload.node, payload.port, (err) ->
+      return proto.transport.send 'graph', 'error', err, ctx if err
+      proto.transport.sendAll 'graph', 'addoutport', payload
+
   else
     debug 'Unhandled FBP protocol message: ', 'graph', cmd
 
