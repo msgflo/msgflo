@@ -74,7 +74,7 @@ participantCommands = (graph, library, only, ignore) ->
     commands[name] = cmd
   return commands
 
-startProcesses = (commands, options, callback) ->
+exports.startProcesses = startProcesses = (commands, options, callback) ->
   start = (name, cb) =>
     cmd = commands[name]
     startProcess cmd, options, (err, child) ->

@@ -66,6 +66,29 @@ class Coordinator extends EventEmitter
     @emit 'participant-removed', definition
     @emit 'participant', 'removed', definition
 
+  startParticipant: (node, component, callback) ->
+    iips = {}
+    cmd = @library.componentCommand component, node, iips
+    commands = {}
+    commands[node] = cmd
+    options = {}
+    setup.startProcesses commands, options, (err, processes) ->
+      return callback err if err
+      for k, v of processes
+        @processes[k] = v
+      return callback null, processes
+
+  stopParticipant: (node, component, callback) ->
+    processes = {}
+    for k, v of @processes
+      if k == node
+        processes[k] = v
+    setup.killProcesses processes, 'SIGTERM', (err) ->
+      return callback err
+      for k, v of processes
+        delete @process[k]
+      return callback null, processes
+
   sendTo: (participantId, inport, message) ->
     debug 'sendTo', participantId, inport, message
     part = @participants[participantId]

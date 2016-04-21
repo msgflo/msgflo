@@ -89,7 +89,21 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 handleGraphMessage = (proto, cmd, payload, ctx) ->
   graph = payload.graph
 
-  if cmd == 'addedge'
+  if cmd == 'clear'
+    # FIXME: support multiple graphs
+  else if cmd == 'addnode'
+    proto.coordinator.startParticipant payload.id, payload.component, (err) ->
+      return proto.transport.sendAll 'graph', 'error', err, ctx if err
+      proto.transport.sendAll 'graph', 'addnode', payload
+  else if cmd == 'removenode'
+    proto.coordinator.stopParticipant payload.id, payload.component, (err) ->
+      return proto.transport.sendAll 'graph', 'error', err, ctx if err
+      proto.transport.sendAll 'graph', 'removenode', payload
+  else if cmd == 'removeedge'
+    p = payload
+    proto.coordinator.disconnect p.src.node, p.src.port, p.tgt.node, p.tgt.port
+    proto.transport.sendAll 'graph', 'removenode', payload
+  else if cmd == 'addedge'
     debug 'addedge', payload
     p = payload
     proto.coordinator.connect p.src.node, p.src.port, p.tgt.node, p.tgt.port
