@@ -1,7 +1,6 @@
 
 protocol = require './protocol'
 coordinator = require './coordinator'
-library = require './library'
 
 querystring = require 'querystring'
 transport = require('msgflo-nodejs').transport
@@ -65,8 +64,7 @@ class Runtime
     @transport = null
     @protocol = null
     @broker = transport.getBroker @options.broker
-    @library = new library.Library { configfile: @options.library }
-    @coordinator = new coordinator.Coordinator @broker, null, @library
+    @coordinator = new coordinator.Coordinator @broker, @options
 
   start: (callback) ->
     @server = http.createServer()

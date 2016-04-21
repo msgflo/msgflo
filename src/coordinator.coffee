@@ -5,6 +5,7 @@ fs = require 'fs'
 async = require 'async'
 
 setup = require './setup'
+library = require './library'
 
 findPort = (def, type, portName) ->
   ports = if type == 'inport' then def.inports else def.outports
@@ -24,12 +25,13 @@ fromIipId = (id) ->
 
 
 class Coordinator extends EventEmitter
-  constructor: (@broker, @initialGraph, @library) ->
+  constructor: (@broker, @options) ->
     @participants = {}
     @connections = {} # connId -> { queue: opt String, handler: opt function }
     @iips = {} # iipId -> value
     @started = false
-    @processes = null
+    @processes = {}
+    @library = new library.Library { configfile: @options.library }
     @on 'participant', @checkParticipantConnections
 
   start: (callback) ->
