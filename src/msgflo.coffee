@@ -4,6 +4,10 @@ runtime = require '../src/runtime'
 ## Main
 program = require 'commander'
 
+collectArray = (val, list) ->
+  list.push val
+  return list
+
 main = () ->
   program
     .option('--host <hostname>', 'Host', String, 'localhost')
@@ -12,6 +16,7 @@ main = () ->
     .option('--ide <uri>', 'FBP IDE address', String, 'http://app.flowhub.io')
     .option('--library <FILE.json>', 'Library configuration file', String, 'package.json')
     .option('--graph <file.json>', 'Initial graph to load', String, '')
+    .option('--ignore [process]', "Don't set up these processes", collectArray, [])
     .parse(process.argv)
 
   r = new runtime.Runtime program

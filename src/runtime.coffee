@@ -81,7 +81,7 @@ class Runtime
         onLoaded = (err) =>
           return callback err, @address(), @liveUrl()
         if @options.graph
-          @coordinator.loadGraphFile @options.graph, onLoaded
+          @coordinator.loadGraphFile @options.graph, @options, onLoaded
         else
           onLoaded null
 

@@ -301,10 +301,12 @@ class Coordinator extends EventEmitter
 
     return graph
 
-  loadGraphFile: (path, callback) ->
+  loadGraphFile: (path, opts, callback) ->
     options =
       graphfile: path
       libraryfile: @library.configfile
+    for k, v of opts
+      options[k] = v
     setup.participants options, (err, proc) =>
       return callback err if err
       @processes = proc
