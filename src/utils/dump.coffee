@@ -1,5 +1,6 @@
 program = require 'commander'
 msgflo_nodejs = require 'msgflo-nodejs'
+common = require '../common'
 
 onError = (err) ->
   console.log err
@@ -10,10 +11,12 @@ onComplete = ->
 
 main = ->
   program
-    .option('--broker <uri>', 'Broker address', String, 'amqp://localhost')
+    .option('--broker <uri>', 'Broker address', String, null)
     .option('--queue <name>', 'Queue to dump messages from', String, '')
     .option('--amount <number>', 'How many messages to dump', Number, 1)
     .parse(process.argv)
+
+  program = common.normalizeOptions program
 
   received = 0
   messaging = msgflo_nodejs.transport.getClient program.broker,
