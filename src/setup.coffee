@@ -27,10 +27,11 @@ startProcess = (cmd, options, callback) ->
   else
     prog = cmd.split(' ')[0]
     args = cmd.split(' ').splice(1)
+  cmd = prog + ' ' + args.join(' ')
 
   childoptions =
     env: env
-  debug 'participant process start', prog, args.join(' ')
+  debug 'participant process start', cmd
   child = child_process.spawn prog, args, childoptions
   returned = false
   child.on 'error', (err) ->
@@ -55,7 +56,7 @@ startProcess = (cmd, options, callback) ->
     debug 'child exited', code, signal
     return if returned
     returned = true
-    return callback new Error "Child exited with #{code} #{signal}"
+    return callback new Error "Child '#{cmd}' (pid=#{child.pid}) exited with #{code} #{signal}"
   return child
 
 participantCommands = (graph, library, only, ignore) ->
