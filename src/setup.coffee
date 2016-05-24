@@ -27,11 +27,11 @@ startProcess = (cmd, options, callback) ->
   else
     prog = cmd.split(' ')[0]
     args = cmd.split(' ').splice(1)
-  cmd = prog + ' ' + args.join(' ')
+  execCmd = prog + ' ' + args.join(' ')
 
   childoptions =
     env: env
-  debug 'participant process start', cmd
+  debug 'participant process start', execCmd
   child = child_process.spawn prog, args, childoptions
   returned = false
   child.on 'error', (err) ->
@@ -56,7 +56,7 @@ startProcess = (cmd, options, callback) ->
     debug 'child exited', code, signal
     return if returned
     returned = true
-    return callback new Error "Child '#{cmd}' (pid=#{child.pid}) exited with #{code} #{signal}"
+    return callback new Error "Child '#{execCmd}' (pid=#{child.pid}) exited with #{code} #{signal}"
   return child
 
 participantCommands = (graph, library, only, ignore) ->
@@ -82,7 +82,7 @@ exports.startProcesses = startProcesses = (commands, options, callback) ->
       return cb err if err
       return cb err, { name: name, command: cmd, child: child }
 
-  debug 'starting participants', commands
+  debug 'starting participants', Object.keys(commands)
   names = Object.keys commands
   async.map names, start, (err, processes) ->
     return callback err if err
