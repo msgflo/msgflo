@@ -1,3 +1,8 @@
+## 0.7.0 | released 06.06.2016
+
+* Update to msgflo-nodejs 0.5.x, which does not install transport libraries (`mqtt` or `amqplib`) automatically.
+You must now install these as dependencies yourself.
+
 ## 0.6.0 | released 21.04.2016
 
 * Initial support for [fbp-spec](https://github.com/flowbased/fbp-spec), a data-driven testing tool
