@@ -3,7 +3,7 @@ fs = require 'fs'
 
 replaceMarker = (str, marker, value) ->
   marker = '#'+marker.toUpperCase()
-  str.replace(marker, value)
+  str.replace(new RegExp(marker,  'g'), value)
 
 replaceVariables = (str, variables) ->
   for marker, value of variables
