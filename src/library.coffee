@@ -5,7 +5,7 @@ replaceMarker = (str, marker, value) ->
   marker = '#'+marker.toUpperCase()
   str.replace(new RegExp(marker,  'g'), value)
 
-replaceVariables = (str, variables) ->
+exports.replaceVariables = replaceVariables = (str, variables) ->
   for marker, value of variables
     str = replaceMarker str, marker, value
   return str

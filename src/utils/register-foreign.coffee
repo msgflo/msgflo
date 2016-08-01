@@ -16,6 +16,7 @@ onComplete = ->
 main = ->
   program
     .option('--broker <uri>', 'Broker address', String, '')
+    .option('--role <role>', 'Role of this instance', String, '')
     .usage('[options] <definition>')
     .parse(process.argv)
   program = common.normalizeOptions program
@@ -28,8 +29,10 @@ main = ->
       definition = yaml.safeLoad contents
     catch e
       return onError e
-    definition.id = path.basename defPath, path.extname defPath unless definition.id
+
+    definition.role = program.role if program.role
     definition.role = path.basename defPath, path.extname defPath unless definition.role
+    definition.id = definition.role if not definition.id
 
     definition = foreigner.mapPorts definition
     messaging = msgflo_nodejs.transport.getClient program.broker
