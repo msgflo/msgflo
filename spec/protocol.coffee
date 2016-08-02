@@ -130,3 +130,22 @@ describe 'FBP runtime protocol', () ->
 
     # TODO: automatically represent multiple participants of same class as subgraph
 
+  describe 'adding an edge', ->
+    it 'should succeed'
+    it 'data should now be forwarded'
+
+  describe 'removing a connected edge', ->
+    it 'should succeed'
+    it 'data should now be forwarded'
+
+  describe 'adding a node', ->
+    it 'should succeed'
+    it 'node should produce data'
+
+  describe 'removing a node', ->
+    it 'should succeed'
+    it 'node should not produce data anymore'
+
+  describe 'adding a component', ->
+    it 'should become available'
+    it 'should be instantiable'
