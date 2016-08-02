@@ -2,6 +2,7 @@
 debug = require('debug')('msgflo:coordinator')
 EventEmitter = require('events').EventEmitter
 fs = require 'fs'
+path = require 'path'
 async = require 'async'
 
 setup = require './setup'
@@ -48,7 +49,7 @@ class Coordinator extends EventEmitter
     @iips = {} # iipId -> value
     @started = false
     @processes = {}
-    @library = new library.Library { configfile: @options.library }
+    @library = new library.Library { configfile: @options.library, componentdir: @options.componentdir }
     @exported =
       inports: {}
       outports: {}
@@ -88,6 +89,9 @@ class Coordinator extends EventEmitter
     definition = @participants[id]
     @emit 'participant-removed', definition
     @emit 'participant', 'removed', definition
+
+  addComponent: (name, language, code, callback) ->
+    @library.addComponent name, language, code, callback
 
   startParticipant: (node, component, callback) ->
     iips = {}

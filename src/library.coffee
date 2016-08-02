@@ -1,5 +1,6 @@
 
 fs = require 'fs'
+path = require 'path'
 
 replaceMarker = (str, marker, value) ->
   marker = '#'+marker.toUpperCase()
@@ -29,9 +30,25 @@ class Library
     options.config = JSON.parse(fs.readFileSync options.configfile, 'utf-8') if options.configfile
     options.config = {} if not options.config
     options.config = options.config.msgflo if options.config.msgflo
+    options.componentdir = 'participants' if not options.componentdir
     @options = options
 
     @components = componentsFromConfig options.config
+
+  addComponent: (name, language, code, callback) ->
+    extensions =
+      'python': 'py'
+      'coffeescript': 'coffee'
+      'javascript': 'js'
+      'yaml': 'yml'
+    ext = extensions[language]
+    ext = ext or language  # default to input lang for open-ended extensibility
+    name = path.basename name # TODO: support multiple libraries?
+    filename = path.join @options.componentdir, "#{name}.#{ext}"
+    # TODO: lookup handlers to build command, add to @components
+    fs.writeFile filename, code, (err) ->
+      return callback err if err
+      return callback err
 
   componentCommand: (component, role, iips={}) ->
     cmd = @components[component]

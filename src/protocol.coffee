@@ -19,6 +19,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         'protocol:graph'
         'protocol:network'
         'component:getsource'
+        'component:setsource'
       ]
       graph: defaultGraph
     proto.transport.send 'runtime', 'runtime', runtime, ctx
@@ -85,6 +86,12 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       proto.transport.send 'component', 'source', resp, ctx
 
     setTimeout sendSource, 0
+
+  else if sub == 'component' and cmd == 'source'
+    p = payload
+    proto.coordinator.addComponent p.name, p.language, p.code, (err) ->
+      return proto.transport.send 'component', 'error', err, ctx if err
+      return proto.transport.sendAll 'component', 'source', payload
 
   # Network
   else if sub == 'network' and cmd == 'start'

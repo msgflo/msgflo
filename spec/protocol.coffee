@@ -3,6 +3,7 @@ chai = require 'chai'
 EventEmitter = require('events').EventEmitter
 websocket = require 'websocket'
 fbp = require 'fbp'
+fs = require 'fs'
 
 participants = require './fixtures/participants'
 Runtime = require('../src/runtime').Runtime
@@ -51,8 +52,11 @@ describe 'FBP runtime protocol', () ->
     broker: 'direct://broker111'
     port: 3333
     host: 'localhost'
+    componentdir: 'spec/protocoltemp'
 
   before (done) ->
+    fs.rmdirSync options.componentdir if fs.existsSync options.componentdir
+    fs.mkdirSync options.componentdir
     runtime = new Runtime options
     runtime.start (err, url) ->
       chai.expect(err).to.be.a 'null'
@@ -90,6 +94,8 @@ describe 'FBP runtime protocol', () ->
         chai.expect(info.capabilities).to.include "protocol:network"
       it 'should include "component:getsource"', ->
         chai.expect(info.capabilities).to.include "component:getsource"
+      it 'should include "component:setsource"', ->
+        chai.expect(info.capabilities).to.include "component:setsource"
 
   describe 'participant queues already connected', ->
     # TODO: move IIP sending into Participant class?
@@ -114,7 +120,7 @@ describe 'FBP runtime protocol', () ->
           chai.expect(err).to.be.a 'null'
 
           ui.send 'component', 'getsource', { name: 'default/main' }
-          ui.on 'message', (d, protocol, command, payload) ->
+          ui.once 'message', (d, protocol, command, payload) ->
             chai.expect(payload).to.be.an 'object'
             chai.expect(payload).to.include.keys ['name', 'code', 'language']
             chai.expect(payload.language).to.equal 'json'
@@ -147,5 +153,25 @@ describe 'FBP runtime protocol', () ->
     it 'node should not produce data anymore'
 
   describe 'adding a component', ->
-    it 'should become available'
-    it 'should be instantiable'
+    componentName = 'foo/SetSource'
+    componentCode = fs.readFileSync(__dirname+'/fixtures/ProduceFoo.coffee', 'utf-8')
+
+    it 'should become available', (done) ->
+      ui.once 'message', (d, protocol, command, payload) ->
+        chai.expect(payload).to.be.an 'object'
+        chai.expect(payload).to.include.keys ['name', 'code', 'language']
+        chai.expect(payload.language).to.equal 'coffeescript'
+        chai.expect(payload.code).to.include "component: 'ProduceFoo'"
+        chai.expect(payload.code).to.include "module.exports = ProduceFoo"
+        done()
+
+      source =
+        name: componentName
+        language: 'coffeescript'
+        library: undefined
+        code: componentCode
+      ui.send 'component', 'source', source
+    
+    it 'should be returned on getsource'
+    it 'should be instantiable as new node'
+
