@@ -26,7 +26,6 @@ componentCommandForFile = (config, filename) ->
   ext = path.extname filename
   component = path.basename filename, ext
   cmd = config.handlers[ext]
-  debug 'command for file', filename, ext, Object.keys(config.handlers)
   return baseComponentCommand config, component, cmd
 
 componentsFromConfig = (config) ->
@@ -38,15 +37,20 @@ componentsFromConfig = (config) ->
 componentsFromDirectory = (directory, config, callback) ->
   components = {}
   extensions = Object.keys config.handlers
-  fs.readDir directory, (err, filenames) ->
-    return callback err if err
-    supported = files.filter (f) -> path.extname(f) in extensions
-    unsupported = files.filter (f) -> not (path.extname(f) in extensions)
-    debug 'unsupported component files', unsupported if unsuppported.length
-    for filename in supported
-      components[component] = componentCommandForFile config, filename
+  fs.exists directory, (exists) ->
+    return callback null, {} if not exists
 
-    return callback null, components
+    fs.readdir directory, (err, filenames) ->
+      return callback err if err
+      supported = filenames.filter (f) -> path.extname(f) in extensions
+      unsupported = filenames.filter (f) -> not (path.extname(f) in extensions)
+      debug 'unsupported component files', unsupported if unsupported.length
+      for filename in supported
+        component = path.basename(filename, path.extname(filename))
+        debug 'loading component from file', filename, component
+        components[component] = componentCommandForFile config, filename
+
+      return callback null, components
 
 # TODO: also add msgflo-python
 defaultHandlers =
@@ -82,11 +86,16 @@ class Library
     options.config = normalizeConfig options.config
     @options = options
 
-    # FIXME: also load components from directory
-    @components = componentsFromConfig options.config
+    @components = {} # lazy-loaded using load()
 
   load: (callback) ->
-    return callback null
+    componentsFromDirectory @options.componentdir, @options.config, (err, components) =>
+      return callback err if err
+      for k,v of components
+        @components[k] = v
+      for k,v of componentsFromConfig @options.config
+        @components[k] = v
+      return callback null
 
   addComponent: (name, language, code, callback) ->
     debug 'adding component', name, language

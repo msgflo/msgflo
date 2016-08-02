@@ -26,6 +26,18 @@ describe 'Library', ->
         chai.expect(lib.components).to.eql expectedCommands
         done()
 
+  describe 'components on disk with default handlers', ->
+    it 'both config and disk components exists', (done) ->
+      options =
+        configfile: path.join __dirname, 'fixtures', 'library-nontrivial.json'
+        componentdir: path.join __dirname, 'fixtures'
+      lib = new msgflo.library.Library options
+      lib.load (err) ->
+        return done err if err
+        chai.expect(lib.components).to.include.keys ['api/ConvertDocument', 'api/Router']
+        chai.expect(lib.components).to.include.keys ['participants']
+        done()
+
   describe 'when instantiating component', ->
     it '#ROLE in command is replaced', (done) ->
       options =
