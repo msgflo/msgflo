@@ -1,6 +1,9 @@
 
 fs = require 'fs'
 path = require 'path'
+debug = require('debug')('msgflo:library')
+
+common = require './common'
 
 replaceMarker = (str, marker, value) ->
   marker = '#'+marker.toUpperCase()
@@ -11,44 +14,88 @@ exports.replaceVariables = replaceVariables = (str, variables) ->
     str = replaceMarker str, marker, value
   return str
 
-componentsFromConfig = (config) ->
-  variables = config.variables or {}
-  config.components = {} if not config.components
+baseComponentCommand = (config, component, cmd) ->
+  variables = common.clone config.variables
+  componentName = component.split('/')[1]
+  componentName = component if not componentName
+  variables['COMPONENTNAME'] = componentName
+  variables['COMPONENT'] = component
+  return replaceVariables cmd, variables
 
+componentCommandForFile = (config, filename) ->
+  ext = path.extname filename
+  component = path.basename filename, ext
+  cmd = config.handlers[ext]
+  debug 'command for file', filename, ext, Object.keys(config.handlers)
+  return baseComponentCommand config, component, cmd
+
+componentsFromConfig = (config) ->
   components = {}
   for component, cmd of config.components
-    componentName = component.split('/')[1]
-    componentName = component if not componentName
-    variables['COMPONENTNAME'] = componentName
-    variables['COMPONENT'] = component
-
-    components[component] = replaceVariables cmd, variables
+    components[component] = baseComponentCommand config, component, cmd
   return components
+
+componentsFromDirectory = (directory, config, callback) ->
+  components = {}
+  extensions = Object.keys config.handlers
+  fs.readDir directory, (err, filenames) ->
+    return callback err if err
+    supported = files.filter (f) -> path.extname(f) in extensions
+    unsupported = files.filter (f) -> not (path.extname(f) in extensions)
+    debug 'unsupported component files', unsupported if unsuppported.length
+    for filename in supported
+      components[component] = componentCommandForFile config, filename
+
+    return callback null, components
+
+# TODO: also add msgflo-python
+defaultHandlers =
+  ".yml":     "msgflo-register-foreign --role #ROLE participants/#COMPONENT.yml"
+  ".js":      "msgflo-nodejs --name #ROLE participants/#COMPONENT.js"
+  ".coffee":  "msgflo-nodejs --name #ROLE participants/#COMPONENT.coffee"
+  ".json":    "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
+  ".fbp":     "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
+
+languageExtensions =
+  'python': 'py'
+  'coffeescript': 'coffee'
+  'javascript': 'js'
+  'yaml': 'yml'
+
+normalizeConfig = (config) ->
+  config = {} if not config
+  config = config.msgflo if config.msgflo # Migth be under a .msgflo key, for instance in package.json
+
+  config.components = {} if not config.components
+  config.variables = {} if not config.variables
+  config.handlers = {} if not config.handlers
+
+  for k, v of defaultHandlers
+    config.handlers[k] = defaultHandlers[k] if not config.handlers[k]
+
+  return config
 
 class Library
   constructor: (options) ->
     options.config = JSON.parse(fs.readFileSync options.configfile, 'utf-8') if options.configfile
-    options.config = {} if not options.config
-    options.config = options.config.msgflo if options.config.msgflo
     options.componentdir = 'participants' if not options.componentdir
+    options.config = normalizeConfig options.config
     @options = options
 
+    # FIXME: also load components from directory
     @components = componentsFromConfig options.config
 
   addComponent: (name, language, code, callback) ->
-    extensions =
-      'python': 'py'
-      'coffeescript': 'coffee'
-      'javascript': 'js'
-      'yaml': 'yml'
-    ext = extensions[language]
+    debug 'adding component', name, language
+    ext = languageExtensions[language]
     ext = ext or language  # default to input lang for open-ended extensibility
     name = path.basename name # TODO: support multiple libraries?
     filename = path.join @options.componentdir, "#{name}.#{ext}"
-    # TODO: lookup handlers to build command, add to @components
-    fs.writeFile filename, code, (err) ->
+
+    fs.writeFile filename, code, (err) =>
       return callback err if err
-      return callback err
+      @components[name] = componentCommandForFile @options.config, filename
+      return callback null
 
   componentCommand: (component, role, iips={}) ->
     cmd = @components[component]
