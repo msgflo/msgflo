@@ -57,15 +57,17 @@ class Coordinator extends EventEmitter
     @on 'participant', @checkParticipantConnections
 
   start: (callback) ->
-    @broker.connect (err) =>
-      debug 'connected', err
+    @library.load (err) =>
       return callback err if err
-      @broker.subscribeParticipantChange (msg) =>
-        @handleFbpMessage msg.data
-        @broker.ackMessage msg
-      @started = true
-      debug 'started', err, @started
-      return callback null
+      @broker.connect (err) =>
+        debug 'connected', err
+        return callback err if err
+        @broker.subscribeParticipantChange (msg) =>
+          @handleFbpMessage msg.data
+          @broker.ackMessage msg
+        @started = true
+        debug 'started', err, @started
+        return callback null
 
   stop: (callback) ->
     @started = false

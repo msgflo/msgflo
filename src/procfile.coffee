@@ -18,15 +18,8 @@ readGraph = (filepath, callback) ->
     catch e
       return callback e
 
-# Generating Heroku/foreman Profile definiton
-# from a FBP graph definition
-exports.generate = generate = (graph, options) ->
-  libOptions =
-    configfile: options.library
-  libOptions.configfile = path.join(process.cwd(), 'package.json') if not libOptions.configfile
 
-  lib = new library.Library libOptions
-
+generateWithLibrary = (lib, graph, options) ->
   lines = []
   for name, proc of graph.processes
     continue if name in options.ignore
@@ -38,6 +31,19 @@ exports.generate = generate = (graph, options) ->
   includes = options.include.join '\n'
   out = lines.join '\n'
   return "#{out}\n#{includes}"
+
+# Generating Heroku/foreman Profile definiton
+# from a FBP graph definition
+exports.generate = generate = (graph, options, callback) ->
+  libOptions =
+    configfile: options.library
+  libOptions.configfile = path.join(process.cwd(), 'package.json') if not libOptions.configfile
+
+  lib = new library.Library libOptions
+  lib.load (err) ->
+    return callback err if err
+    out = generateWithLibrary lib, graph, options
+    return callback null, out
 
 
 exports.parse = parse = (args) ->
@@ -70,9 +76,13 @@ exports.main = main = () ->
     program.help()
     process.exit()
 
-  readGraph options.graphfile, (err, graph) ->
+  callback = (err, out) ->
     throw err if err
-    out = generate graph, options
-    # TODO: support writing directly to Procfile?
     console.log out
+
+    # TODO: support writing directly to Procfile?
+  readGraph options.graphfile, (err, graph) ->
+    return callback err if err
+    generate graph, options, (err, out) ->
+      return callback err, out
 

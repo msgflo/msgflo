@@ -85,6 +85,9 @@ class Library
     # FIXME: also load components from directory
     @components = componentsFromConfig options.config
 
+  load: (callback) ->
+    return callback null
+
   addComponent: (name, language, code, callback) ->
     debug 'adding component', name, language
     ext = languageExtensions[language]
