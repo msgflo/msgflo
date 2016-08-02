@@ -281,8 +281,10 @@ exports.participants = setupParticipants = (options, callback) ->
     return callback err if err
 
     lib = new Library { configfile: options.libraryfile }
-    commands = participantCommands graph, lib, options.only, options.ignore
-    startProcesses commands, options, callback
+    lib.load (err) ->
+      return callback err if err
+      commands = participantCommands graph, lib, options.only, options.ignore
+      return startProcesses commands, options, callback
 
 exports.parse = parse = (args) ->
   graph = null
