@@ -135,6 +135,15 @@ describe 'FBP runtime protocol', () ->
             done()
 
     # TODO: automatically represent multiple participants of same class as subgraph
+  describe 'stopping a running network', ->
+    it 'should succeed'
+    it 'network:getstatus shows not running'
+    it 'should not respond to messages'
+
+  describe 'starting a stopped network', ->
+    it 'should succeed'
+    it 'network:getstatus should show running'
+    it 'should respond to messages again'
 
   describe 'adding an edge', ->
     it 'should succeed'
