@@ -1,5 +1,6 @@
 
-runtime = require '../src/runtime'
+runtime = require './runtime'
+common = require './common'
 
 ## Main
 program = require 'commander'
@@ -12,7 +13,7 @@ main = () ->
   program
     .option('--host <hostname>', 'Host', String, 'localhost')
     .option('--port <port>', 'Port', Number, 3569)
-    .option('--broker <uri>', 'Broker address', String, 'amqp://localhost')
+    .option('--broker <uri>', 'Broker address', String, '')
     .option('--ide <uri>', 'FBP IDE address', String, 'http://app.flowhub.io')
     .option('--library <FILE.json>', 'Library configuration file', String, 'package.json')
     .option('--graph <file.json>', 'Initial graph to load', String, '')
@@ -20,7 +21,8 @@ main = () ->
     .option('--forward stderr,stdout', "Forward these streams from child", String, 'stderr,stdout')
     .parse(process.argv)
 
-  r = new runtime.Runtime program
+  options = common.normalizeOptions program
+  r = new runtime.Runtime options
   r.start (err, address, liveUrl) ->
     throw err if err
     console.log "msgflo started on #{address}"
