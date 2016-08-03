@@ -66,11 +66,14 @@ exports.testParticipant = testParticipant = (state, name, options = {}) ->
       definitions = []
 
       onDiscovery = (msg) ->
-        def = msg.data
-        definitions.push def
-        state.broker.ackMessage msg
-        if typeof onParticipantDiscovered == 'function'
-          onParticipantDiscovered def, definitions
+        if msg.data.protocol == 'discovery' and msg.data.command == 'participant'
+          def = msg.data.payload
+          definitions.push def
+          state.broker.ackMessage msg
+          if typeof onParticipantDiscovered == 'function'
+            onParticipantDiscovered def, definitions
+        else
+          console.log "WARNING", 'unknown discovery message:', msg.data.protocol, msg.data.command
       state.broker.subscribeParticipantChange onDiscovery
 
       participant = startForeign state.commands, name, options, done
