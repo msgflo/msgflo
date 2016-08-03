@@ -1,3 +1,8 @@
+## 0.8.0 | released 03.08.2016
+
+* Fix spec/heterogenous participant test enforcing wrong discovery message.
+The messages sent to `fbp` topic must have a wrapper with protocol=discovery and command=participant.
+
 ## 0.7.0 | released 06.06.2016
 
 * Update to msgflo-nodejs 0.5.x, which does not install transport libraries (`mqtt` or `amqplib`) automatically.
