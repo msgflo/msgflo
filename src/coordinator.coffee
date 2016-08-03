@@ -178,6 +178,7 @@ class Coordinator extends EventEmitter
       toName: toName
       srcQueue: null
       tgtQueue: null
+    debug 'connect', edge
     @connections[edgeId] = edge
 
     # might be that it was just added/started, not yet discovered
@@ -291,7 +292,8 @@ class Coordinator extends EventEmitter
       outports: []
 
     for id, part of @participants
-      graph.processes[id] =
+      name = part.role
+      graph.processes[name] =
         component: part.component
 
     for id, conn of @connections
