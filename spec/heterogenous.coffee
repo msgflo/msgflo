@@ -7,17 +7,18 @@ child_process = require 'child_process'
 
 debug = require('debug')('msgflo:spec:heterogenous')
 
-python = process.env.PYTHON or 'python'
 foreignParticipants =
 #  'PythonRepeat': [python, path.join __dirname, 'fixtures', './repeat.py']
 #  'CppRepeat': [python, path.join __dirname, 'fixtures', './repeat-cpp']
 
 # TODO: use setup.participant + Library code
-startProcess = (args, callback) ->
+startProcess = (args, options, callback) ->
   prog = args[0]
   args = args.slice(1)
+  childOptions = {}
+  childOptions.env = { 'MSGFLO_BROKER': options.broker } if options.broker
   debug 'starting', prog, args.join(' ')
-  child = child_process.spawn prog, args
+  child = child_process.spawn prog, args, childOptions
   debug 'started PID', child.pid
   returned = false
   child.on 'error', (err) ->
@@ -38,11 +39,12 @@ startProcess = (args, callback) ->
     return callback new Error data.toString()
   return child
 
-startForeign = (commands, name, callback) ->
+startForeign = (commands, name, options, callback) ->
   args = commands[name]
-  return startProcess args, callback
+  return startProcess args, options, callback
 
-exports.testParticipant = testParticipant = (state, name) ->
+exports.testParticipant = testParticipant = (state, name, options = {}) ->
+  options.timeout = 10*1000 if not options.timeout
   state.repeat = { bar: 'foo' } if typeof state.repeat == 'undefined'
 
   describe "#{name} participant", ->
@@ -60,7 +62,7 @@ exports.testParticipant = testParticipant = (state, name) ->
       onParticipantDiscovered = checkAndCallback
 
     beforeEach (done) ->
-      @timeout 4000
+      @timeout options.timeout
       definitions = []
 
       onDiscovery = (msg) ->
@@ -71,13 +73,14 @@ exports.testParticipant = testParticipant = (state, name) ->
           onParticipantDiscovered def, definitions
       state.broker.subscribeParticipantChange onDiscovery
 
-      participant = startForeign state.commands, name, done
+      participant = startForeign state.commands, name, options, done
     afterEach (done) ->
       participant.kill()
       done()
 
     describe 'when started', ->
       it 'sends definition on fbp queue', (done) ->
+        @timeout options.timeout
 
         waitDefinition name, (def) ->
           chai.expect(def).to.be.an 'object'
@@ -85,7 +88,7 @@ exports.testParticipant = testParticipant = (state, name) ->
           done()
 
     describe 'sending data on inport queue', ->
-      @timeout 4000
+      @timeout options.timeout
       it 'repeats the same data on outport queue', (done) ->
         broker = state.broker
 
