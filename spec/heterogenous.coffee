@@ -1,5 +1,6 @@
 
 msgflo = require '../'
+common = require '../src/common'
 
 path = require 'path'
 chai = require 'chai' unless chai
@@ -16,7 +17,8 @@ startProcess = (args, options, callback) ->
   prog = args[0]
   args = args.slice(1)
   childOptions = {}
-  childOptions.env = { 'MSGFLO_BROKER': options.broker } if options.broker
+  childOptions.env = common.clone process.env
+  childOptions.env.MSGFLO_BROKER = options.broker if options.broker
   debug 'starting', prog, args.join(' ')
   child = child_process.spawn prog, args, childOptions
   debug 'started PID', child.pid
