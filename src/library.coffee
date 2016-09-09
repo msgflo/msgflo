@@ -97,6 +97,20 @@ class Library
         @components[k] = v
       return callback null
 
+  getSource: (name, callback) ->
+    debug 'requesting component source', name
+    name = path.basename name # TODO: support multiple libraries?
+    return callback new Error "Component not found for #{name}" if not @components[name]
+    ext = 'coffee' # FIXME: don't hardcode
+    filename = path.join @options.componentdir, "#{name}.#{ext}"
+    fs.readFile filename, 'utf-8', (err, code) ->
+      debug 'component source file', filename, err
+      return callback new Error "Could not find component source for #{name}" if err
+      source =
+        language: 'coffeescript' # FIXME don't hardcode
+        code: code
+      return callback null, source
+
   addComponent: (name, language, code, callback) ->
     debug 'adding component', name, language
     ext = languageExtensions[language]

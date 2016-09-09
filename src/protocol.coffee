@@ -74,9 +74,8 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     debug 'sent components', components.length
 
   else if sub == 'component' and cmd == 'getsource'
-    return debug 'ERROR: cannot get source for #{payload.name}' if payload.name != defaultGraph
 
-    sendSource = () ->
+    sendMainGraphSource = () ->
       graph = proto.coordinator.serializeGraph 'main'
       resp =
         code: JSON.stringify graph
@@ -84,8 +83,16 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         library: 'default'
         language: 'json'
       proto.transport.send 'component', 'source', resp, ctx
-
-    setTimeout sendSource, 0
+    if payload.name == defaultGraph
+      # Main graph. Ref https://github.com/noflo/noflo-ui/issues/390
+      setTimeout sendMainGraphSource, 0
+    else
+      # Regular component
+      proto.coordinator.getComponentSource payload.name, (err, source) ->
+        if err
+          proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
+        source.name = payload.name
+        proto.transport.send 'component', 'source', source, ctx
 
   else if sub == 'component' and cmd == 'source'
     p = payload
