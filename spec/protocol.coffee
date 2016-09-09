@@ -49,7 +49,7 @@ describe 'FBP runtime protocol', () ->
   runtime = null
   ui = new MockUi
   options =
-    broker: 'direct://broker111'
+    broker: 'mqtt://localhost'
     port: 3333
     host: 'localhost'
     componentdir: 'spec/protocoltemp'
@@ -197,10 +197,10 @@ describe 'FBP runtime protocol', () ->
         name: componentName
       ui.send 'component', 'getsource', source
 
-    it.skip 'should be instantiable as new node', (done) ->
+    it 'should be instantiable as new node', (done) ->
       ui.once 'message', (d, protocol, command, payload) ->
         chai.expect(protocol).to.equal 'graph'
-        chai.expect(protocol).to.equal 'addnode'
+        chai.expect(command).to.equal 'addnode'
         chai.expect(payload).to.be.an 'object'
         chai.expect(payload).to.include.keys ['id', 'graph', 'component']
         chai.expect(payload.component).to.equal componentName
