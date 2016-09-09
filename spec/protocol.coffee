@@ -4,9 +4,23 @@ EventEmitter = require('events').EventEmitter
 websocket = require 'websocket'
 fbp = require 'fbp'
 fs = require 'fs'
+path = require 'path'
 
 participants = require './fixtures/participants'
 Runtime = require('../src/runtime').Runtime
+
+rmrf = (dir) ->
+  return if not fs.existsSync dir
+
+  for f in fs.readdirSync dir
+    f = path.join dir, f
+    try
+      fs.unlinkSync f
+    catch e
+      if e.code == 'EISDIR'
+        rmrf f
+      else
+        throw e
 
 class MockUi extends EventEmitter
   constructor: ->
@@ -55,6 +69,7 @@ describe 'FBP runtime protocol', () ->
     componentdir: 'spec/protocoltemp'
 
   before (done) ->
+    rmrf options.componentdir
     fs.rmdirSync options.componentdir if fs.existsSync options.componentdir
     fs.mkdirSync options.componentdir
     runtime = new Runtime options
