@@ -84,12 +84,14 @@ class Coordinator extends EventEmitter
   addParticipant: (definition) ->
     debug 'addParticipant', definition.id
     @participants[definition.id] = definition
+    @library._updateDefinition definition.component, definition
     @emit 'participant-added', definition
     @emit 'participant', 'added', definition
 
   removeParticipant: (id) ->
     definition = @participants[id]
     @emit 'participant-removed', definition
+    @library._updateDefinition definition.component, null
     @emit 'participant', 'removed', definition
 
   addComponent: (name, language, code, callback) ->

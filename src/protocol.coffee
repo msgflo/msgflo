@@ -5,6 +5,37 @@
 debug = require('debug')('msgflo:fbp')
 EventEmitter = require('events').EventEmitter
 
+fbpPort = (port) ->
+  m =
+    id: port.id
+    type: port.type or "any"
+    description: port.description or ""
+    addressable: false
+    required: false # TODO: implement
+  return m
+
+fbpComponentFromMsgflo = (name, component) ->
+  if component.definition
+    # full info available
+    info =
+      name: name
+      description: component.label or component.cmd or ""
+      icon: component.definition.icon
+      subgraph: false
+      inPorts: component.definition.inports.map fbpPort
+      outPorts: component.definition.outports.map fbpPort
+  else
+    # just inifial info
+    info =
+      name: name
+      description: component.cmd
+      icon: null
+      subgraph: false
+      inPorts: []
+      outPorts: []
+
+  return info
+
 handleMessage = (proto, sub, cmd, payload, ctx) ->
   debug 'RECV:', sub, cmd, payload
 
@@ -31,45 +62,16 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
   # Component
   else if sub == 'component' and cmd == 'list'
-    getPorts = (participant, type) ->
-      out = []
-      for port in participant[type]
-        m =
-          id: port.id
-          type: port.type
-          description: ""
-          addressable: false
-          required: false # TODO: implement
-        out.push m
-      return out
+
 
     debug 'attempting to list components'
     components = []
-    for name, part of proto.coordinator.participants
-      continue if part.component in components # Avoid duplicates
-      components.push part.component
-      info =
-        name: part.component
-        description: part.label or "" # FIXME: should be .description instead?
-        icon: part.icon
-        subgraph: false # TODO: implement
-        inPorts: getPorts part, 'inports'
-        outPorts: getPorts part, 'outports'
-      proto.transport.send 'component', 'component', info, ctx
-
     for name, component of proto.coordinator.library.components
-      # XXX: we don't know anything about these apart from the name and command
-      # when it has been instantiated first time we'll know the correct values, and should re-send
-      continue if name in components
-      components.push name
-      info =
-        name: name
-        description: component.cmd
-        icon: null
-        subgraph: false
-        inPorts: []
-        outPorts: []
+      info = fbpComponentFromMsgflo name, component
+      components.push info
 
+    for info in components
+      proto.transport.send 'component', 'component', info, ctx
     proto.transport.send 'component', 'componentsready', components.length, ctx
     debug 'sent components', components.length
 
@@ -187,6 +189,13 @@ class Protocol
 
     @transport.on 'message', (protocol, command, payload, ctx) =>
       handleMessage @, protocol, command, payload, ctx
+
+    @coordinator.library.on 'components-changed', (names, allComponents) =>
+      debug 'components-changed', names
+      for name in names
+        component = allComponents[name]
+        info = fbpComponentFromMsgflo name, component
+        @transport.sendAll 'component', 'component', info
 
     @coordinator.on 'data', (from, fromPort, to, toPort, data) =>
       debug 'on data', from, fromPort, data
