@@ -7,9 +7,9 @@ common = require './common'
 
 # TODO: also add msgflo-python
 defaultHandlers =
-  ".yml":     "msgflo-register-foreign --role #ROLE participants/#COMPONENT.yml"
-  ".js":      "msgflo-nodejs --name #ROLE participants/#COMPONENT.js"
-  ".coffee":  "msgflo-nodejs --name #ROLE participants/#COMPONENT.coffee"
+  ".yml":     "msgflo-register-foreign --role #ROLE #FILENAME"
+  ".js":      "msgflo-nodejs --name #ROLE #FILENAME"
+  ".coffee":  "msgflo-nodejs --name #ROLE #FILENAME"
   ".json":    "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
   ".fbp":     "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
 
@@ -31,10 +31,11 @@ exports.replaceVariables = replaceVariables = (str, variables) ->
     str = replaceMarker str, marker, value
   return str
 
-baseComponentCommand = (config, component, cmd) ->
+baseComponentCommand = (config, component, cmd, filename) ->
   variables = common.clone config.variables
   componentName = component.split('/')[1]
   componentName = component if not componentName
+  variables['FILENAME'] = filename if filename
   variables['COMPONENTNAME'] = componentName
   variables['COMPONENT'] = component
   return replaceVariables cmd, variables
@@ -43,7 +44,7 @@ componentCommandForFile = (config, filename) ->
   ext = path.extname filename
   component = path.basename filename, ext
   cmd = config.handlers[ext]
-  return baseComponentCommand config, component, cmd
+  return baseComponentCommand config, component, cmd, filename
 
 componentsFromConfig = (config) ->
   components = {}
@@ -137,6 +138,8 @@ class Library
 
   componentCommand: (component, role, iips={}) ->
     cmd = @components[component]?.command
+    componentName = path.basename component
+    cmd = @components[componentName]?.command if not cmd
     throw new Error "No component #{component} defined for role #{role}" if not cmd
 
     vars =
