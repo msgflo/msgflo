@@ -1,3 +1,5 @@
+msgflo = require 'msgflo-nodejs'
+
 ProduceFoo = (client, role) ->
   definition =
     component: 'ProduceFoo'

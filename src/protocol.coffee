@@ -57,14 +57,14 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         outPorts: getPorts part, 'outports'
       proto.transport.send 'component', 'component', info, ctx
 
-    for name, cmd of proto.coordinator.library.components
+    for name, component of proto.coordinator.library.components
       # XXX: we don't know anything about these apart from the name and command
       # when it has been instantiated first time we'll know the correct values, and should re-send
       continue if name in components
       components.push name
       info =
         name: name
-        description: cmd
+        description: component.cmd
         icon: null
         subgraph: false
         inPorts: []
@@ -74,9 +74,8 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     debug 'sent components', components.length
 
   else if sub == 'component' and cmd == 'getsource'
-    return debug 'ERROR: cannot get source for #{payload.name}' if payload.name != defaultGraph
 
-    sendSource = () ->
+    sendMainGraphSource = () ->
       graph = proto.coordinator.serializeGraph 'main'
       resp =
         code: JSON.stringify graph
@@ -84,8 +83,16 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         library: 'default'
         language: 'json'
       proto.transport.send 'component', 'source', resp, ctx
-
-    setTimeout sendSource, 0
+    if payload.name == defaultGraph
+      # Main graph. Ref https://github.com/noflo/noflo-ui/issues/390
+      setTimeout sendMainGraphSource, 0
+    else
+      # Regular component
+      proto.coordinator.getComponentSource payload.name, (err, source) ->
+        if err
+          proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
+        source.name = payload.name
+        proto.transport.send 'component', 'source', source, ctx
 
   else if sub == 'component' and cmd == 'source'
     p = payload

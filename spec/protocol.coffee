@@ -49,7 +49,7 @@ describe 'FBP runtime protocol', () ->
   runtime = null
   ui = new MockUi
   options =
-    broker: 'direct://broker111'
+    broker: 'mqtt://localhost'
     port: 3333
     host: 'localhost'
     componentdir: 'spec/protocoltemp'
@@ -119,7 +119,6 @@ describe 'FBP runtime protocol', () ->
         source.start (err) ->
           chai.expect(err).to.be.a 'null'
 
-          ui.send 'component', 'getsource', { name: 'default/main' }
           ui.once 'message', (d, protocol, command, payload) ->
             chai.expect(payload).to.be.an 'object'
             chai.expect(payload).to.include.keys ['name', 'code', 'language']
@@ -133,6 +132,9 @@ describe 'FBP runtime protocol', () ->
             chai.expect(conn.tgt.process).to.contain 'sink'
             chai.expect(conn.tgt.port).to.equal 'drop'
             done()
+          setTimeout () ->
+            ui.send 'component', 'getsource', { name: 'default/main' }
+          , 500
 
     # TODO: automatically represent multiple participants of same class as subgraph
   describe 'stopping a running network', ->
@@ -181,6 +183,33 @@ describe 'FBP runtime protocol', () ->
         code: componentCode
       ui.send 'component', 'source', source
     
-    it 'should be returned on getsource'
-    it 'should be instantiable as new node'
+    it 'should be returned on getsource', (done) ->
+      ui.once 'message', (d, protocol, command, payload) ->
+        chai.expect(payload).to.be.an 'object'
+        chai.expect(protocol).to.equal 'component'
+        chai.expect(command, JSON.stringify(payload)).to.equal 'source'
+        chai.expect(payload).to.include.keys ['name', 'code', 'language']
+        chai.expect(payload.name).to.equal componentName
+        chai.expect(payload.language).to.equal 'coffeescript'
+        chai.expect(payload.code).to.include "component: 'ProduceFoo'"
+        chai.expect(payload.code).to.include "module.exports = ProduceFoo"
+        done()
+
+      source =
+        name: componentName
+      ui.send 'component', 'getsource', source
+
+    it 'should be instantiable as new node', (done) ->
+      ui.once 'message', (d, protocol, command, payload) ->
+        chai.expect(protocol).to.equal 'graph'
+        chai.expect(command).to.equal 'addnode'
+        chai.expect(payload).to.be.an 'object'
+        chai.expect(payload).to.include.keys ['id', 'graph', 'component']
+        chai.expect(payload.component).to.equal componentName
+        done()
+      add =
+        id: 'mycoffeescriptproducer'
+        graph: 'default/main'
+        component: componentName
+      ui.send 'graph', 'addnode', add
 

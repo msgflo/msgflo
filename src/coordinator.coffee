@@ -95,6 +95,9 @@ class Coordinator extends EventEmitter
   addComponent: (name, language, code, callback) ->
     @library.addComponent name, language, code, callback
 
+  getComponentSource: (component, callback) ->
+    return @library.getSource component, callback
+
   startParticipant: (node, component, callback) ->
     iips = {}
     cmd = @library.componentCommand component, node, iips

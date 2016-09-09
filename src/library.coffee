@@ -5,6 +5,23 @@ debug = require('debug')('msgflo:library')
 
 common = require './common'
 
+# TODO: also add msgflo-python
+defaultHandlers =
+  ".yml":     "msgflo-register-foreign --role #ROLE #FILENAME"
+  ".js":      "msgflo-nodejs --name #ROLE #FILENAME"
+  ".coffee":  "msgflo-nodejs --name #ROLE #FILENAME"
+  ".json":    "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
+  ".fbp":     "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
+
+languageExtensions =
+  'python': 'py'
+  'coffeescript': 'coffee'
+  'javascript': 'js'
+  'yaml': 'yml'
+extensionToLanguage = {}
+for lang, ext of languageExtensions
+  extensionToLanguage[ext] = lang
+
 replaceMarker = (str, marker, value) ->
   marker = '#'+marker.toUpperCase()
   str.replace(new RegExp(marker,  'g'), value)
@@ -14,10 +31,11 @@ exports.replaceVariables = replaceVariables = (str, variables) ->
     str = replaceMarker str, marker, value
   return str
 
-baseComponentCommand = (config, component, cmd) ->
+baseComponentCommand = (config, component, cmd, filename) ->
   variables = common.clone config.variables
   componentName = component.split('/')[1]
   componentName = component if not componentName
+  variables['FILENAME'] = filename if filename
   variables['COMPONENTNAME'] = componentName
   variables['COMPONENT'] = component
   return replaceVariables cmd, variables
@@ -26,12 +44,14 @@ componentCommandForFile = (config, filename) ->
   ext = path.extname filename
   component = path.basename filename, ext
   cmd = config.handlers[ext]
-  return baseComponentCommand config, component, cmd
+  return baseComponentCommand config, component, cmd, filename
 
 componentsFromConfig = (config) ->
   components = {}
   for component, cmd of config.components
-    components[component] = baseComponentCommand config, component, cmd
+    components[component] =
+      language: null # XXX: Could try to guess from cmd/template??
+      command: baseComponentCommand config, component, cmd
   return components
 
 componentsFromDirectory = (directory, config, callback) ->
@@ -46,25 +66,15 @@ componentsFromDirectory = (directory, config, callback) ->
       unsupported = filenames.filter (f) -> not (path.extname(f) in extensions)
       debug 'unsupported component files', unsupported if unsupported.length
       for filename in supported
-        component = path.basename(filename, path.extname(filename))
+        ext = path.extname filename
+        lang = extensionToLanguage[ext]
+        component = path.basename(filename, ext)
         debug 'loading component from file', filename, component
-        components[component] = componentCommandForFile config, filename
+        components[component] =
+          language: lang
+          command: componentCommandForFile config, filename
 
       return callback null, components
-
-# TODO: also add msgflo-python
-defaultHandlers =
-  ".yml":     "msgflo-register-foreign --role #ROLE participants/#COMPONENT.yml"
-  ".js":      "msgflo-nodejs --name #ROLE participants/#COMPONENT.js"
-  ".coffee":  "msgflo-nodejs --name #ROLE participants/#COMPONENT.coffee"
-  ".json":    "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
-  ".fbp":     "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
-
-languageExtensions =
-  'python': 'py'
-  'coffeescript': 'coffee'
-  'javascript': 'js'
-  'yaml': 'yml'
 
 normalizeConfig = (config) ->
   config = {} if not config
@@ -86,7 +96,7 @@ class Library
     options.config = normalizeConfig options.config
     @options = options
 
-    @components = {} # lazy-loaded using load()
+    @components = {} # "name" -> { command: "", language: ''|null }.  lazy-loaded using load()
 
   load: (callback) ->
     componentsFromDirectory @options.componentdir, @options.config, (err, components) =>
@@ -97,6 +107,21 @@ class Library
         @components[k] = v
       return callback null
 
+  getSource: (name, callback) ->
+    debug 'requesting component source', name
+    name = path.basename name # TODO: support multiple libraries?
+    return callback new Error "Component not found for #{name}" if not @components[name]?
+    lang = @components[name].language
+    ext = languageExtensions[lang]
+    filename = path.join @options.componentdir, "#{name}.#{ext}"
+    fs.readFile filename, 'utf-8', (err, code) ->
+      debug 'component source file', filename, lang, err
+      return callback new Error "Could not find component source for #{name}" if err
+      source =
+        language: 'coffeescript' # FIXME don't hardcode
+        code: code
+      return callback null, source
+
   addComponent: (name, language, code, callback) ->
     debug 'adding component', name, language
     ext = languageExtensions[language]
@@ -106,11 +131,15 @@ class Library
 
     fs.writeFile filename, code, (err) =>
       return callback err if err
-      @components[name] = componentCommandForFile @options.config, filename
+      @components[name] =
+        language: language
+        command: componentCommandForFile @options.config, filename
       return callback null
 
   componentCommand: (component, role, iips={}) ->
-    cmd = @components[component]
+    cmd = @components[component]?.command
+    componentName = path.basename component
+    cmd = @components[componentName]?.command if not cmd
     throw new Error "No component #{component} defined for role #{role}" if not cmd
 
     vars =
