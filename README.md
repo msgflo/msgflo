@@ -12,18 +12,25 @@ Each node can be implemented in different languages, and be a FBP runtime intern
 
 ## Status
 
-**Production**
+**In Production**
 
-* Used in production at [TheGrid](https://thegrid.io) for all workers using AMQP/RabbitMQ,
-including in [imgflo-server](https://github.com/jonnor/imgflo-server)
-* [msgflo-nodejs](./src/participant.coffee) makes it easy to set up [Node.js](http://nodejs.org/) participants
+* Used in production at [TheGrid](https://thegrid.io) website builder, with **AMQP**/RabbitMQ. 20 roles, 1'000'000 jobs/weekly+
+* Used in production in [imgflo image processing server](https://github.com/jonnor/imgflo-server). 4 roles, 200'000 jobs/weekly+
+* Used for IoT networks at hackerspaces [c-base](https://github.com/c-base/c-flo)
+and [Bitraf](https://github.com/bitraf/bitraf-iot), using **MQTT**/Mosquitto.
+
+Client support
+
+* [msgflo-nodejs](./src/participant.coffee) makes it easy to make [Node.js](http://nodejs.org/) participants in **JavaScript**/**CoffeeScript**
 * [noflo-runtime-msgflo](https://github.com/noflo/noflo-runtime-msgflo)
-makes it super easy to use NoFlo in the participants
-* Basic support for C++ participants with [msgflo-cpp](https://github.com/msgflo/msgflo-cpp) and [MicroFlo](https://github.com/microflo/microflo)
-* Basic support for Python participants with [msgflo-python](https://github.com/msgflo/msgflo-python)
-* Basic support for MQTT transport
-* Experimental support for Rust participants with [msgflo-rust](https://github.com/msgflo/msgflo-rust)
-* `msgflo` executable implements basic [FBP runtime protocol](http://noflojs.org/documentation/protocol/).
+makes it super easy to use [NoFlo](http://noflojs.org) in the participants
+* Basic support for **C++** participants with [msgflo-cpp](https://github.com/msgflo/msgflo-cpp) and [MicroFlo](https://github.com/microflo/microflo)
+* Basic support for **Python** participants with [msgflo-python](https://github.com/msgflo/msgflo-python)
+* Experimental support for **Rust** participants with [msgflo-rust](https://github.com/msgflo/msgflo-rust)
+
+Tooling
+
+* `msgflo` executable implements the [FBP runtime protocol](https://flowbased.github.io/fbp-protocol).
 * Initial support for automated testing using [fbp-spec](https://github.com/flowbased/fbp-spec)
 * Experimental support for visually building networks using [Flowhub](https://flowhub.io/)
 
