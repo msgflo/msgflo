@@ -2,6 +2,7 @@
 fs = require 'fs'
 path = require 'path'
 debug = require('debug')('msgflo:library')
+EventEmitter = require('events').EventEmitter
 
 common = require './common'
 
@@ -89,7 +90,7 @@ normalizeConfig = (config) ->
 
   return config
 
-class Library
+class Library extends EventEmitter
   constructor: (options) ->
     options.config = JSON.parse(fs.readFileSync options.configfile, 'utf-8') if options.configfile
     options.componentdir = 'participants' if not options.componentdir
@@ -98,13 +99,17 @@ class Library
 
     @components = {} # "name" -> { command: "", language: ''|null }.  lazy-loaded using load()
 
+  _updateComponents: (components) ->
+    names = Object.keys components
+    for name, comp of components
+      @components[name] = comp
+    @emit 'components-changed', names, @components
+
   load: (callback) ->
     componentsFromDirectory @options.componentdir, @options.config, (err, components) =>
       return callback err if err
-      for k,v of components
-        @components[k] = v
-      for k,v of componentsFromConfig @options.config
-        @components[k] = v
+      @_updateComponents components
+      @_updateComponents componentsFromConfig(@options.config)
       return callback null
 
   getSource: (name, callback) ->
@@ -131,9 +136,11 @@ class Library
 
     fs.writeFile filename, code, (err) =>
       return callback err if err
-      @components[name] =
+      changes = {}
+      changes[name] =
         language: language
         command: componentCommandForFile @options.config, filename
+      @_updateComponents changes
       return callback null
 
   componentCommand: (component, role, iips={}) ->
