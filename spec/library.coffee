@@ -23,7 +23,10 @@ describe 'Library', ->
       lib = new msgflo.library.Library options
       lib.load (err) ->
         return done err if err
-        chai.expect(lib.components).to.eql expectedCommands
+        commands = {}
+        for k,v of lib.components
+          commands[k] = v.command
+        chai.expect(commands).to.eql expectedCommands
         done()
 
   describe 'components on disk with default handlers', ->

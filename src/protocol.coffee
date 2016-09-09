@@ -57,14 +57,14 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         outPorts: getPorts part, 'outports'
       proto.transport.send 'component', 'component', info, ctx
 
-    for name, cmd of proto.coordinator.library.components
+    for name, component of proto.coordinator.library.components
       # XXX: we don't know anything about these apart from the name and command
       # when it has been instantiated first time we'll know the correct values, and should re-send
       continue if name in components
       components.push name
       info =
         name: name
-        description: cmd
+        description: component.cmd
         icon: null
         subgraph: false
         inPorts: []

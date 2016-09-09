@@ -65,6 +65,9 @@ languageExtensions =
   'coffeescript': 'coffee'
   'javascript': 'js'
   'yaml': 'yml'
+extensionToLanguage = {}
+for lang, ext of languageExtensions
+  extensionToLanguage[ext] = lang
 
 normalizeConfig = (config) ->
   config = {} if not config
@@ -86,25 +89,29 @@ class Library
     options.config = normalizeConfig options.config
     @options = options
 
-    @components = {} # lazy-loaded using load()
+    @components = {} # "name" -> { command: "", language: ''|null }.  lazy-loaded using load()
 
   load: (callback) ->
     componentsFromDirectory @options.componentdir, @options.config, (err, components) =>
       return callback err if err
+      # FIXME: set .language
       for k,v of components
-        @components[k] = v
+        @components[k] =
+          command: v
       for k,v of componentsFromConfig @options.config
-        @components[k] = v
+        @components[k] =
+          command: v
       return callback null
 
   getSource: (name, callback) ->
     debug 'requesting component source', name
     name = path.basename name # TODO: support multiple libraries?
-    return callback new Error "Component not found for #{name}" if not @components[name]
-    ext = 'coffee' # FIXME: don't hardcode
+    return callback new Error "Component not found for #{name}" if not @components[name]?
+    lang = @components[name].language
+    ext = languageExtensions[lang]
     filename = path.join @options.componentdir, "#{name}.#{ext}"
     fs.readFile filename, 'utf-8', (err, code) ->
-      debug 'component source file', filename, err
+      debug 'component source file', filename, lang, err
       return callback new Error "Could not find component source for #{name}" if err
       source =
         language: 'coffeescript' # FIXME don't hardcode
@@ -120,11 +127,13 @@ class Library
 
     fs.writeFile filename, code, (err) =>
       return callback err if err
-      @components[name] = componentCommandForFile @options.config, filename
+      @components[name] =
+        language: language
+        command: componentCommandForFile @options.config, filename
       return callback null
 
   componentCommand: (component, role, iips={}) ->
-    cmd = @components[component]
+    cmd = @components[component]?.command
     throw new Error "No component #{component} defined for role #{role}" if not cmd
 
     vars =
