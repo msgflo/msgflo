@@ -119,7 +119,6 @@ describe 'FBP runtime protocol', () ->
         source.start (err) ->
           chai.expect(err).to.be.a 'null'
 
-          ui.send 'component', 'getsource', { name: 'default/main' }
           ui.once 'message', (d, protocol, command, payload) ->
             chai.expect(payload).to.be.an 'object'
             chai.expect(payload).to.include.keys ['name', 'code', 'language']
@@ -133,6 +132,9 @@ describe 'FBP runtime protocol', () ->
             chai.expect(conn.tgt.process).to.contain 'sink'
             chai.expect(conn.tgt.port).to.equal 'drop'
             done()
+          setTimeout () ->
+            ui.send 'component', 'getsource', { name: 'default/main' }
+          , 500
 
     # TODO: automatically represent multiple participants of same class as subgraph
   describe 'stopping a running network', ->
