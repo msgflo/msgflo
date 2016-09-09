@@ -168,13 +168,35 @@ describe 'FBP runtime protocol', () ->
     componentCode = fs.readFileSync(__dirname+'/fixtures/ProduceFoo.coffee', 'utf-8')
 
     it 'should become available', (done) ->
-      ui.once 'message', (d, protocol, command, payload) ->
+      receivedAck = false
+      receivedComponent = false
+      checkMessage = (d, protocol, command, payload) ->
         chai.expect(payload).to.be.an 'object'
-        chai.expect(payload).to.include.keys ['name', 'code', 'language']
-        chai.expect(payload.language).to.equal 'coffeescript'
-        chai.expect(payload.code).to.include "component: 'ProduceFoo'"
-        chai.expect(payload.code).to.include "module.exports = ProduceFoo"
-        done()
+
+        if command == 'source'
+          # ACK
+          chai.expect(protocol).to.equal 'component'
+          chai.expect(payload).to.include.keys ['name', 'code', 'language']
+          chai.expect(payload.language).to.equal 'coffeescript'
+          chai.expect(payload.code).to.include "component: 'ProduceFoo'"
+          chai.expect(payload.code).to.include "module.exports = ProduceFoo"
+          receivedAck = true
+          console.log 'got ACK'
+        else if command == 'component'
+          # New component
+          chai.expect(protocol).to.equal 'component'
+          chai.expect(payload).to.include.keys ['name', 'subgraph', 'inPorts', 'outPorts']
+          chai.expect(payload.name).to.equal 'SetSource'
+          receivedComponent = true
+          console.log 'got Component'
+        else
+          chai.expect(command, "Unexpected command").to.not.exist
+
+        if receivedAck and receivedComponent
+          ui.removeListener 'message', checkMessage
+          done()
+
+      ui.on 'message', checkMessage
 
       source =
         name: componentName
@@ -186,8 +208,8 @@ describe 'FBP runtime protocol', () ->
     it 'should be returned on getsource', (done) ->
       ui.once 'message', (d, protocol, command, payload) ->
         chai.expect(payload).to.be.an 'object'
-        chai.expect(protocol).to.equal 'component'
         chai.expect(command, JSON.stringify(payload)).to.equal 'source'
+        chai.expect(protocol).to.equal 'component'
         chai.expect(payload).to.include.keys ['name', 'code', 'language']
         chai.expect(payload.name).to.equal componentName
         chai.expect(payload.language).to.equal 'coffeescript'
@@ -201,8 +223,8 @@ describe 'FBP runtime protocol', () ->
 
     it 'should be instantiable as new node', (done) ->
       ui.once 'message', (d, protocol, command, payload) ->
+        chai.expect(command, JSON.stringify(payload)).to.equal 'addnode'
         chai.expect(protocol).to.equal 'graph'
-        chai.expect(command).to.equal 'addnode'
         chai.expect(payload).to.be.an 'object'
         chai.expect(payload).to.include.keys ['id', 'graph', 'component']
         chai.expect(payload.component).to.equal componentName

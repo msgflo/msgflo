@@ -189,6 +189,21 @@ class Protocol
     @transport.on 'message', (protocol, command, payload, ctx) =>
       handleMessage @, protocol, command, payload, ctx
 
+    @coordinator.library.on 'components-changed', (names, allComponents) =>
+      debug 'components-changed', names
+      for name in names
+        component = allComponents[name]
+        # TODO: let Library emit a new change when discovery message comes in,
+        # which has inPorts/outPorts info etc
+        info =
+          name: name
+          description: component.cmd
+          icon: null
+          subgraph: false
+          inPorts: []
+          outPorts: []
+        @transport.sendAll 'component', 'component', info
+
     @coordinator.on 'data', (from, fromPort, to, toPort, data) =>
       debug 'on data', from, fromPort, data
 
