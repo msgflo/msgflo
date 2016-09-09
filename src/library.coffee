@@ -103,7 +103,17 @@ class Library extends EventEmitter
   _updateComponents: (components) ->
     names = Object.keys components
     for name, comp of components
-      @components[name] = comp
+      if not comp
+        # removed
+        @components[name] = null
+      else if not @components[name]
+        # added
+        @components[name] = comp
+      else
+        # update
+        for k, v of comp
+          @components[name][k] = v
+
     @emit 'components-changed', names, @components
 
   load: (callback) ->
@@ -112,6 +122,14 @@ class Library extends EventEmitter
       @_updateComponents components
       @_updateComponents componentsFromConfig(@options.config)
       return callback null
+
+  # call when MsgFlo discovery message has come in
+  _updateDefinition: (name, def) ->
+    return if not def # Ignore participants being removed
+    changes = {}
+    changes[name] =
+      definition: def
+    @_updateComponents changes
 
   getSource: (name, callback) ->
     debug 'requesting component source', name

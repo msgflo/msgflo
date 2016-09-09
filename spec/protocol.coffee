@@ -119,7 +119,9 @@ describe 'FBP runtime protocol', () ->
         source.start (err) ->
           chai.expect(err).to.be.a 'null'
 
-          ui.once 'message', (d, protocol, command, payload) ->
+          checkMessage = (d, protocol, command, payload) ->
+            return if command == 'component' # Ignore component update coming from instantiating
+
             chai.expect(payload).to.be.an 'object'
             chai.expect(payload).to.include.keys ['name', 'code', 'language']
             chai.expect(payload.language).to.equal 'json'
@@ -131,7 +133,10 @@ describe 'FBP runtime protocol', () ->
             chai.expect(conn.src.port).to.equal 'out'
             chai.expect(conn.tgt.process).to.contain 'sink'
             chai.expect(conn.tgt.port).to.equal 'drop'
+            ui.removeListener 'message', checkMessage
             done()
+          ui.on 'message', checkMessage
+
           setTimeout () ->
             ui.send 'component', 'getsource', { name: 'default/main' }
           , 500
@@ -222,13 +227,17 @@ describe 'FBP runtime protocol', () ->
       ui.send 'component', 'getsource', source
 
     it 'should be instantiable as new node', (done) ->
-      ui.once 'message', (d, protocol, command, payload) ->
+      checkMessage = (d, protocol, command, payload) ->
+        return if command == 'component' # Ignore component update coming from instantiating
+
         chai.expect(command, JSON.stringify(payload)).to.equal 'addnode'
         chai.expect(protocol).to.equal 'graph'
         chai.expect(payload).to.be.an 'object'
         chai.expect(payload).to.include.keys ['id', 'graph', 'component']
         chai.expect(payload.component).to.equal componentName
+        ui.removeListener 'message', checkMessage
         done()
+      ui.on 'message', checkMessage
       add =
         id: 'mycoffeescriptproducer'
         graph: 'default/main'
