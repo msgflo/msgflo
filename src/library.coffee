@@ -5,6 +5,23 @@ debug = require('debug')('msgflo:library')
 
 common = require './common'
 
+# TODO: also add msgflo-python
+defaultHandlers =
+  ".yml":     "msgflo-register-foreign --role #ROLE participants/#COMPONENT.yml"
+  ".js":      "msgflo-nodejs --name #ROLE participants/#COMPONENT.js"
+  ".coffee":  "msgflo-nodejs --name #ROLE participants/#COMPONENT.coffee"
+  ".json":    "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
+  ".fbp":     "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
+
+languageExtensions =
+  'python': 'py'
+  'coffeescript': 'coffee'
+  'javascript': 'js'
+  'yaml': 'yml'
+extensionToLanguage = {}
+for lang, ext of languageExtensions
+  extensionToLanguage[ext] = lang
+
 replaceMarker = (str, marker, value) ->
   marker = '#'+marker.toUpperCase()
   str.replace(new RegExp(marker,  'g'), value)
@@ -31,7 +48,9 @@ componentCommandForFile = (config, filename) ->
 componentsFromConfig = (config) ->
   components = {}
   for component, cmd of config.components
-    components[component] = baseComponentCommand config, component, cmd
+    components[component] =
+      language: null # XXX: Could try to guess from cmd/template??
+      command: baseComponentCommand config, component, cmd
   return components
 
 componentsFromDirectory = (directory, config, callback) ->
@@ -46,28 +65,15 @@ componentsFromDirectory = (directory, config, callback) ->
       unsupported = filenames.filter (f) -> not (path.extname(f) in extensions)
       debug 'unsupported component files', unsupported if unsupported.length
       for filename in supported
-        component = path.basename(filename, path.extname(filename))
+        ext = path.extname filename
+        lang = extensionToLanguage[ext]
+        component = path.basename(filename, ext)
         debug 'loading component from file', filename, component
-        components[component] = componentCommandForFile config, filename
+        components[component] =
+          language: lang
+          command: componentCommandForFile config, filename
 
       return callback null, components
-
-# TODO: also add msgflo-python
-defaultHandlers =
-  ".yml":     "msgflo-register-foreign --role #ROLE participants/#COMPONENT.yml"
-  ".js":      "msgflo-nodejs --name #ROLE participants/#COMPONENT.js"
-  ".coffee":  "msgflo-nodejs --name #ROLE participants/#COMPONENT.coffee"
-  ".json":    "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
-  ".fbp":     "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
-
-languageExtensions =
-  'python': 'py'
-  'coffeescript': 'coffee'
-  'javascript': 'js'
-  'yaml': 'yml'
-extensionToLanguage = {}
-for lang, ext of languageExtensions
-  extensionToLanguage[ext] = lang
 
 normalizeConfig = (config) ->
   config = {} if not config
@@ -94,13 +100,10 @@ class Library
   load: (callback) ->
     componentsFromDirectory @options.componentdir, @options.config, (err, components) =>
       return callback err if err
-      # FIXME: set .language
       for k,v of components
-        @components[k] =
-          command: v
+        @components[k] = v
       for k,v of componentsFromConfig @options.config
-        @components[k] =
-          command: v
+        @components[k] = v
       return callback null
 
   getSource: (name, callback) ->
