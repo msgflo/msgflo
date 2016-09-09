@@ -69,6 +69,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         subgraph: false
         inPorts: []
         outPorts: []
+      proto.transport.send 'component', 'component', info, ctx
 
     proto.transport.send 'component', 'componentsready', components.length, ctx
     debug 'sent components', components.length
