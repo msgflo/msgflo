@@ -151,20 +151,9 @@ The network coordinator subscribes to a queue named `fbp`.
 Once a participant becomes available, it announces its availability by sending a message to this queue
 with `protocol`: 'discovery' and `command`: 'participant'.
 
-In case of fully FBP protocol capable participants, the `payload` contains the following information:
-
-* `id`: short unique name for the system
-* `label`: (optional) human-readable description of the system
-* `type`: type of the runtime, for example `noflo-nodejs` or `microflo`
-* `version`: version of the runtime protocol that the runtime supports, for example `0.4`
-* `capabilities`: array of capability strings for things the runtime is able to do
-* `inqueue`:  name of the message queue the participant listens for FBP protocol messages
-* `outqueue`:  name of the message queue the participant sends FBP protocol messages
-
 In case of systems incapable of communicating via FBP protocol
 but which can nonetheless be connected to a network,
 the message `payload` contains the following information:
-
 
 * `id`: short unique name for the participant. Ex: measure1
 * `role`: the role this participant has in the network. Used to group multiple partipants. Ex: measure
@@ -182,6 +171,14 @@ the message `payload` contains the following information:
   - `type`: port datatype, for example `boolean`
   - `options`: queue options as specified by the message queue implementation
 
+If the participant is itself implemented using FBP and supports the
+[FBP runtime protocol](https://flowbased.github.io/fbp-protocol/), these additional keys should be defined.
+
+* `type`: type of the runtime, for example `noflo-nodejs` or `microflo`
+* `version`: version of the runtime protocol that the runtime supports, for example `0.4`
+* `inqueue`:  name of the message queue the participant listens for FBP protocol messages
+* `outqueue`:  name of the message queue the participant sends FBP protocol messages
+
 #### Participant changes
 
 When changes are made in the participant,
@@ -197,34 +194,3 @@ The default limit is 600 seconds.
 Note: if sending data on ports on a sporadic connection,
 one should first send a `participant` message for the data.
 
-### Coordinator-Participant communications
-
-Most of the communications between the coordinator and the participants happens
-via the regular [FBP protocol](http://noflojs.org/documentation/protocol/).
-Here are listed some additional messages that are used for the MsgFlo environment.
-
-#### Connecting ports to queues
-
-The coordinator can tell a participant to connect an inport of a running graph
-to a message queue with the `connectinport` message with the following payload:
-
-* `src`: source
-  - `queue`: message queue name
-  - `options`: queue options as specified by the message queue implementation
-* `tgt`: target
-  - `port`: port name
-  - `index`: connection index (optional, for addressable ports)
-* `metadata` (optional): structure of key-value pairs for edge metadata
-* `graph`: graph the action targets
-
-The coordinator can also tell a participant to connect an outport of a running graph
-to a message queue with the `connectoutport` message with the following payload:
-
-* `src`:  source
-  - `port`: port name
-  - `index`: connection index (optional, for addressable ports)
-* `tgt`:
-  - `queue`: message queue name
-  - `options`: queue options as specified by the message queue implementation
-* `metadata` (optional): structure of key-value pairs for edge metadata
-* `graph`: graph the action targets
