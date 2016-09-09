@@ -71,9 +71,10 @@ componentsFromDirectory = (directory, config, callback) ->
         lang = extensionToLanguage[ext]
         component = path.basename(filename, ext)
         debug 'loading component from file', filename, component
+        filepath = path.join directory, filename
         components[component] =
           language: lang
-          command: componentCommandForFile config, filename
+          command: componentCommandForFile config, filepath
 
       return callback null, components
 
