@@ -298,6 +298,8 @@ class Coordinator extends EventEmitter
     graph =
       properties:
         name: name
+        environment:
+          type: 'msgflo'
       processes: {}
       connections: []
       inports: []
