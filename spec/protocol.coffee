@@ -197,8 +197,45 @@ describe 'FBP runtime protocol', () ->
     it 'data should now be forwarded'
 
   describe 'removing a connected edge', ->
-    it 'should succeed'
-    it 'data should now be forwarded'
+    repeatA = null
+    repeatB = null
+    before (done) ->
+      repeatA = participants.Repeat options.broker, 'removeedge-repeat-A'
+      repeatA.start (err) ->
+        return done err if err
+        repeatB = participants.Repeat options.broker, 'removeedge-repeat-B'
+        repeatB.start (err) ->
+          edge =
+            src: { node: 'removeedge-repeat-A', port: 'out' }
+            tgt: { node: 'removeedge-repeat-B', port: 'in' }
+          check = (d, protocol, command, payload) ->
+            return if command == 'component'
+            chai.expect(command).to.equal 'addedge'
+            ui.removeListener 'message', check
+            return done()
+          ui.on 'message', check
+          ui.send 'graph', 'addedge', edge
+    after (done) ->
+      repeatA.stop (err) ->
+        return repeatB.stop done
+
+    it 'should succeed', (done) ->
+      edge =
+        src: { node: 'removeedge-repeat-A', port: 'out' }
+        tgt: { node: 'removeedge-repeat-B', port: 'in' }
+      ui.once 'message', (d, protocol, command, payload) ->
+        chai.expect(payload).to.be.a 'object'
+        chai.expect(command, JSON.stringify(payload)).to.equal 'removeedge'
+        chai.expect(protocol).to.equal 'graph'
+        chai.expect(payload).to.have.keys ['src', 'tgt']
+        chai.expect(payload.src.node).to.equal edge.src.node
+        chai.expect(payload.src.port).to.equal edge.src.port
+        chai.expect(payload.tgt.node).to.equal edge.tgt.node
+        chai.expect(payload.tgt.port).to.equal edge.tgt.port
+        return done()
+      ui.send 'graph', 'removeedge', edge
+
+    it 'data should now not be forwarded'
 
   describe 'adding a node', ->
     it 'should succeed'
