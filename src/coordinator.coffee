@@ -87,12 +87,14 @@ class Coordinator extends EventEmitter
     @library._updateDefinition definition.component, definition
     @emit 'participant-added', definition
     @emit 'participant', 'added', definition
+    @emit 'graph-changed'
 
   removeParticipant: (id) ->
     definition = @participants[id]
     @emit 'participant-removed', definition
     @library._updateDefinition definition.component, null
     @emit 'participant', 'removed', definition
+    @emit 'graph-changed'
 
   addComponent: (name, language, code, callback) ->
     @library.addComponent name, language, code, callback
@@ -194,6 +196,7 @@ class Coordinator extends EventEmitter
         # TODO: support roundtrip
         @connections[edgeId].srcQueue = findQueue fromId, 'outports', fromPort
         @connections[edgeId].tgtQueue = findQueue toId, 'inports', toName
+        @emit 'graph-changed'
         @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
           return callback err
 
@@ -207,6 +210,7 @@ class Coordinator extends EventEmitter
     @broker.removeBinding { type: 'pubsub', src: edge.srcQueue, tgt: edge.tgtQueue }, (err) =>
       return callback err if err
       delete @connections[edgeId]
+      @emit 'graph-changed'
       return callback null
 
   checkParticipantConnections: (action, participant) ->
