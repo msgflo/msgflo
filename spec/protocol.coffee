@@ -74,7 +74,7 @@ describe 'FBP runtime protocol', () ->
     fs.mkdirSync options.componentdir
     runtime = new Runtime options
     runtime.start (err, url) ->
-      chai.expect(err).to.be.a 'null'
+      chai.expect(err).to.not.exist
       ui.once 'connected', () ->
         done()
       ui.connect options.port
