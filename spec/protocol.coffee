@@ -124,11 +124,9 @@ describe 'FBP runtime protocol', () ->
         part.send iip.tgt.port, iip.data
 
     it 'should show as connected edges', (done) ->
-      graph = fbp.parse " 'world' -> NAME say(Hello) OUT -> DROP sink(DevNullSink) "
       source = participants.Hello options.broker, 'say'
       sink = participants.DevNullSink options.broker, 'sink'
-      source.connectGraphEdges graph
-      sink.connectGraphEdges graph
+      source.definition.outports[0].queue = sink.definition.inports[0].queue
       sink.start (err) ->
         chai.expect(err).to.be.a 'null'
         source.start (err) ->
