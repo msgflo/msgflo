@@ -58,6 +58,17 @@ class WebSocketTransport extends EventEmitter
   emitMessage: (msg, ctx) ->
     @emit 'message', msg.protocol, msg.command, msg.payload, ctx
 
+# atomic
+saveGraphFile = (graph, filepath, callback) ->
+  fs = require 'fs'
+  temppath = filepath + "msgflo-autosave-#{Date.now()}"
+  json = JSON.stringify graph, null, 2
+  fs.writeFile temppath, json, (err) ->
+    return err if err
+    fs.rename temppath, filepath, (err) ->
+      fs.unlink temppath, (e) ->
+        return callback err
+
 class Runtime
   constructor: (@options) ->
     @server = null
@@ -65,6 +76,14 @@ class Runtime
     @protocol = null
     @broker = transport.getBroker @options.broker
     @coordinator = new coordinator.Coordinator @broker, @options
+
+    if @options.graph and @options.autoSave
+      @coordinator.on 'graph-changed', () =>
+        setTimeout () =>
+          graph = @coordinator.serializeGraph 'main'
+          saveGraphFile graph, @options.graph, (err) ->
+            console.log "ERROR: Failed to save graph file", err if err
+        , 0
 
   start: (callback) ->
     @server = http.createServer()
