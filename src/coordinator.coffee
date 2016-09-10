@@ -199,8 +199,15 @@ class Coordinator extends EventEmitter
 
     # TODO: introduce some "spying functionality" to provide edge messages, add tests
 
-  disconnect: (fromId, fromPortId, toId, toPortId) -> # FIXME: implement
-
+  disconnect: (fromId, fromPort, toId, toPort, callback) ->
+    edgeId = connId fromId, fromPort, toId, toPort
+    edge = @connections[edgeId]
+    return callback new Error "Could not find connection #{edgeId}" if not edge
+    return callback new Error "No queues for connection #{edgeId}" if not edge.srcQueue and edge.tgtQueue
+    @broker.removeBinding { type: 'pubsub', src: edge.srcQueue, tgt: edge.tgtQueue }, (err) =>
+      return callback err if err
+      delete @connections[edgeId]
+      return callback null
 
   checkParticipantConnections: (action, participant) ->
     findConnectedPorts = (dir, srcPort) =>
