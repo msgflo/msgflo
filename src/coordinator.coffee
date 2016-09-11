@@ -87,12 +87,14 @@ class Coordinator extends EventEmitter
     @library._updateDefinition definition.component, definition
     @emit 'participant-added', definition
     @emit 'participant', 'added', definition
+    @emit 'graph-changed'
 
   removeParticipant: (id) ->
     definition = @participants[id]
     @emit 'participant-removed', definition
     @library._updateDefinition definition.component, null
     @emit 'participant', 'removed', definition
+    @emit 'graph-changed'
 
   addComponent: (name, language, code, callback) ->
     @library.addComponent name, language, code, callback
@@ -194,13 +196,22 @@ class Coordinator extends EventEmitter
         # TODO: support roundtrip
         @connections[edgeId].srcQueue = findQueue fromId, 'outports', fromPort
         @connections[edgeId].tgtQueue = findQueue toId, 'inports', toName
+        @emit 'graph-changed'
         @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
           return callback err
 
     # TODO: introduce some "spying functionality" to provide edge messages, add tests
 
-  disconnect: (fromId, fromPortId, toId, toPortId) -> # FIXME: implement
-
+  disconnect: (fromId, fromPort, toId, toPort, callback) ->
+    edgeId = connId fromId, fromPort, toId, toPort
+    edge = @connections[edgeId]
+    return callback new Error "Could not find connection #{edgeId}" if not edge
+    return callback new Error "No queues for connection #{edgeId}" if not edge.srcQueue and edge.tgtQueue
+    @broker.removeBinding { type: 'pubsub', src: edge.srcQueue, tgt: edge.tgtQueue }, (err) =>
+      return callback err if err
+      delete @connections[edgeId]
+      @emit 'graph-changed'
+      return callback null
 
   checkParticipantConnections: (action, participant) ->
     findConnectedPorts = (dir, srcPort) =>
@@ -291,6 +302,8 @@ class Coordinator extends EventEmitter
     graph =
       properties:
         name: name
+        environment:
+          type: 'msgflo'
       processes: {}
       connections: []
       inports: []

@@ -152,8 +152,9 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
       proto.transport.sendAll 'graph', 'addedge', payload
   else if cmd == 'removeedge'
     p = payload
-    proto.coordinator.disconnect p.src.node, p.src.port, p.tgt.node, p.tgt.port
-    proto.transport.sendAll 'graph', 'removeedge', payload
+    proto.coordinator.disconnect p.src.node, p.src.port, p.tgt.node, p.tgt.port, (err) ->
+      return proto.transport.send 'graph', 'error', err, ctx if err
+      proto.transport.sendAll 'graph', 'removeedge', payload
 
   # IIPs
   else if cmd == 'addinitial'

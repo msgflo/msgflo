@@ -6,11 +6,11 @@ EventEmitter = require('events').EventEmitter
 
 common = require './common'
 
-# TODO: also add msgflo-python
 defaultHandlers =
   ".yml":     "msgflo-register-foreign --role #ROLE #FILENAME"
   ".js":      "msgflo-nodejs --name #ROLE #FILENAME"
   ".coffee":  "msgflo-nodejs --name #ROLE #FILENAME"
+  ".py":  "msgflo-python #FILENAME #ROLE"
   ".json":    "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
   ".fbp":     "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
 

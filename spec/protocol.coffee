@@ -74,7 +74,7 @@ describe 'FBP runtime protocol', () ->
     fs.mkdirSync options.componentdir
     runtime = new Runtime options
     runtime.start (err, url) ->
-      chai.expect(err).to.be.a 'null'
+      chai.expect(err).to.not.exist
       ui.once 'connected', () ->
         done()
       ui.connect options.port
@@ -124,11 +124,9 @@ describe 'FBP runtime protocol', () ->
         part.send iip.tgt.port, iip.data
 
     it 'should show as connected edges', (done) ->
-      graph = fbp.parse " 'world' -> NAME say(Hello) OUT -> DROP sink(DevNullSink) "
       source = participants.Hello options.broker, 'say'
       sink = participants.DevNullSink options.broker, 'sink'
-      source.connectGraphEdges graph
-      sink.connectGraphEdges graph
+      source.definition.outports[0].queue = sink.definition.inports[0].queue
       sink.start (err) ->
         chai.expect(err).to.be.a 'null'
         source.start (err) ->
@@ -168,12 +166,76 @@ describe 'FBP runtime protocol', () ->
     it 'should respond to messages again'
 
   describe 'adding an edge', ->
-    it 'should succeed'
+    repeatA = null
+    repeatB = null
+    before (done) ->
+      repeatA = participants.Repeat options.broker, 'addedge-repeat-A'
+      repeatA.start (err) ->
+        return done err if err
+        repeatB = participants.Repeat options.broker, 'addedge-repeat-B'
+        return repeatB.start done
+    after (done) ->
+      repeatA.stop (err) ->
+        return repeatB.stop done
+
+    it 'should succeed', (done) ->
+      edge =
+        src: { node: 'addedge-repeat-A', port: 'out' }
+        tgt: { node: 'addedge-repeat-B', port: 'in' }
+      ui.once 'message', (d, protocol, command, payload) ->
+        chai.expect(payload).to.be.a 'object'
+        chai.expect(command, JSON.stringify(payload)).to.equal 'addedge'
+        chai.expect(protocol).to.equal 'graph'
+        chai.expect(payload).to.have.keys ['src', 'tgt']
+        chai.expect(payload.src.node).to.equal edge.src.node
+        chai.expect(payload.src.port).to.equal edge.src.port
+        chai.expect(payload.tgt.node).to.equal edge.tgt.node
+        chai.expect(payload.tgt.port).to.equal edge.tgt.port
+        return done()
+      ui.send 'graph', 'addedge', edge
+
     it 'data should now be forwarded'
 
   describe 'removing a connected edge', ->
-    it 'should succeed'
-    it 'data should now be forwarded'
+    repeatA = null
+    repeatB = null
+    before (done) ->
+      repeatA = participants.Repeat options.broker, 'removeedge-repeat-A'
+      repeatA.start (err) ->
+        return done err if err
+        repeatB = participants.Repeat options.broker, 'removeedge-repeat-B'
+        repeatB.start (err) ->
+          edge =
+            src: { node: 'removeedge-repeat-A', port: 'out' }
+            tgt: { node: 'removeedge-repeat-B', port: 'in' }
+          check = (d, protocol, command, payload) ->
+            return if command == 'component'
+            chai.expect(command).to.equal 'addedge'
+            ui.removeListener 'message', check
+            return done()
+          ui.on 'message', check
+          ui.send 'graph', 'addedge', edge
+    after (done) ->
+      repeatA.stop (err) ->
+        return repeatB.stop done
+
+    it 'should succeed', (done) ->
+      edge =
+        src: { node: 'removeedge-repeat-A', port: 'out' }
+        tgt: { node: 'removeedge-repeat-B', port: 'in' }
+      ui.once 'message', (d, protocol, command, payload) ->
+        chai.expect(payload).to.be.a 'object'
+        chai.expect(command, JSON.stringify(payload)).to.equal 'removeedge'
+        chai.expect(protocol).to.equal 'graph'
+        chai.expect(payload).to.have.keys ['src', 'tgt']
+        chai.expect(payload.src.node).to.equal edge.src.node
+        chai.expect(payload.src.port).to.equal edge.src.port
+        chai.expect(payload.tgt.node).to.equal edge.tgt.node
+        chai.expect(payload.tgt.port).to.equal edge.tgt.port
+        return done()
+      ui.send 'graph', 'removeedge', edge
+
+    it 'data should now not be forwarded'
 
   describe 'adding a node', ->
     it 'should succeed'
