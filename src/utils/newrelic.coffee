@@ -11,6 +11,7 @@ getJobStats = (options, app, callback) ->
   q = "SELECT average(duration), stddev(duration), percentile(duration, 90) FROM MsgfloJobCompleted FACET role SINCE #{options.since} ago WHERE outport != 'error' AND appName = '#{app}' LIMIT #{limit}"
   insights.query q, (err, body) ->
     return callback err if err
+    return callback new Error "newrelic: No facets was returned in query" if not body.facets?.length
 
     results = {}
     for facet in body.facets
