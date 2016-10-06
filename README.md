@@ -33,6 +33,7 @@ Tooling
 * `msgflo` executable implements the [FBP runtime protocol](https://flowbased.github.io/fbp-protocol).
 * Initial support for automated testing using [fbp-spec](https://github.com/flowbased/fbp-spec)
 * Experimental support for visually building networks using [Flowhub](https://flowhub.io/)
+* [guv](http://github.com/the-grid/guv) provides autoscaling of workers when using Heroku/AMQP.
 
 ## Licence
 
