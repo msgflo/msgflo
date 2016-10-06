@@ -86,7 +86,7 @@ Setup a NoFlo participant using [noflo-runtime-msgflo](https://github.com/noflo/
 
     noflo-runtime-msgflo --name out --graph core/Output --broker amqp://localhost
 
-Define how the participants form a network (.FBP DSL)
+Define how the participants form a network (in [.FBP DSL](https://github.com/flowbased/fbp#language-for-flow-based-programming))
 
     # FILE: myservice.fbp
     repeater(Repeat) OUT -> IN out(Output)
@@ -103,6 +103,39 @@ Send some data to input
 
 TODO: also show Python example
 TODO: also show C++ examples
+
+
+## Using non-MsgFlo-aware code as participants
+
+MsgFlo can work with existing code that uses a supported message-queues system (AMQP, MQTT).
+Because the code is not MsgFlo-aware, another process needs to send the MsgFlo discovery
+message on its behalf.
+
+For instance if we had a system that takes data on a queue named `process/A/in`,
+transforms it and then sends the results on queue `process/A/out`,
+the information can be declared in a [YAML](https://en.wikipedia.org/wiki/YAML) file:
+
+```yaml
+ # File: participants/ProcessSomething.yaml
+component: ProcessSomething
+label: Process input and send some output
+icon: ambulance
+inports:
+  in:
+    queue: process/A/in
+    type: string
+outports:
+  out:
+    queue: process/A/out
+    type: string
+```
+
+And then run `msgflo-register-foreign` to publish the information
+
+    msgflo-register-foreign participants/ProcessSomething.yaml
+
+The `queue` key supports substituting `#ROLE`. This allows a single YAML file to declare a component
+which can be instantiated multiple times - each with a different role and queue name.
 
 
 ## Debugging
