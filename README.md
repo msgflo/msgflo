@@ -1,14 +1,22 @@
 MsgFlo - Flow-Based Programming with Message Queues [![Build Status](https://travis-ci.org/msgflo/msgflo.svg?branch=master)](https://travis-ci.org/msgflo/msgflo)
 ===================================================
 
-This is an implementation of the
-[Flow-Based Programming](http://en.wikipedia.org/wiki/Flow-based_programming) paradigm using message queues
-as the communications layer between different processes. Initial message queue transports targeted are
+Implementation of the [Flow-Based Programming](http://en.wikipedia.org/wiki/Flow-based_programming)
+using message queues as the communications layer between different processes.
+Initial message queue transports targeted are
 [AMQP](http://en.wikipedia.org/wiki/Advanced_Message_Queuing_Protocol)
 and [MQTT](http://mqtt.org).
 
-MsgFlo lets you build robust polyglot FBP systems spanning multiple nodes.
-Each node can be implemented in different languages, and be a FBP runtime internally or not.
+MsgFlo lets you build robust polyglot FBP systems spanning multiple computers/devices.
+A node can be implemented in any language, to reuse existing code, libraries and developer know-how.
+
+In FBP each component is a black-box that processes and produces data,
+without knowledge about where the input data comes from, or where the output data goes.
+This ensures that a service is easy to change, and facilitates automated testing.
+
+MsgFlo is designed to enable partial and gradual integration into existing systems;
+by using standard broker/transports, not placing restrictions on message payloads,
+allowing to use existing queue names, and integrating non-MsgFlo nodes seamlessly.
 
 ## Status
 
@@ -243,6 +251,42 @@ run with `mocha --reporter spec --compilers coffee:coffee-script/register spec/p
 If these tests are set up and passing, with [Travis CI](http://travis-ci.org/) enabled, the library
 can be hosted under the [msgflo Github organization](https://github.com/msgflo) as an official module.
 
+## Best practices
+
+A loose collection of best practices to consider when building systems with Msgflo.
+Some of these are generic FBP/dataflow programming advice.
+For scalability considerations in cloud/worker environments,
+[guv best practices](https://github.com/the-grid/guv#best-practices) may also be useful.
+
+### Components/nodes model verbs, not nouns
+
+Components should, to the extent possible, be state-free.
+Ideally all the data needed to perform a task is provided in the input data.
+In object-oriented-programming the primary entities often represent things/nouns,
+which encourages bundling together different aspects of, with associated buildup of state.
+
+Instead it is preferrable to let the data that moves through the system be the thing/noun,
+and let the components be the actions/verbs which *operate on* this thing.
+
+If there are a collection of actions somehow provided by the same "thing" (like a device or subsystem),
+one can use a group to visually indicate that a set of nodes are related to eachother.
+
+### Always send data
+
+Even for cases where one "does not need to", like when a component uses input to perform a side-effect,
+like storing to a database, or notifying an external system.
+
+This allows to know that an operation completed, and to trigger new operations afterwards.
+One immediate usecase is for automated tests, which can then assert that any side-effects performed
+was done, and done correctly.
+
+If there is no processed/derived data, send the original input onwards.
+
+### Use a dedicated port/queue for errors
+
+Allows to easily distinguish success from failures. By convention it is often just called `error`.
+This can for instance be used to automatically report failures to a QA system, for automated or manual analysis.
+Or to retry operations, in order to automatically recover from intermittent failures.
 
 ## Architecture
 
