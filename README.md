@@ -137,6 +137,9 @@ And then run `msgflo-register-foreign` to publish the information
 The `queue` key supports substituting `#ROLE`. This allows a single YAML file to declare a component
 which can be instantiated multiple times - each with a different role and queue name.
 
+Several real-life examples of foreign participant declaration can be found
+[in c-flo](https://github.com/c-base/c-flo/tree/master/participants).
+
 ## Generating Heroku Procfile
 
 `msgflo-procfile` can automatically generate a [Procfile](https://devcenter.heroku.com/articles/procfile)
@@ -148,6 +151,7 @@ This ensures that the production service runs in the same way as when using MsgF
 You can also selectively ignore certain roles in the graph, by using `--ignore role`.
 Or you can include additional process stanzas by using `--include="guv: node ./node_modules/.bin/guv"`.
 
+A real-life example can be found [in imgflo-server](https://github.com/imgflo/imgflo-server/blob/master/Makefile#L67).
 
 ## Debugging
 
