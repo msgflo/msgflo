@@ -219,6 +219,30 @@ You can enable (all) logging using:
 
     export DEBUG=msgflo*
 
+## Participant support for new environments
+
+For programming languages or environments which there does not exist a MsgFlo library,
+and native support is desired (ie not using "foreign participant" support), here are some guidelines.
+
+* Must at minimum support either MQTT or AMQP brokers. If possible, support both
+* Must send the MsgFlo discovery message
+* Must at least support UTF-8 JSON formatted messages
+* Should also support binary messages, allowing for non-JSON payloads
+* The `MSGFLO_BROKER` envvar must be respected for configuring broker info (including optional user/password)
+* When starting a participant via commandline, it must send output on stdout *when ready to receive messages*
+
+Please let the community know about new MsgFlo libraries or tools, including in-progress ones.
+This enables interested parties to collaborate, and avoids duplicated efforts.
+For instance start a [Github issue](https://github.com/msgflo/msgflo/issues/new).
+
+There exists a basic set of [automated tests](https://github.com/msgflo/msgflo/blob/master/spec/heterogenous.coffee)
+for a participant, which checks that the guidelines above are followed.
+
+Example usage: [code](https://github.com/msgflo/msgflo-cpp/blob/master/spec/participant.coffee),
+run with `mocha --reporter spec --compilers coffee:coffee-script/register spec/participant.coffee`.
+If these tests are set up and passing, with [Travis CI](http://travis-ci.org/) enabled, the library
+can be hosted under the [msgflo Github organization](https://github.com/msgflo) as an official module.
+
 
 ## Architecture
 
