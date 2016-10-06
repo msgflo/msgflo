@@ -110,7 +110,7 @@ Send some data to input
 A component is a piece of code which can instantiate a MsgFlo participant.
 By default such component code is placed in `./participants/` directory of a project.
 
-  cp ./node_modules/msgflo-nodejs/examples/Repeat.coffee ./participants/
+    cp ./node_modules/msgflo-nodejs/examples/Repeat.coffee ./participants/
 
 Declaring a command template in `package.json` tells MsgFlo how to instantiate them.
 This can be done per component, or by specifying a handler for a given file extension,
