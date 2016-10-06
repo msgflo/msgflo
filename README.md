@@ -101,8 +101,8 @@ Send some data to input
     # Should now see output from 'out' participant
     # after having traveled through NoFlo and node.js participants
 
-TODO: also show Python example
-TODO: also show C++ examples
+`TODO: also show Python example`
+`TODO: also show C++ examples`
 
 
 ## Using non-MsgFlo-aware code as participants
@@ -136,6 +136,17 @@ And then run `msgflo-register-foreign` to publish the information
 
 The `queue` key supports substituting `#ROLE`. This allows a single YAML file to declare a component
 which can be instantiated multiple times - each with a different role and queue name.
+
+## Generating Heroku Procfile
+
+`msgflo-procfile` can automatically generate a [Procfile](https://devcenter.heroku.com/articles/procfile)
+for running as a Heroku service, based on the MsgFlo graph and component information.
+This ensures that the production service runs in the same way as when using MsgFlo locally.
+
+    msgflo-procfile graphs/myservice.fbp > Procfile
+
+You can also selectively ignore certain roles in the graph, by using `--ignore role`.
+Or you can include additional process stanzas by using `--include="guv: node ./node_modules/.bin/guv"`.
 
 
 ## Debugging
