@@ -17,6 +17,7 @@ main = ->
   program
     .option('--broker <uri>', 'Broker address', String, '')
     .option('--role <role>', 'Role of this instance', String, '')
+    .option('--forever <true>', 'Keep running forever', Boolean, false)
     .usage('[options] <definition>')
     .parse(process.argv)
   program = common.normalizeOptions program
@@ -40,6 +41,8 @@ main = ->
       return onError err if err
       foreigner.register messaging, definition, (err) ->
         return onError err if err
-        onComplete()
+
+        if not program.forever
+          onComplete()
 
 exports.main = main
