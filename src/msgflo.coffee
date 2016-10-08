@@ -19,7 +19,7 @@ main = () ->
     .option('--graph <file.json>', 'Initial graph to load', String, '')
     .option('--ignore [process]', "Don't set up these processes", collectArray, [])
     .option('--forward stderr,stdout', "Forward these streams from child", String, 'stderr,stdout')
-    .option('--auto-save', "Autosave changes to graph", Boolean, false)
+    .option('--auto-save [true|false]', "Autosave changes to graph", Boolean, false)
     .parse(process.argv)
 
   options = common.normalizeOptions program

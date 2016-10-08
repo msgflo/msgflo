@@ -64,7 +64,7 @@ saveGraphFile = (graph, filepath, callback) ->
   temppath = filepath + "msgflo-autosave-#{Date.now()}"
   json = JSON.stringify graph, null, 2
   fs.writeFile temppath, json, (err) ->
-    return err if err
+    return callback err if err
     fs.rename temppath, filepath, (err) ->
       fs.unlink temppath, (e) ->
         return callback err
@@ -78,8 +78,10 @@ class Runtime
     @coordinator = new coordinator.Coordinator @broker, @options
 
     if @options.graph and @options.autoSave
+      debug 'enabling autosave'
       @coordinator.on 'graph-changed', () =>
         setTimeout () =>
+          debug 'saving graph changes', @options.graph
           graph = @coordinator.serializeGraph 'main'
           saveGraphFile graph, @options.graph, (err) ->
             console.log "ERROR: Failed to save graph file", err if err
