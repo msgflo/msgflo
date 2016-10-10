@@ -93,6 +93,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       proto.coordinator.getComponentSource payload.name, (err, source) ->
         if err
           proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
+          return
         source.name = payload.name
         proto.transport.send 'component', 'source', source, ctx
 
