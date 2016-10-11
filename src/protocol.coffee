@@ -36,6 +36,10 @@ fbpComponentFromMsgflo = (name, component) ->
 
   return info
 
+# JSON serialization of Error objects is empty
+serializeErr = (err) ->
+  return { message: err.message }
+
 handleMessage = (proto, sub, cmd, payload, ctx) ->
   debug 'RECV:', sub, cmd, payload
 
@@ -57,7 +61,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
   else if sub == 'runtime' and cmd == 'packet'
     proto.coordinator.sendToExportedPort payload.port, payload.payload, (err) ->
-      return proto.transport.send 'runtime', 'error', err if err
+      return proto.transport.send 'runtime', 'error', serializeErr(err), ctx if err
       # No ACK in this case apparently, as it is interpreted as output
 
   # Component
@@ -92,6 +96,10 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       # Regular component
       proto.coordinator.getComponentSource payload.name, (err, source) ->
         if err
+          # return empty component response, as clients handle errors badly...
+          source =
+            language: 'javascript'
+            code: ""
           proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
         source.name = payload.name
         proto.transport.send 'component', 'source', source, ctx
@@ -136,11 +144,11 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
     # FIXME: support multiple graphs
   else if cmd == 'addnode'
     proto.coordinator.startParticipant payload.id, payload.component, (err) ->
-      return proto.transport.send 'graph', 'error', err, ctx if err
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addnode', payload
   else if cmd == 'removenode'
     proto.coordinator.stopParticipant payload.id, payload.component, (err) ->
-      return proto.transport.send 'graph', 'error', err, ctx if err
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'removenode', payload
 
   # Connections
@@ -148,12 +156,12 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
     debug 'addedge', payload
     p = payload
     proto.coordinator.connect p.src.node, p.src.port, p.tgt.node, p.tgt.port, (err) ->
-      return proto.transport.send 'graph', 'error', err, ctx if err
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addedge', payload
   else if cmd == 'removeedge'
     p = payload
     proto.coordinator.disconnect p.src.node, p.src.port, p.tgt.node, p.tgt.port, (err) ->
-      return proto.transport.send 'graph', 'error', err, ctx if err
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'removeedge', payload
 
   # IIPs
@@ -167,11 +175,11 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
   # exported ports
   else if cmd == 'addinport'
     proto.coordinator.exportPort 'inport', payload.public, payload.node, payload.port, (err) ->
-      return proto.transport.send 'graph', 'error', err, ctx if err
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addinport', payload
   else if cmd == 'addoutport'
     proto.coordinator.exportPort 'outport', payload.public, payload.node, payload.port, (err) ->
-      return proto.transport.send 'graph', 'error', err, ctx if err
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addoutport', payload
 
   else

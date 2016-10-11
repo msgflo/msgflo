@@ -154,6 +154,8 @@ class Coordinator extends EventEmitter
       handler msg
       @broker.ackMessage msg
 
+    return callback new Error "Could not find outport #{outport} for role #{participantId}" if not port
+
     # Cannot subscribe directly to an outqueue, must create and bind an inqueue
     readQueue = 'msgflo-export-' + Math.floor(Math.random()*999999)
     @broker.createQueue 'inqueue', readQueue, (err) =>
