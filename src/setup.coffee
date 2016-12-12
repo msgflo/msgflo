@@ -348,5 +348,5 @@ exports.main = main = () ->
           null # just keep alive
         , 1000
       else
-          process.exit 0
+        process.exit 0
 
