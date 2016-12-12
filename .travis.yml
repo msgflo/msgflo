@@ -23,7 +23,7 @@ deploy:
   provider: npm
   email: jononor@gmail.com
   api_key:
-    secure: mePf8GiNCSIZyOo8V1zGYzeQv4j7tzvgGvLyoPnutwDpmblEWI1ygtMRC7TP+yLp2GZ7eMhzaJvjQ0sEjeX7eV+xAOIQFMApUWLN4lihjIgnD5/jWnR1upkAldDlhaPVx+XIdZ7N5g6+W6EnlgRixlh3j0pao7yhW/+MKH2RLf0=
+    secure: MaBahjfJntupij63O69PyjK4TMgWox1/NRmLl1nM59fZlvLa0TKjxwUksIxvjghLZzJxbrvQyMY3F6aV6FSW5lLbANWVKND6gGniucMBw8xxamF1Dvzkb8KT/2vpEogFHJLycL1dDsGK11nAaYs39NTVSOYY6YBLrc+2OxiKZqo=
   on:
     tags: true
     repo: msgflo/msgflo
