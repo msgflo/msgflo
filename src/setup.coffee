@@ -340,6 +340,8 @@ exports.main = main = () ->
       setInterval () ->
         null # just keep alive
       , 1000
+    else
+        process.exit 0
 
   maybeSetupParticipants = (options, callback) ->
     return callback null, {}
