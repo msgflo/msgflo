@@ -236,9 +236,9 @@ exports.normalizeOptions = normalize = (options) ->
   common.normalizeOptions options
   options.libraryfile = path.join(process.cwd(), 'package.json') if not options.libraryfile
 
-  options.only = options.only.split(',') if typeof options.only == 'string'
-  options.ignore = options.ignore.split(',') if typeof options.ignore == 'string'
-  options.forward = options.forward.split(',') if typeof options.forward == 'string'
+  options.only = options.only.split(',') if typeof options.only == 'string' and options.only
+  options.ignore = options.ignore.split(',') if typeof options.ignore == 'string' and options.ignore
+  options.forward = options.forward.split(',') if typeof options.forward == 'string' and options.forward
   options.only = [] if not options.only
   options.ignore = [] if not options.ignore
   options.forward = [] if not options.forward
@@ -292,8 +292,8 @@ exports.parse = parse = (args) ->
     .arguments('<graph.fbp/.json>')
     .option('--broker <URL>', 'URL of broker to connect to', String, null)
     .option('--participants [BOOL]', 'Also set up participants, not just bindings', Boolean, false)
-    .option('--only', 'Only set up these participants', String, '')
-    .option('--ignore', 'Do not set up these participants', String, '')
+    .option('--only <one,two,three>', 'Only set up participants for these roles', String, '')
+    .option('--ignore <one,two,three>', 'Do not set up participants for these roles', String, '')
     .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
     .option('--forward [stderr,stdout]', 'Forward child process stdout and/or stderr', String, '')
     .option('--discover [BOOL]', 'Whether to wait for FBP discovery messages for queue info', Boolean, false)
