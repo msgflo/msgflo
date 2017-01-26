@@ -7,7 +7,7 @@ EventEmitter = require('events').EventEmitter
 common = require './common'
 
 defaultHandlers =
-  ".yml":     "msgflo-register-foreign --role #ROLE #FILENAME"
+  ".yml":     "msgflo-register-foreign --forever=true --role #ROLE #FILENAME"
   ".js":      "msgflo-nodejs --name #ROLE #FILENAME"
   ".coffee":  "msgflo-nodejs --name #ROLE #FILENAME"
   ".py":  "msgflo-python #FILENAME #ROLE"
