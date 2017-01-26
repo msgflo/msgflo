@@ -80,7 +80,6 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     debug 'sent components', components.length
 
   else if sub == 'component' and cmd == 'getsource'
-
     sendMainGraphSource = () ->
       graph = proto.coordinator.serializeGraph 'main'
       resp =
@@ -101,7 +100,6 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
             language: 'javascript'
             code: ""
           proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
-        source.name = payload.name
         proto.transport.send 'component', 'source', source, ctx
 
   else if sub == 'component' and cmd == 'source'
