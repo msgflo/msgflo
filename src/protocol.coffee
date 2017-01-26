@@ -19,7 +19,7 @@ fbpComponentFromMsgflo = (name, component) ->
     # full info available
     info =
       name: name
-      description: component.label or component.cmd or ""
+      description: component.definition.label or component.cmd or ""
       icon: component.definition.icon
       subgraph: false
       inPorts: component.definition.inports.map fbpPort
