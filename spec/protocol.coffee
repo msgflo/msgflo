@@ -293,7 +293,8 @@ describe 'FBP runtime protocol', () ->
         chai.expect(command, JSON.stringify(payload)).to.equal 'source'
         chai.expect(protocol).to.equal 'component'
         chai.expect(payload).to.include.keys ['name', 'code', 'language']
-        chai.expect(payload.name).to.equal componentName
+        chai.expect(payload.library).to.equal 'foo'
+        chai.expect(payload.name).to.equal 'SetSource'
         chai.expect(payload.language).to.equal 'coffeescript'
         chai.expect(payload.code).to.include "component: 'ProduceFoo'"
         chai.expect(payload.code).to.include "module.exports = ProduceFoo"
