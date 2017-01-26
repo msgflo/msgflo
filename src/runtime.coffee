@@ -61,9 +61,9 @@ class WebSocketTransport extends EventEmitter
 # atomic
 saveGraphFile = (graph, filepath, callback) ->
   fs = require 'fs'
-  temppath = filepath + "msgflo-autosave-#{Date.now()}"
+  temppath = filepath + ".msgflo-autosave-#{Date.now()}"
   json = JSON.stringify graph, null, 2
-  fs.open temppath, 'w', (err, fd) ->
+  fs.open temppath, 'wx', (err, fd) ->
     return callback err if err
     fs.write fd, json, (err) ->
       return callback err if err
