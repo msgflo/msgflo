@@ -104,19 +104,28 @@ class Library extends EventEmitter
 
     @components = {} # "name" -> { command: "", language: ''|null }.  lazy-loaded using load()
 
+  getComponent: (name) ->
+    # Direct match
+    return @components[name] if @components[name]
+    withoutNamespace = path.basename name
+    return @components[withoutNamespace] if @components[withoutNamespace]
+    return null
+
   _updateComponents: (components) ->
     names = Object.keys components
     for name, comp of components
       if not comp
         # removed
         @components[name] = null
-      else if not @components[name]
+        continue
+      existing = @getComponent name
+      unless existing
         # added
         @components[name] = comp
-      else
-        # update
-        for k, v of comp
-          @components[name][k] = v
+        continue
+      # update
+      for k, v of comp
+        existing[k] = v
 
     @emit 'components-changed', names, @components
 
@@ -137,17 +146,23 @@ class Library extends EventEmitter
 
   getSource: (name, callback) ->
     debug 'requesting component source', name
-    name = path.basename name # TODO: support multiple libraries?
-    return callback new Error "Component not found for #{name}" if not @components[name]?
-    lang = @components[name].language
+    component = @getComponent name
+    return callback new Error "Component not found for #{name}" unless component
+    lang = component.language
     ext = languageExtensions[lang]
-    filename = path.join @options.componentdir, "#{name}.#{ext}"
+    basename = name
+    library = null
+    if name.indexOf('/') isnt -1
+      [library, basename] = name.split '/'
+    filename = path.join @options.componentdir, "#{basename}.#{ext}"
     fs.readFile filename, 'utf-8', (err, code) ->
       debug 'component source file', filename, lang, err
       return callback new Error "Could not find component source for #{name}" if err
       source =
-        language: 'coffeescript' # FIXME don't hardcode
+        name: basename
+        library: library
         code: code
+        language: component.language
       return callback null, source
 
   addComponent: (name, language, code, callback) ->
@@ -167,9 +182,7 @@ class Library extends EventEmitter
       return callback null
 
   componentCommand: (component, role, iips={}) ->
-    cmd = @components[component]?.command
-    componentName = path.basename component
-    cmd = @components[componentName]?.command if not cmd
+    cmd = @getComponent(component)?.command
     throw new Error "No component #{component} defined for role #{role}" if not cmd
 
     vars =
