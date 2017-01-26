@@ -82,15 +82,16 @@ class Runtime
     @broker = transport.getBroker @options.broker
     @coordinator = new coordinator.Coordinator @broker, @options
 
+    @saveGraph = common.debounce () =>
+      debug 'saving graph changes', @options.graph
+      graph = @coordinator.serializeGraph 'main'
+      saveGraphFile graph, @options.graph, (err) ->
+        console.log "ERROR: Failed to save graph file", err if err
+    , 500
     if @options.graph and @options.autoSave
       debug 'enabling autosave'
       @coordinator.on 'graph-changed', () =>
-        common.debounce () =>
-          debug 'saving graph changes', @options.graph
-          graph = @coordinator.serializeGraph 'main'
-          saveGraphFile graph, @options.graph, (err) ->
-            console.log "ERROR: Failed to save graph file", err if err
-        , 500
+        @saveGraph()
 
   start: (callback) ->
     @server = http.createServer()
