@@ -63,11 +63,15 @@ saveGraphFile = (graph, filepath, callback) ->
   fs = require 'fs'
   temppath = filepath + "msgflo-autosave-#{Date.now()}"
   json = JSON.stringify graph, null, 2
-  fs.writeFile temppath, json, (err) ->
+  fs.open temppath, 'w', (err, fd) ->
     return callback err if err
-    fs.rename temppath, filepath, (err) ->
-      fs.unlink temppath, (e) ->
-        return callback err
+    fs.write fd, json, (err) ->
+      return callback err if err
+      fs.fsync fd, (err) ->
+        return callback err if err
+        fs.rename temppath, filepath, (err) ->
+          fs.unlink temppath, (e) ->
+            return callback err
 
 class Runtime
   constructor: (@options) ->
