@@ -70,6 +70,8 @@ componentsFromDirectory = (directory, config, callback) ->
         ext = path.extname filename
         lang = extensionToLanguage[ext]
         component = path.basename(filename, ext)
+        if config.namespace
+          component = "#{config.namespace}/#{component}"
         debug 'loading component from file', filename, component
         filepath = path.join directory, filename
         components[component] =
@@ -80,8 +82,10 @@ componentsFromDirectory = (directory, config, callback) ->
 
 normalizeConfig = (config) ->
   config = {} if not config
+  namespace = config.name or null
   config = config.msgflo if config.msgflo # Migth be under a .msgflo key, for instance in package.json
 
+  config.namespace = config.namespace or namespace
   config.components = {} if not config.components
   config.variables = {} if not config.variables
   config.handlers = {} if not config.handlers
