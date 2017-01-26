@@ -1,6 +1,7 @@
 
 protocol = require './protocol'
 coordinator = require './coordinator'
+common = require './common'
 
 querystring = require 'querystring'
 transport = require('msgflo-nodejs').transport
@@ -61,13 +62,17 @@ class WebSocketTransport extends EventEmitter
 # atomic
 saveGraphFile = (graph, filepath, callback) ->
   fs = require 'fs'
-  temppath = filepath + "msgflo-autosave-#{Date.now()}"
+  temppath = filepath + ".msgflo-autosave-#{Date.now()}"
   json = JSON.stringify graph, null, 2
-  fs.writeFile temppath, json, (err) ->
+  fs.open temppath, 'wx', (err, fd) ->
     return callback err if err
-    fs.rename temppath, filepath, (err) ->
-      fs.unlink temppath, (e) ->
-        return callback err
+    fs.write fd, json, (err) ->
+      return callback err if err
+      fs.fsync fd, (err) ->
+        return callback err if err
+        fs.rename temppath, filepath, (err) ->
+          fs.unlink temppath, (e) ->
+            return callback err
 
 class Runtime
   constructor: (@options) ->
@@ -77,15 +82,16 @@ class Runtime
     @broker = transport.getBroker @options.broker
     @coordinator = new coordinator.Coordinator @broker, @options
 
+    @saveGraph = common.debounce () =>
+      debug 'saving graph changes', @options.graph
+      graph = @coordinator.serializeGraph 'main'
+      saveGraphFile graph, @options.graph, (err) ->
+        console.log "ERROR: Failed to save graph file", err if err
+    , 500
     if @options.graph and @options.autoSave
       debug 'enabling autosave'
       @coordinator.on 'graph-changed', () =>
-        setTimeout () =>
-          debug 'saving graph changes', @options.graph
-          graph = @coordinator.serializeGraph 'main'
-          saveGraphFile graph, @options.graph, (err) ->
-            console.log "ERROR: Failed to save graph file", err if err
-        , 0
+        @saveGraph()
 
   start: (callback) ->
     @server = http.createServer()
