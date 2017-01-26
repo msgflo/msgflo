@@ -1,6 +1,7 @@
 
 protocol = require './protocol'
 coordinator = require './coordinator'
+common = require './common'
 
 querystring = require 'querystring'
 transport = require('msgflo-nodejs').transport
@@ -84,12 +85,12 @@ class Runtime
     if @options.graph and @options.autoSave
       debug 'enabling autosave'
       @coordinator.on 'graph-changed', () =>
-        setTimeout () =>
+        common.debounce () =>
           debug 'saving graph changes', @options.graph
           graph = @coordinator.serializeGraph 'main'
           saveGraphFile graph, @options.graph, (err) ->
             console.log "ERROR: Failed to save graph file", err if err
-        , 0
+        , 500
 
   start: (callback) ->
     @server = http.createServer()
