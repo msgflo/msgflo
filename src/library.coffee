@@ -21,7 +21,7 @@ languageExtensions =
   'yaml': 'yml'
 extensionToLanguage = {}
 for lang, ext of languageExtensions
-  extensionToLanguage[ext] = lang
+  extensionToLanguage[".#{ext}"] = lang
 
 replaceMarker = (str, marker, value) ->
   marker = '#'+marker.toUpperCase()
