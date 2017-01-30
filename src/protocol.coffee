@@ -19,7 +19,7 @@ fbpComponentFromMsgflo = (name, component) ->
     # full info available
     info =
       name: name
-      description: component.label or component.cmd or ""
+      description: component.definition.label or component.cmd or ""
       icon: component.definition.icon
       subgraph: false
       inPorts: component.definition.inports.map fbpPort
@@ -80,7 +80,6 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     debug 'sent components', components.length
 
   else if sub == 'component' and cmd == 'getsource'
-
     sendMainGraphSource = () ->
       graph = proto.coordinator.serializeGraph 'main'
       resp =
@@ -96,12 +95,8 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       # Regular component
       proto.coordinator.getComponentSource payload.name, (err, source) ->
         if err
-          # return empty component response, as clients handle errors badly...
-          source =
-            language: 'javascript'
-            code: ""
           proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
-        source.name = payload.name
+          return
         proto.transport.send 'component', 'source', source, ctx
 
   else if sub == 'component' and cmd == 'source'
