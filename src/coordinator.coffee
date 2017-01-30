@@ -63,7 +63,10 @@ class Coordinator extends EventEmitter
         debug 'connected', err
         return callback err if err
         @broker.subscribeParticipantChange (msg) =>
-          @handleFbpMessage msg.data
+          try
+            @handleFbpMessage msg.data
+          catch e
+            console.log 'Participant discovery failed:', e.message
           @broker.ackMessage msg
         @started = true
         debug 'started', err, @started
@@ -79,7 +82,7 @@ class Coordinator extends EventEmitter
     if data.protocol == 'discovery' and data.command == 'participant'
       @addParticipant data.payload
     else
-      throw new Error 'Unknown FBP message'
+      throw new Error "Unknown FBP message: #{typeof(data)} #{data?.protocol}:#{data?.command}"
 
   addParticipant: (definition) ->
     debug 'addParticipant', definition.id
