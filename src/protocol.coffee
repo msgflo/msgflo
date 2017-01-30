@@ -95,11 +95,8 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       # Regular component
       proto.coordinator.getComponentSource payload.name, (err, source) ->
         if err
-          # return empty component response, as clients handle errors badly...
-          source =
-            language: 'javascript'
-            code: ""
           proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
+          return
         proto.transport.send 'component', 'source', source, ctx
 
   else if sub == 'component' and cmd == 'source'
