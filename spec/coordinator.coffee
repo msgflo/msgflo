@@ -69,8 +69,10 @@ describe 'Coordinator', ->
           # send two times
           client.registerParticipant definition, (err) ->
             return done err if err
-            client.registerParticipant definition, (err) ->
-              return done err if err
+            setTimeout () ->
+              client.registerParticipant definition, (err) ->
+                return done err if err
+            , 20 # ensure there is time difference
 
         after (done) ->
           coordinator.removeListener 'participant', eventListener
@@ -87,7 +89,7 @@ describe 'Coordinator', ->
           d = updated[0]
           chai.expect(d.id).to.equal definition.id
           diff = d.extra.lastSeen.getTime() - added[0].extra.lastSeen.getTime()
-          chai.expect(diff).to.be.above 0
+          chai.expect(diff, 'time difference').to.be.above 0
 
 
       describe.skip 'discovery for multiple participants with same role', ->
