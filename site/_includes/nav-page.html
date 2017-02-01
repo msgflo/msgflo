@@ -1,0 +1,14 @@
+<nav class="docs">
+  {% for collection in site.collections %}
+  {% if collection.output and collection.docs.size > 0 %}
+  <h2>{{ collection.title }}</h2>
+  <ul>
+  {% for doc in collection.docs %}
+    <li {% if page.url == doc.url %} class="current"{% endif %}>
+      <a href="{{ doc.url }}">{{ doc.title }}</a>
+    </li>
+  {% endfor %}
+  </ul>
+  {% endif %}
+{% endfor %}
+</nav>

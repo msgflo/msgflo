@@ -32,6 +32,10 @@ h1, h2, h3 {
   font-family: $display-font;
 }
 
-a:link {
-  color: $color-highlight;
+a {
+  color: $color-text;
+  cursor: pointer;
+}
+a:hover {
+  color: $color-prime;
 }

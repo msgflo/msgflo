@@ -11,3 +11,23 @@ body_class: feed
 <article>
   {{ content }}
 </article>
+{% if site.features %}
+  {% for feature in site.features %}
+<section class="feature">
+  {% if feature.cover %}
+  <img src="{{ feature.cover }}">
+  {% endif %}
+  <article>
+    <h1>
+      {{ feature.title }}
+      {% if feature.subtitle %}
+      &mdash; {{ feature.subtitle }}
+      {% endif %}
+    </h1>
+    <p>
+    {{ feature.content }}
+    </p>
+  </article>
+</section>
+  {% endfor %}
+{% endif %}

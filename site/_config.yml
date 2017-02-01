@@ -1,3 +1,17 @@
 title: MsgFlo
 permalink: /:categories/:title/
 color_prime: "#70A7C6"
+github_url: 'https://github.com/msgflo'
+collections:
+  features:
+    output: false
+  documentation:
+    title: Documentation
+    output: true
+    permalink: /docs/:title/index.html
+defaults:
+  - scope:
+      path: ""
+      type: documentation
+    values:
+      layout: page
