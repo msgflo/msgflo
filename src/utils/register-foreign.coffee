@@ -17,6 +17,7 @@ main = ->
   program
     .option('--broker <uri>', 'Broker address', String, '')
     .option('--role <role>', 'Role of this instance', String, '')
+    .option('--interval <SECONDS>', 'How often to send discovery message', Number, 60)
     .option('--forever <true>', 'Keep running forever', Boolean, false)
     .usage('[options] <definition>')
     .parse(process.argv)
@@ -42,7 +43,12 @@ main = ->
       foreigner.register messaging, definition, (err) ->
         return onError err if err
 
-        if not program.forever
+        if program.forever
+          setInterval () ->
+            foreigner.register messaging, definition, (err) ->
+              console.log 'Warning: Failed to send discovery message:', err if err
+          , program.interval*1000/2.2
+        else
           onComplete()
 
 exports.main = main
