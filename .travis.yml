@@ -3,6 +3,7 @@ services:
 - rabbitmq
 node_js:
 - '4.2'
+dist: trusty
 before_install:
 - sudo apt-get update -qq
 - sudo apt-get install pkg-config cmake openssl libc-ares-dev

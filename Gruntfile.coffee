@@ -30,8 +30,25 @@ module.exports = ->
       fbp_test:
         command: 'fbp-test --colors'
 
+    # Building the website
+    jekyll:
+      options:
+        src: 'site/'
+        dest: 'dist/'
+        bundleExec: true
+      dist:
+        options:
+          dest: 'dist/'
+      serve:
+        options:
+          dest: 'dist/'
+          serve: true
+          watch: true
+          host: process.env.HOSTNAME or 'localhost'
+          port: process.env.PORT or 4000
 
   # Grunt plugins used for building
+  @loadNpmTasks 'grunt-jekyll'
 
   # Grunt plugins used for testing
   @loadNpmTasks 'grunt-mocha-test'
@@ -45,13 +62,10 @@ module.exports = ->
     'shell:msgflo:kill'
   ]
 
-  @registerTask 'build', 'Build the chosen target platform', (target = 'all') =>
-    # nothing
-
   @registerTask 'test', 'Build and run automated tests', (target = 'all') =>
     @task.run 'coffeelint'
-    @task.run 'build'
     @task.run 'mochaTest'
+    @task.run 'jekyll:dist'
 #    @task.run 'fbp-test'
 
   @registerTask 'default', ['test']
