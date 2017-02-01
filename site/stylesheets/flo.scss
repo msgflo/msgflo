@@ -1,12 +1,15 @@
 ---
 ---
 @import "typography";
+@import "color";
 
 body {
   width: 60em;
   margin-left: auto;
   margin-right: auto;
   font-family: $text-font;
+  background-color: $color-box;
+  color: $color-text;
 }
 body.feed {
   header {
@@ -27,4 +30,8 @@ body.feed {
 
 h1, h2, h3 {
   font-family: $display-font;
+}
+
+a:link {
+  color: $color-highlight;
 }
