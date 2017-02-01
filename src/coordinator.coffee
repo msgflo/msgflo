@@ -339,12 +339,16 @@ class Coordinator extends EventEmitter
       inports: []
       outports: []
 
-    for id, part of @participants
+    participantNames = Object.keys(@participants).sort()
+    for id in participantNames
+      part = @participants[id]
       name = part.role
       graph.processes[name] =
         component: part.component
 
-    for id, conn of @connections
+    connectionIds = Object.keys(@connections).sort()
+    for id in connectionIds
+      conn = @connections[id]
       parts = fromConnId id
       edge =
         src:
