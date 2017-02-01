@@ -51,7 +51,12 @@ FooSourceParticipant = (client, role) ->
     else
         @interval = setInterval sayFoo, indata
 
-  return new msgflo.participant.Participant client, definition, process, role
+  part = new msgflo.participant.Participant client, definition, process, role
+  originalStop = part.stop.bind part
+  part.stop = (cb) ->
+    part.send 'interval', 0
+    return originalStop cb
+  return part
 
 exports.FooSource = (c, i) -> new FooSourceParticipant c, i
 
