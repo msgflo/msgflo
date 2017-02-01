@@ -34,6 +34,7 @@ Client support
 makes it super easy to use [NoFlo](http://noflojs.org) in the participants
 * Basic support for **C++** participants with [msgflo-cpp](https://github.com/msgflo/msgflo-cpp) and [MicroFlo](https://github.com/microflo/microflo)
 * Basic support for **Python** participants with [msgflo-python](https://github.com/msgflo/msgflo-python)
+* Experimental support for **Arduino** participants with [msgflo-arduino](https://github.com/msgflo/msgflo-arduino)
 * Experimental support for **Rust** participants with [msgflo-rust](https://github.com/msgflo/msgflo-rust)
 
 Tooling
