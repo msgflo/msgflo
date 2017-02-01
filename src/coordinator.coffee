@@ -7,6 +7,7 @@ async = require 'async'
 
 setup = require './setup'
 library = require './library'
+common = require './common'
 
 findPort = (def, type, portName) ->
   ports = if type == 'inport' then def.inports else def.outports
@@ -80,12 +81,35 @@ class Coordinator extends EventEmitter
 
   handleFbpMessage: (data) ->
     if data.protocol == 'discovery' and data.command == 'participant'
-      @addParticipant data.payload
+      @participantDiscovered data.payload
     else
       throw new Error "Unknown FBP message: #{typeof(data)} #{data?.protocol}:#{data?.command}"
 
+  participantDiscovered: (definition) ->
+    throw new Error "Discovery message missing .id" if not definition.id
+    if @participants[definition.id]
+      @updateParticipant definition
+    else
+      @addParticipant definition
+
+  updateParticipant: (definition) ->
+    debug 'updateParticipant', definition.id
+    original = @participants[definition.id]
+    definition.extra = {} if not definition.extra
+    definition.extra.lastSeen = new Date
+    newDefinition = common.clone definition
+    for k, v of original
+      newDefinition[k] = v if not newDefinition[k]
+    @participants[definition.id] = newDefinition
+    @library._updateDefinition newDefinition.component, newDefinition
+    @emit 'participant-updated', newDefinition
+    @emit 'participant', 'updated', newDefinition
+
   addParticipant: (definition) ->
     debug 'addParticipant', definition.id
+    definition.extra = {} if not definition.extra
+    definition.extra.firstSeen = new Date
+    definition.extra.lastSeen = new Date
     @participants[definition.id] = definition
     @library._updateDefinition definition.component, definition
     @emit 'participant-added', definition
@@ -94,6 +118,7 @@ class Coordinator extends EventEmitter
 
   removeParticipant: (id) ->
     definition = @participants[id]
+    delete @participants[id]
     @emit 'participant-removed', definition
     @library._updateDefinition definition.component, null
     @emit 'participant', 'removed', definition

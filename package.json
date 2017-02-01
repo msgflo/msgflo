@@ -19,7 +19,7 @@
     "debug": "^2.1.2",
     "fbp": "^1.1.4",
     "js-yaml": "^3.4.2",
-    "msgflo-nodejs": "^0.7.1",
+    "msgflo-nodejs": "^0.8.0",
     "node-insights": "^1.0.14",
     "uuid": "^3.0.1",
     "websocket": "^1.0.17"
