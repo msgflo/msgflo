@@ -4,12 +4,16 @@
 @import "color";
 
 body {
-  width: 60em;
-  margin-left: auto;
-  margin-right: auto;
   font-family: $text-font;
   background-color: $color-box;
   color: $color-text;
+  margin: 0;
+  padding: 0;
+  header, article {
+    width: 60em;
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 body.feed {
   header {
@@ -24,6 +28,42 @@ body.feed {
     }
     h2 {
       font-weight: normal;
+    }
+  }
+}
+
+nav.main {
+  position: fixed;
+  display: block;
+  top: 0;
+  width: 100vw;
+  background-color: $color-meta;
+  z-index: 1;
+  ul {
+    min-height: 72px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    list-style: none;
+    justify-content: flex-end;
+    margin: 0;
+    padding: 0;
+    li {
+      padding: 0;
+      margin: 0;
+      padding-left: 36px;
+      padding-right: 36px;
+      text-transform: uppercase;
+      font-size: 0.8em;
+      a {
+        text-decoration: none;
+      }
+    }
+    li.home {
+      flex-grow: 1;
+      font-weight: bold;
+      text-transform: none;
+      font-size: 0.9em;
     }
   }
 }
