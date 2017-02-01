@@ -1,0 +1,30 @@
+---
+---
+@import "typography";
+
+body {
+  width: 60em;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: $text-font;
+}
+body.feed {
+  header {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    min-height: 30em;
+    justify-content: center;
+    h1 {
+      font-size: 3em;
+      font-weight: normal;
+    }
+    h2 {
+      font-weight: normal;
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-family: $display-font;
+}

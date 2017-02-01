@@ -2,4 +2,12 @@
 layout: default
 body_class: feed
 ---
-{{ content }}
+<header>
+  <article>
+    <h1>{{ site.title }}</h1>
+    <h2>{{ page.title }}</h2>
+  </article>
+</header>
+<article>
+  {{ content }}
+</article>
