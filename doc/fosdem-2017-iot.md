@@ -1,8 +1,9 @@
 # FOSDEM 2017 IoT devroom
 
-* CfP: https://github.com/maximevince/IoT-devroom-fosdem
-* Date: Saturday 4th February, 2017, somewhere between 10.30 and 18:00
+* Date: Saturday 4th February, 2017
+* Talk accepted: https://fosdem.org/2017/schedule/event/iot_msgflo/
 * Format: 25 mins, with demo 5-10min, talk 5-10min, QA 5min.
+* CfP: https://github.com/maximevince/IoT-devroom-fosdem
 
 # Title
 Building distributed systems with Msgflo
@@ -57,6 +58,89 @@ https://github.com/msgflo/msgflo/blob/master/README.md
 https://github.com/flowbased/fbp-spec
 http://www.flowhub.io/
 https://archive.fosdem.org/2014/schedule/event/deviot02/
+
+# Slides
+
+What to cover
+
+* Understanding how it works
+* Benefits over "traditional approach"
+* What can/should it be used for right now
+* Where we see this going in future
+
+IoT first step: Get the devices and their data accessible via some protocol
+Pubsub is good: Single point where one can send and pickup messages
+MQTT is a good choice: open protocol, simple and well-supported.
+
+Ensuring reusability / composability
+
+Device code 
+In one device, receive on a certain topic
+In another device, send on that topic
+hardcoded queues -> hardcoded functionality -> low reusability
+
+Participants as "components"
+
+* Receives on a set of topics "inports"
+* Sends on another set of topics "outports"
+
+How to know which devices are available?
+
+Discovery protocol
+
+* Each device describes itself
+* JSON message to a standardized topic
+* https://github.com/msgflo/msgflo#communications
+
+Working with existing devices/software
+
+* Send discovery message on behalf
+* YAML declaration
+* msgflo-register-foreign
+
+Handling incompatible message payloads.
+
+* No magic performed by Msgflo
+* Super-basic type info in discovery message,
+space for more. JSON schemas, etc?
+* But! easy-to introspect / see what is going on
+* fbp-spec for testing
+
+Modelling / conventions
+
+* Prefer to have "services" as the core unit. Only ports/topics that affect eachother together.
+Avoids dependency on a particular device / implmentation. Encourages thinking about common "interfaces".
+Things that are hosted in the same device can be grouped. Naming convention etc
+* Dataflow/FBP and (event driven) finite state machines provides best practices
+* Source/sink/router components classes. 1->1, 1->N firing/packet patterns 
+* Anytime there is a parameter/configuration, expose it.
+Never know when you will need it. Much faster to change it live than reflashing!
+* Always send, proof that state-transition was successful (or not)
+
+Support libraries
+
+* Node.js
+* NoFlo
+* Arduino
+* Rust
+https://github.com/msgflo/
+
+Creating a new library for one transport is a 1-2 day job.
+
+Maturity
+
+* MsgFlo programming model and JavaScript participant libraries, battle-tested in production with AMQP+RabbitMQ
+* MQTT deployed in a couple of hackerspaces
+* Live-programming is 
+* MQTT SSL support not tested! https://github.com/msgflo/msgflo/issues/76
+
+Future
+
+* SSL support verify and document
+* Support RabbitMQ routing on MQTT, https://github.com/msgflo/msgflo-nodejs/issues/22
+* MQTT support for msgflo-rust, https://github.com/msgflo/msgflo-rust/issues/1
+* FBP protocol forwarding. Live-programming all the way down! 
+* Flowhub showing changes from outside automatically (no refresh)
 
 # Notes
 
