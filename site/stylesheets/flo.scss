@@ -86,30 +86,27 @@ a:hover {
 main {
   display: flex;
   flex-direction: row;
+  width: 60em;
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 72px;
   nav {
-    background-color: $color-meta;
     margin: 36px;
-    padding: 18px;
     box-sizing: border-box;
-    h2 {
-      font-size: 1em;
-      margin: 0;
-      padding: 0;
-    }
     ul {
+      background-color: $color-meta;
       list-style: none;
-      padding: 0;
+      padding: 18px;
       margin: 0;
-      margin-left: 1em;
       li {
         font-size: .8em;
+        margin-bottom: 1em;
         a {
           text-decoration: none;
         }
-        a:hover {
+        a.current, a:hover {
           color: $color-text;
-          text-decoration: underline;
+          font-weight: bold;
         }
       }
     }
