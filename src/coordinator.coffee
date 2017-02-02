@@ -367,10 +367,31 @@ class Coordinator extends EventEmitter
       libraryfile: @library.configfile
     for k, v of opts
       options[k] = v
-    setup.participants options, (err, proc) =>
+
+    # Avoid trying to instantiate
+    # Probably these are external participants, which *should* be running
+    # TODO: check whether the participants do indeed show up
+    rolesWithComponent = []
+    rolesNoComponent = []
+    availableComponents = Object.keys @library.components
+    common.readGraph options.graphfile, (err, graph) ->
       return callback err if err
-      @processes = proc
-      setup.bindings options, callback
+      for role, process of graph.processes
+        if process.component in availableComponents
+          rolesWithComponent.push role
+        else
+          rolesNoComponent.push role
+      console.log 'Skipping setup for participants without component available. Assuming already setup:'
+      for role in rolesNoComponent
+        componentName = graph.processes[role].component
+        console.log "\t#{role}(#{componentName})"
+
+      options.only = rolesWithComponent
+
+      setup.participants options, (err, proc) =>
+        return callback err if err
+        @processes = proc
+        setup.bindings options, callback
 
   participantsByRole: (role) ->
     matchRole = (id) =>

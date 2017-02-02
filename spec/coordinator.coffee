@@ -102,3 +102,4 @@ describe 'Coordinator', ->
       describe 'receiving discovery message for pending connection', ->
         it 'should setup the connection'
 
+  describe.skip 'setting up graph with mix of local and remote roles', ->
