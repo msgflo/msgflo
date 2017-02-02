@@ -119,6 +119,9 @@ body.page {
         li {
           font-size: .8em;
           margin-bottom: 1em;
+          &:last-child {
+            margin-bottom: 0;
+          }
           a {
             text-decoration: none;
             &.current, &:hover {
