@@ -1,6 +1,14 @@
 <nav class="main">
   <ul>
-    <li class="home"><a href="/">{{ site.title }}</a></li>
+    <li class="home">
+      <a href="/">
+        {% if site.logo %}
+        <img class="logo" src="{{ site.logo }}" alt="{{site.title}}">
+        {% else %}
+        {{ site.title }}
+        {% endif %}
+      </a>
+    </li>
     <ul>
     {% for collection in site.collections %}
       {% if collection.output and collection.docs.size > 0 %}

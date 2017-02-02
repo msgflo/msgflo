@@ -181,13 +181,16 @@ nav.main {
       text-transform: uppercase;
       font-size: 0.8em;
       &.home {
+        img {
+          width: 108px;
+        }
         flex-grow: 1;
         font-weight: bold;
         text-transform: none;
         font-size: 0.9em;
         @media #{$mobile} {
           position: absolute;
-          left: 36px;
+          left: 0px;
           flex-grow: 0;
         }
       }
@@ -209,6 +212,7 @@ nav.main {
         margin-top: 36px;
         margin-bottom: 36px;
         overflow: hidden;
+        padding-left: 36px;
       }
       li {
         display: inline;
