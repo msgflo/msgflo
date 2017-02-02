@@ -5,12 +5,13 @@
 * Format: 25 mins, with demo 5-10min, talk 5-10min, QA 5min.
 * CfP: https://github.com/maximevince/IoT-devroom-fosdem
 
-# Title
+# Proposal
+## Title
 Building distributed systems with Msgflo
 
 Flow-based-programming over message queues
 
-# Abstract (500 chars)
+## Abstract (500 chars)
 
 MsgFlo is a tool to build systems that span multiple processes and devices, for instance IoT sensor networks.
 Each device acts as a black-box component with input and output ports, mapped to MQTT message queues.
@@ -18,7 +19,7 @@ One then constructs a system by binding the queues of the components together.
 Focus on components exchanging data gives good composability and testability, both important in IoT.
 We will program a system with MsgFlo using Flowhub, a visual live-programming IDE, and test using fbp-spec.
 
-# Full description (1500 chars)
+## Full description (1500 chars)
 
 At the 2014 IoT devroom, we introduced flow-based programming (FBP) for heterogenous IoT systems, using NoFlo and MicroFlo.
 The programming model worked well for individual devices, but between the devices of the system our solution caused too tight coupling.
@@ -52,7 +53,7 @@ For existing devices without native Msgflo support, the discovery messages can b
 
 We have used Msgflo in a handful of real-life deployments, and will demonstrate building a simple stand-alone IoT system.
 
-# Links
+## Links
 
 https://github.com/msgflo/msgflo/blob/master/README.md
 https://github.com/flowbased/fbp-spec
@@ -72,7 +73,7 @@ IoT first step: Get the devices and their data accessible via some protocol
 Pubsub is good: Single point where one can send and pickup messages
 MQTT is a good choice: open protocol, simple and well-supported.
 
-Ensuring reusability / composability
+## Ensuring reusability / composability
 
 Device code 
 In one device, receive on a certain topic
@@ -80,24 +81,24 @@ In another device, send on that topic
 hardcoded queues -> hardcoded functionality -> low reusability
 Don't know what connections are or what data available
 
-Participants as "components"
+## Participants as "components"
 
 * Receives on a set of topics "inports"
 * Sends on another set of topics "outports"
 
-Discovery protocol
+## Discovery protocol
 
 * Each device describes itself
 * JSON message to a standardized topic
 * https://github.com/msgflo/msgflo#communications
 
-Working with existing devices/software
+## Working with existing devices/software
 
 * Send discovery message on behalf
 * YAML declaration
 * msgflo-register-foreign
 
-Using Flowhub
+## Using Flowhub
 
 * Start runtime. `msgflo --graph foo.json`
 * Connect via live-url `http://app.flowhub.io/#runtime/endpoint?protocol%3Dwebsocket%26address%3Dws%3A%2F%2Flocalhost%3A3569`
@@ -106,7 +107,7 @@ Using Flowhub
 * Can reconfigure system on the fly
 * Observe data flowing through network
 
-Support libraries
+## Support libraries
 
 * Node.js
 * NoFlo
@@ -116,7 +117,7 @@ https://github.com/msgflo/
 
 Creating a new library for one transport is a 1-2 day job.
 
-Maturity
+## Maturity
 
 * MsgFlo programming model and JavaScript participant libraries,
 battle-tested in production with AMQP+RabbitMQ.
@@ -124,7 +125,7 @@ battle-tested in production with AMQP+RabbitMQ.
 * Live-programming is not so much used yet
 * MQTT SSL support not tested! https://github.com/msgflo/msgflo/issues/76
 
-Future
+## Future
 
 * SSL support verify and document
 * Support RabbitMQ routing on MQTT, https://github.com/msgflo/msgflo-nodejs/issues/22
@@ -134,7 +135,7 @@ Future
 
 ## Extras
 
-Message payloads.
+### Message payloads.
 
 * Msgflo does not care about payload format
 * Slight preference for JSON in existing tooling (Flowhub) 
@@ -143,8 +144,7 @@ Message payloads.
 * Super-basic type info in discovery message,
 space for more. JSON schemas, etc?
 
-
-Participant modelling / conventions
+### Participant modelling / conventions
 
 * Prefer to have "services" as the core unit. Only ports/topics that affect eachother together.
 Avoids dependency on a particular device / implmentation. Encourages thinking about common "interfaces".
@@ -230,7 +230,6 @@ Especially for building UIs, and having these represented in the system as parti
 Support MQTT over WebSockets (Mosquitto, RabbitMQ)
 
 Would be good to have a set of "virtual" devices in a webUI that can be used to test
-
 
 # Guidelines
 
