@@ -3,17 +3,14 @@
 @import "typography";
 @import "color";
 
+$mobile: "(max-width: 1024px)";
+
 body {
   font-family: $text-font;
   background-color: $color-box;
   color: $color-text;
   margin: 0;
   padding: 0;
-  article {
-    width: 60em;
-    margin-left: auto;
-    margin-right: auto;
-  }
 }
 body.feed {
   header {
@@ -43,9 +40,19 @@ body.feed {
     h1 {
       font-size: 3em;
       font-weight: normal;
+      max-width: 80vw;
     }
     h2 {
       font-weight: normal;
+      max-width: 80vw;
+    }
+  }
+  article {
+    max-width: 50em;
+    margin-left: auto;
+    margin-right: auto;
+    @media #{$mobile} {
+      width: 90vw;
     }
   }
 }
@@ -72,11 +79,20 @@ body.page {
       background-color: $color-prime;
       object-fit: cover;
     }
+    h1 {
+      max-width: 80vw;
+    }
+    h2 {
+      max-width: 80vw;
+    }
   }
   main {
     display: flex;
     flex-direction: row;
     margin-top: 72px;
+    @media #{$mobile} {
+      flex-direction: column;
+    }
     nav {
       margin: 36px;
       box-sizing: border-box;
@@ -101,6 +117,7 @@ body.page {
     }
     article {
       margin-left: 36px;
+      margin-right: 36px;
       pre {
         max-width: 90%;
         overflow-x: scroll;
