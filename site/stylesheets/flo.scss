@@ -67,6 +67,42 @@ body.feed {
       width: 90vw;
     }
   }
+  section {
+    max-width: 50em;
+    display: flex;
+    flex-direction: row;
+    &:nth-of-type(even) {
+      flex-direction: row-reverse;
+      img {
+        margin-left: 36px;
+        margin-right: 0px;
+      }
+      @media #{$tablet} {
+        flex-direction: column;
+        img {
+          margin-left: 0px;
+        }
+      }
+    }
+    @media #{$tablet} {
+      flex-direction: column;
+    }
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    img {
+      max-width: 40vw;
+      object-fit: contain;
+      margin-right: 36px;
+      margin-left: 0px;
+      @media #{$tablet} {
+        margin-right: 0px;
+        margin-left: 0px;
+        max-width: 95vw;
+      }
+    }
+  }
 }
 
 body.page {

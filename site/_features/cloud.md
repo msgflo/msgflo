@@ -1,5 +1,6 @@
 ---
 title: Horizontally scalable web services
+cover: /assets/msgflo-system-example-cloud.png
 ---
 A web service built using several groups of workers,
 each performing a set of tasks, and communicating with eachother using a messaging queue service.
