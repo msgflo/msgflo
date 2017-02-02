@@ -1,6 +1,6 @@
 ---
-title: MsgFlo at c-base
-subtitle: Rewiring a hackerspace
+title: c-base
+subtitle: Rewiring a hackerspace with MsgFlo
 cover: /assets/c-base.jpg
 ---
 [c-base](https://c-base.org) is a crashed space station under Berlin, Germany that acts as one of the world's oldest hackerspaces.

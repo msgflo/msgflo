@@ -105,6 +105,13 @@ body.page {
         max-width: 90%;
         overflow-x: scroll;
       }
+      img {
+        display: block;
+        max-width: 60%;
+        object-fit: cover;
+        margin-left: auto;
+        margin-right: auto;
+      }
     }
   }
   header+main {
