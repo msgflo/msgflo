@@ -23,7 +23,7 @@ script:
 - npm test
 - grunt jekyll:dist
 after_deploy:
-- grunt site
+- grunt sitedeploy
 deploy:
   provider: npm
   email: jononor@gmail.com

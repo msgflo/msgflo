@@ -85,7 +85,7 @@ module.exports = ->
 
   @registerTask 'default', ['test']
 
-  @registerTask 'site', [
+  @registerTask 'sitedeploy', [
     'jekyll:dist'
     'gh-pages'
   ]
