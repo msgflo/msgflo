@@ -78,13 +78,12 @@ Device code
 In one device, receive on a certain topic
 In another device, send on that topic
 hardcoded queues -> hardcoded functionality -> low reusability
+Don't know what connections are or what data available
 
 Participants as "components"
 
 * Receives on a set of topics "inports"
 * Sends on another set of topics "outports"
-
-How to know which devices are available?
 
 Discovery protocol
 
@@ -98,25 +97,14 @@ Working with existing devices/software
 * YAML declaration
 * msgflo-register-foreign
 
-Handling incompatible message payloads.
+Using Flowhub
 
-* No magic performed by Msgflo
-* Super-basic type info in discovery message,
-space for more. JSON schemas, etc?
-* But! easy-to introspect / see what is going on
-* Participants as adapters
-* fbp-spec for testing
-
-Modelling / conventions
-
-* Prefer to have "services" as the core unit. Only ports/topics that affect eachother together.
-Avoids dependency on a particular device / implmentation. Encourages thinking about common "interfaces".
-Things that are hosted in the same device can be grouped. Naming convention etc
-* Dataflow/FBP and (event driven) finite state machines provides best practices
-* Source/sink/router components classes. 1->1, 1->N firing/packet patterns 
-* Anytime there is a parameter/configuration, expose it.
-Never know when you will need it. Much faster to change it live than reflashing!
-* Always send, proof that state-transition was successful (or not)
+* Start runtime. `msgflo --graph foo.json`
+* Connect via live-url `http://app.flowhub.io/#runtime/endpoint?protocol%3Dwebsocket%26address%3Dws%3A%2F%2Flocalhost%3A3569`
+* Introspects live system using the discovery messages
+* Visual node-based programming
+* Can reconfigure system on the fly
+* Observe data flowing through network
 
 Support libraries
 
@@ -130,9 +118,10 @@ Creating a new library for one transport is a 1-2 day job.
 
 Maturity
 
-* MsgFlo programming model and JavaScript participant libraries, battle-tested in production with AMQP+RabbitMQ
-* MQTT deployed in a couple of hackerspaces
-* Live-programming is 
+* MsgFlo programming model and JavaScript participant libraries,
+battle-tested in production with AMQP+RabbitMQ.
+* MsgFlo with MQTT deployed in Berlin,Oslo hackerspaces
+* Live-programming is not so much used yet
 * MQTT SSL support not tested! https://github.com/msgflo/msgflo/issues/76
 
 Future
@@ -142,6 +131,31 @@ Future
 * MQTT support for msgflo-rust, https://github.com/msgflo/msgflo-rust/issues/1
 * FBP protocol forwarding. Live-programming all the way down! 
 * Flowhub showing changes from outside automatically (no refresh)
+
+## Extras
+
+Message payloads.
+
+* Msgflo does not care about payload format
+* Slight preference for JSON in existing tooling (Flowhub) 
+* Handling incompatibilities? Participants as adapters
+* Easy-to introspect / see what is going on
+* Super-basic type info in discovery message,
+space for more. JSON schemas, etc?
+
+
+Participant modelling / conventions
+
+* Prefer to have "services" as the core unit. Only ports/topics that affect eachother together.
+Avoids dependency on a particular device / implmentation. Encourages thinking about common "interfaces".
+Things that are hosted in the same device can be grouped. Naming convention etc
+* Dataflow/FBP and (event driven) finite state machines provides best practices
+* Source/sink/router components classes. 1->1, 1->N firing/packet patterns 
+* Always send, proof that state-transition was successful (or not)
+* Prefer payloads describing current state fully, instead of events / state changes. Recipient can do transition detection
+* Anytime there is a parameter/configuration, expose it.
+Never know when you will need it. Much faster to change it live than reflashing!
+
 
 # Notes
 
@@ -161,7 +175,7 @@ which made it hard to integrate existing devices and systems.
 Msgflo
 
 * Use standard message queue protocol and broker. Ex: MQTT with Mosquitto
-* Does touch message payloads, use what you'd like.
+* Does not touch message payloads, use what you'd like.
 * Can be configured to use specific topic/queue names of existing sytems
 * Any programming language, combinations of multiple languages
 
