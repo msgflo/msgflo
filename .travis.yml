@@ -25,6 +25,7 @@ script:
 - npm test
 - grunt jekyll:dist
 after_deploy:
+- eval "$(ssh-agent -s)" #start the ssh agent
 - git config --global user.email bot+msgflo@flowhub.io
 - git config --global user.name "msgflo.org website bot"
 - chmod 600 travis/msgflo_deploy.pem
