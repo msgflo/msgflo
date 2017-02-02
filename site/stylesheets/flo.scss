@@ -4,6 +4,7 @@
 @import "color";
 
 $mobile: "(max-width: 750px)";
+$tablet: "(max-width: 950px)";
 
 body {
   font-family: $text-font;
@@ -104,7 +105,7 @@ body.page {
     margin-left: auto;
     margin-right: auto;
     max-width: 70em;
-    @media #{$mobile} {
+    @media #{$tablet} {
       flex-direction: column;
     }
     nav {
@@ -136,7 +137,7 @@ body.page {
       margin-left: 36px;
       margin-right: 36px;
       width: 50em;
-      @media #{$mobile} {
+      @media #{$tablet} {
         width: 85vw;
       }
       pre {
