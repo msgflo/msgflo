@@ -1,21 +1,23 @@
 <nav class="main">
   <ul>
     <li class="home"><a href="/">{{ site.title }}</a></li>
+    <ul>
     {% for collection in site.collections %}
       {% if collection.output and collection.docs.size > 0 %}
-    <li>
-      <a href="{{ collection.docs[0].url }}"{% if page.collection == collection.label %} class="current"{% endif %}>
-        {% if collection.title %}
-        {{ collection.title }}
-        {% else %}
-        {{ collection.label }}
+      <li>
+        <a href="{{ collection.docs[0].url }}"{% if page.collection == collection.label %} class="current"{% endif %}>
+          {% if collection.title %}
+          {{ collection.title }}
+          {% else %}
+          {{ collection.label }}
+          {% endif %}
+        </a>
+      </li>
         {% endif %}
-      </a>
-    </li>
+      {% endfor %}
+      {% if site.github_url %}
+      <li><a href="{{ site.github_url }}">GitHub</a></li>
       {% endif %}
-    {% endfor %}
-    {% if site.github_url %}
-    <li><a href="{{ site.github_url }}">GitHub</a></li>
-    {% endif %}
+    </ul>
   </ul>
 </nav>

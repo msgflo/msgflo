@@ -160,13 +160,17 @@ nav.main {
   width: 100vw;
   background-color: $color-prime;
   z-index: 1;
-  ul {
+  > ul {
     min-height: 72px;
     display: flex;
     flex-direction: row;
+    justify-content: flex-end;
+    @media #{$mobile} {
+      flex-direction: column;
+      justify-content: center;
+    }
     align-items: center;
     list-style: none;
-    justify-content: flex-end;
     margin: 0;
     padding: 0;
     li {
@@ -176,6 +180,17 @@ nav.main {
       padding-right: 36px;
       text-transform: uppercase;
       font-size: 0.8em;
+      &.home {
+        flex-grow: 1;
+        font-weight: bold;
+        text-transform: none;
+        font-size: 0.9em;
+        @media #{$mobile} {
+          position: absolute;
+          left: 36px;
+          flex-grow: 0;
+        }
+      }
       a {
         text-decoration: none;
         &.current, &:hover {
@@ -184,11 +199,33 @@ nav.main {
         }
       }
     }
-    li.home {
-      flex-grow: 1;
-      font-weight: bold;
-      text-transform: none;
-      font-size: 0.9em;
+    ul { 
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      transition: max-height 0.5s ease-in;
+      @media #{$mobile} {
+        max-height: 0px;
+        margin-top: 36px;
+        margin-bottom: 36px;
+        overflow: hidden;
+      }
+      li {
+        display: inline;
+        @media #{$mobile} {
+          display: block;
+          padding-top: 9px;
+          padding-bottom: 9px;
+        }
+      }
+    }
+    &:hover {
+      ul {
+        @media #{$mobile} {
+          flex-direction: column;
+          max-height: 100vh;
+        }
+      }
     }
   }
 }
