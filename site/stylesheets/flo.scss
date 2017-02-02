@@ -37,7 +37,7 @@ nav.main {
   display: block;
   top: 0;
   width: 100vw;
-  background-color: $color-meta;
+  background-color: $color-prime;
   z-index: 1;
   ul {
     min-height: 72px;
@@ -59,7 +59,7 @@ nav.main {
         text-decoration: none;
       }
       a:hover {
-        color: $color-highlight;
+        color: $color-text;
       }
     }
     li.home {
@@ -81,4 +81,39 @@ a {
 }
 a:hover {
   color: $color-prime;
+}
+
+main {
+  display: flex;
+  flex-direction: row;
+  margin-top: 72px;
+  nav {
+    background-color: $color-meta;
+    margin: 36px;
+    padding: 18px;
+    box-sizing: border-box;
+    h2 {
+      font-size: 1em;
+      margin: 0;
+      padding: 0;
+    }
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      margin-left: 1em;
+      li {
+        font-size: .8em;
+        a {
+          text-decoration: none;
+        }
+        a:hover {
+          color: $color-text;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+  article {
+  }
 }
