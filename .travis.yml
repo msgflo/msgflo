@@ -21,6 +21,9 @@ before_script:
 - npm install -g grunt-cli
 script:
 - npm test
+- grunt jekyll:dist
+after_deploy:
+- grunt site
 deploy:
   provider: npm
   email: jononor@gmail.com

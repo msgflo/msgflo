@@ -1,7 +1,8 @@
 module.exports = ->
+  pkg = @file.readJSON 'package.json'
   # Project configuration
   @initConfig
-    pkg: @file.readJSON 'package.json'
+    pkg: pkg
 
     # BDD tests on Node.js
     mochaTest:
@@ -46,6 +47,18 @@ module.exports = ->
           watch: true
           host: process.env.HOSTNAME or 'localhost'
           port: process.env.PORT or 4000
+    # Deploying the website
+    'gh-pages':
+      options:
+        base: 'dist/',
+        clone: 'gh-pages'
+        message: "Release #{pkg.name} #{process.env.TRAVIS_TAG}"
+        repo: 'https://' + process.env.GH_TOKEN + '@github.com/msgflo/msgflo.git'
+        user:
+          name: 'msgflo bot',
+          email: 'jononor+msgflobot@gmail.com'
+        silent: true
+      src: '**/*'
 
   # Grunt plugins used for building
   @loadNpmTasks 'grunt-jekyll'
@@ -54,6 +67,9 @@ module.exports = ->
   @loadNpmTasks 'grunt-mocha-test'
   @loadNpmTasks 'grunt-coffeelint'
   @loadNpmTasks 'grunt-shell-spawn'
+
+  # For deploying
+  @loadNpmTasks 'grunt-gh-pages'
 
   # Our local tasks
   @registerTask 'fbp-test', [
@@ -65,7 +81,11 @@ module.exports = ->
   @registerTask 'test', 'Build and run automated tests', (target = 'all') =>
     @task.run 'coffeelint'
     @task.run 'mochaTest'
-    @task.run 'jekyll:dist'
 #    @task.run 'fbp-test'
 
   @registerTask 'default', ['test']
+
+  @registerTask 'site', [
+    'jekyll:dist'
+    'gh-pages'
+  ]

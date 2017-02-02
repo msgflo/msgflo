@@ -32,6 +32,7 @@
     "fbp-spec": "^0.1.8",
     "grunt": "~1.0.1",
     "grunt-coffeelint": "~0.0.6",
+    "grunt-gh-pages": "^2.0.0",
     "grunt-jekyll": "^0.4.6",
     "grunt-mocha-test": "^0.13.2",
     "grunt-shell-spawn": "^0.3.1",
