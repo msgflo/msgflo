@@ -1,0 +1,15 @@
+<nav class="docs">
+  {% for collection in site.collections %}
+  {% if collection.label == page.collection %}
+  <ul>
+  {% for doc in collection.docs %}
+    <li>
+      <a href="{{ doc.url }}"{% if page.url == doc.url %} class="current"{% endif %}>
+        {{ doc.title }}
+      </a>
+    </li>
+  {% endfor %}
+  </ul>
+  {% endif %}
+{% endfor %}
+</nav>

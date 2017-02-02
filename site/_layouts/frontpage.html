@@ -1,0 +1,37 @@
+---
+layout: default
+body_class: feed
+---
+<header>
+  <article>
+    {% if site.logo %}
+    <img class="logo" src="{{ site.logo }}" alt="{{site.title}}">
+    {% else %}
+    <h1>{{ site.title }}</h1>
+    {% endif %}
+    <h2>{{ page.title }}</h2>
+  </article>
+</header>
+<article>
+  {{ content }}
+</article>
+{% if site.features %}
+  {% for feature in site.features %}
+<section class="feature">
+  {% if feature.cover %}
+  <img src="{{ feature.cover }}">
+  {% endif %}
+  <article>
+    <h1>
+      {{ feature.title }}
+      {% if feature.subtitle %}
+      &mdash; {{ feature.subtitle }}
+      {% endif %}
+    </h1>
+    <p>
+    {{ feature.content }}
+    </p>
+  </article>
+</section>
+  {% endfor %}
+{% endif %}

@@ -3,6 +3,7 @@ services:
 - rabbitmq
 node_js:
 - '4.2'
+dist: trusty
 before_install:
 - sudo apt-get update -qq
 - sudo apt-get install pkg-config cmake openssl libc-ares-dev
@@ -14,11 +15,15 @@ install:
 - sudo make install
 - cd ..
 - npm install
+- bundle install
 before_script:
 - mosquitto -d
 - npm install -g grunt-cli
 script:
 - npm test
+- grunt jekyll:dist
+after_deploy:
+- grunt sitedeploy
 deploy:
   provider: npm
   email: jononor@gmail.com
