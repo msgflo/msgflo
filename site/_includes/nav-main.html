@@ -3,7 +3,15 @@
     <li class="home"><a href="/">{{ site.title }}</a></li>
     {% for collection in site.collections %}
       {% if collection.output and collection.docs.size > 0 %}
-    <li><a href="{{ collection.docs[0].url }}">{{ collection.title }}</a></li>
+    <li>
+      <a href="{{ collection.docs[0].url }}"{% if page.collection == collection.label %} class="current"{% endif %}>
+        {% if collection.title %}
+        {{ collection.title }}
+        {% else %}
+        {{ collection.label }}
+        {% endif %}
+      </a>
+    </li>
       {% endif %}
     {% endfor %}
     {% if site.github_url %}

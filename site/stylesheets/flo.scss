@@ -58,8 +58,9 @@ nav.main {
       a {
         text-decoration: none;
       }
-      a:hover {
+      a.current, a:hover {
         color: $color-text;
+        font-weight: bold;
       }
     }
     li.home {
