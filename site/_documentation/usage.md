@@ -1,5 +1,6 @@
 ---
 title: Usage
+score: 10
 ---
 Install MsgFlo and some participant libraries
 

@@ -16,7 +16,8 @@ body_class: feed
   {{ content }}
 </article>
 {% if site.features %}
-  {% for feature in site.features %}
+  {% assign features = site.features | sort: 'score' | reverse %}
+  {% for feature in features %}
 <section class="feature">
   {% if feature.cover %}
   <img src="{{ feature.cover }}">

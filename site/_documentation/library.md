@@ -1,5 +1,6 @@
 ---
 title: Component library
+score: 8
 ---
 
 A component is a piece of code which can instantiate a MsgFlo participant.

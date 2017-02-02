@@ -2,7 +2,8 @@
   {% for collection in site.collections %}
   {% if collection.label == page.collection %}
   <ul>
-  {% for doc in collection.docs %}
+  {% assign docs = collection.docs | sort: 'score' | reverse %}
+  {% for doc in docs %}
     <li>
       <a href="{{ doc.url }}"{% if page.url == doc.url %} class="current"{% endif %}>
         {{ doc.title }}
