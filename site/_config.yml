@@ -11,9 +11,18 @@ collections:
     title: Documentation
     output: true
     permalink: /docs/:title/index.html
+  examples:
+    title: Examples
+    output: true
+    permalink: /examples/:title/index.html
 defaults:
   - scope:
       path: ""
       type: documentation
+    values:
+      layout: page
+  - scope:
+      path: ""
+      type: examples
     values:
       layout: page
