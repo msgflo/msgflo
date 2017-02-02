@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>MsgFlo | Best practices</title>
+    <link rel="stylesheet" href="/stylesheets/flo.css">
+    <link rel="stylesheet" href="/stylesheets/zenburn.css">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#70A7C6">
+    
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-46363984-7', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+
+  </head>
+  <body class="page">
+    <nav class="main">
+  <ul onclick="void(0)">
+    <li class="home">
+      <a href="/">
+        
+        <img class="logo" src="/assets/msgflo-logo.png" alt="MsgFlo">
+        
+      </a>
+    </li>
+    <ul>
+    
+      
+      
+      <li>
+        <a href="/docs/usage/index.html" class="current">
+          
+          Documentation
+          
+        </a>
+      </li>
+        
+      
+      
+      
+      <li>
+        <a href="/examples/c-base/index.html">
+          
+          Examples
+          
+        </a>
+      </li>
+        
+      
+      
+      
+      
+      
+      
+      <li><a href="https://github.com/msgflo">GitHub</a></li>
+      
+    </ul>
+  </ul>
+</nav>
+
+    
+<main>
+  <article>
+    
+    <h1>Best practices</h1>
+    
+    <p>Components should, to the extent possible, be state-free.
+Ideally all the data needed to perform a task is provided in the input data.
+In object-oriented-programming the primary entities often represent things/nouns,
+which encourages bundling together different aspects of, with associated buildup of state.</p>
+
+<p>Instead it is preferrable to let the data that moves through the system be the thing/noun,
+and let the components be the actions/verbs which <em>operate on</em> this thing.</p>
+
+<p>If there are a collection of actions somehow provided by the same “thing” (like a device or subsystem),
+one can use a group to visually indicate that a set of nodes are related to eachother.</p>
+
+<h3 id="always-send-data">Always send data</h3>
+
+<p>Even for cases where one “does not need to”, like when a component uses input to perform a side-effect,
+like storing to a database, or notifying an external system.</p>
+
+<p>This allows to know that an operation completed, and to trigger new operations afterwards.
+One immediate usecase is for automated tests, which can then assert that any side-effects performed
+was done, and done correctly.</p>
+
+<p>If there is no processed/derived data, send the original input onwards.</p>
+
+<h3 id="use-a-dedicated-portqueue-for-errors">Use a dedicated port/queue for errors</h3>
+
+<p>Allows to easily distinguish success from failures. By convention it is often just called <code class="highlighter-rouge">error</code>.
+This can for instance be used to automatically report failures to a QA system, for automated or manual analysis.
+Or to retry operations, in order to automatically recover from intermittent failures.</p>
+
+
+  </article>
+  <nav class="docs">
+  
+  
+  <ul>
+  
+  
+    <li>
+      <a href="/docs/usage/index.html">
+        Usage
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/communications/index.html">
+        Discovery protocol
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/library/index.html">
+        Component library
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/architecture/index.html">
+        Architecture
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/heroku/index.html">
+        Heroku deployment
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/foreign/index.html">
+        Non-MsgFlo-aware participants
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/best-practices/index.html" class="current">
+        Best practices
+      </a>
+    </li>
+  
+  </ul>
+  
+
+  
+
+  
+
+  
+
+</nav>
+
+</main>
+
+  </body>
+</html>

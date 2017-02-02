@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>MsgFlo | Heroku deployment</title>
+    <link rel="stylesheet" href="/stylesheets/flo.css">
+    <link rel="stylesheet" href="/stylesheets/zenburn.css">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#70A7C6">
+    
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+ga('create', 'UA-46363984-7', 'auto');
+      ga('send', 'pageview');
+    </script>
+
+
+  </head>
+  <body class="page">
+    <nav class="main">
+  <ul onclick="void(0)">
+    <li class="home">
+      <a href="/">
+        
+        <img class="logo" src="/assets/msgflo-logo.png" alt="MsgFlo">
+        
+      </a>
+    </li>
+    <ul>
+    
+      
+      
+      <li>
+        <a href="/docs/usage/index.html" class="current">
+          
+          Documentation
+          
+        </a>
+      </li>
+        
+      
+      
+      
+      <li>
+        <a href="/examples/c-base/index.html">
+          
+          Examples
+          
+        </a>
+      </li>
+        
+      
+      
+      
+      
+      
+      
+      <li><a href="https://github.com/msgflo">GitHub</a></li>
+      
+    </ul>
+  </ul>
+</nav>
+
+    
+<main>
+  <article>
+    
+    <h1>Heroku deployment</h1>
+    
+    <h2 id="generating-heroku-procfile">Generating Heroku Procfile</h2>
+
+<p><code class="highlighter-rouge">msgflo-procfile</code> can automatically generate a <a href="https://devcenter.heroku.com/articles/procfile">Procfile</a>
+for running as a Heroku service, based on the MsgFlo graph and component information.
+This ensures that the production service runs in the same way as when using MsgFlo locally.</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-procfile graphs/myservice.fbp &gt; Procfile
+</code></pre>
+</div>
+
+<p>You can also selectively ignore certain roles in the graph, by using <code class="highlighter-rouge">--ignore role</code>.
+Or you can include additional process stanzas by using <code class="highlighter-rouge">--include="guv: node ./node_modules/.bin/guv"</code>.</p>
+
+<p>A real-life example can be found <a href="https://github.com/imgflo/imgflo-server/blob/master/Makefile#L67">in imgflo-server</a>.</p>
+
+
+  </article>
+  <nav class="docs">
+  
+  
+  <ul>
+  
+  
+    <li>
+      <a href="/docs/usage/index.html">
+        Usage
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/communications/index.html">
+        Discovery protocol
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/library/index.html">
+        Component library
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/architecture/index.html">
+        Architecture
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/heroku/index.html" class="current">
+        Heroku deployment
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/foreign/index.html">
+        Non-MsgFlo-aware participants
+      </a>
+    </li>
+  
+    <li>
+      <a href="/docs/best-practices/index.html">
+        Best practices
+      </a>
+    </li>
+  
+  </ul>
+  
+
+  
+
+  
+
+  
+
+</nav>
+
+</main>
+
+  </body>
+</html>
