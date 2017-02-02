@@ -104,6 +104,7 @@ Handling incompatible message payloads.
 * Super-basic type info in discovery message,
 space for more. JSON schemas, etc?
 * But! easy-to introspect / see what is going on
+* Participants as adapters
 * fbp-spec for testing
 
 Modelling / conventions
