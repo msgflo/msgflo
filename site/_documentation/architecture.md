@@ -1,5 +1,6 @@
 ---
 title: Architecture
+score: 7
 ---
 ### Message queue
 
