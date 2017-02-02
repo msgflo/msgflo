@@ -1,5 +1,5 @@
 ---
-title: Best Practices
+title: Best practices
 ---
 Components should, to the extent possible, be state-free.
 Ideally all the data needed to perform a task is provided in the input data.

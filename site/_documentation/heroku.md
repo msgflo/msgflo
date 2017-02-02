@@ -1,5 +1,5 @@
 ---
-title: Heroku Deployment
+title: Heroku deployment
 ---
 ## Generating Heroku Procfile
 

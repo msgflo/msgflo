@@ -1,5 +1,5 @@
 ---
-title: Communications
+title: Discovery protocol
 ---
 All communications between the coordinator and the participants happens using the message queue.
 The network coordinator and the participants have channels to communicate,

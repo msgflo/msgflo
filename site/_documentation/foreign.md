@@ -1,5 +1,5 @@
 ---
-title: non-MsgFlo-aware participants
+title: Non-MsgFlo-aware participants
 ---
 MsgFlo can work with existing code that uses a supported message-queues system (AMQP, MQTT).
 Because the code is not MsgFlo-aware, another process needs to send the MsgFlo discovery
