@@ -25,7 +25,8 @@ body.feed {
     justify-content: center;
     {% if site.cover %}
     position: relative;
-    background-color: rgba($color-prime, 0.5);
+    background-color: rgba(lighten($color-prime, 20%), 0.5);
+    margin-bottom: 36px;
     &:before {
       content: ' ';
       position: absolute;
