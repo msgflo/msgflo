@@ -58,6 +58,9 @@ nav.main {
       a {
         text-decoration: none;
       }
+      a:hover {
+        color: $color-highlight;
+      }
     }
     li.home {
       flex-grow: 1;
