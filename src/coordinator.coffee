@@ -131,6 +131,10 @@ class Coordinator extends EventEmitter
     return @library.getSource component, callback
 
   startParticipant: (node, component, callback) ->
+    if not @library.components[component]?.command
+      console.log "WARNING: Attempting to start participant with missing component: #{node}(#{component})"
+      # XXX: should be an error, but Flowhub does this in project mode..
+      return callback null
     iips = {}
     cmd = @library.componentCommand component, node, iips
     commands = {}
