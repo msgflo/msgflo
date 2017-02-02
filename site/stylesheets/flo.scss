@@ -227,9 +227,10 @@ nav.main {
         }
       }
     }
-    &:hover {
+    &:hover, &:focus, &:active {
       ul {
         @media #{$mobile} {
+          cursor: pointer;
           flex-direction: column;
           max-height: 100vh;
         }
