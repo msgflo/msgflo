@@ -53,10 +53,7 @@ module.exports = ->
         base: 'dist/',
         clone: 'gh-pages'
         message: "Release #{pkg.name} #{process.env.TRAVIS_TAG}"
-        repo: 'https://' + process.env.GH_TOKEN + '@github.com/msgflo/msgflo.git'
-        user:
-          name: 'msgflo bot',
-          email: 'jononor+msgflobot@gmail.com'
+        repo: 'git@github.com:msgflo/msgflo.git'
         silent: true
       src: '**/*'
 
