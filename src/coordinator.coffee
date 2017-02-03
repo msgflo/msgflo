@@ -40,6 +40,25 @@ findQueue = (participants, partId, dir, portName) =>
   for port in part[dir]
     return port.queue if port.id == portName
 
+connectionFromBinding = (participants, binding) ->
+  byRole = {}
+  for id, part of participants
+    byRole[part.role] = part
+
+  findNodePort = (queue, dir) ->
+    for role, part of byRole
+      for port in part[dir]
+        if port.queue == queue
+          r =
+            node: role
+            port: port.id
+          return r
+
+  connection =
+    src: findNodePort binding.src, 'outports'
+    tgt: findNodePort binding.tgt, 'inports'
+  return connection
+
 waitForParticipant = (coordinator, role, callback) ->
   existing = participantsByRole coordinator.participants, role
   return callback null, coordinator.participants[existing[0]] if existing.length
@@ -338,6 +357,31 @@ class Coordinator extends EventEmitter
     # Don't have a concept of started/stopped so far, no-op
     setTimeout callback, 10
   
+  _onConnectionData: (binding, data) =>
+    connection = connectionFromBinding @participants, binding
+    @emit 'connection-data', connection, data
+
+  subscribeConnection: (fromRole, fromPort, toRole, toPort, callback) ->
+    waitForParticipant @, fromRole, (err) =>
+      return callback err if err
+      waitForParticipant @, toRole, (err) =>
+        return callback err if err
+        binding =
+          src: findQueue @participants, fromRole, 'outports', fromPort
+          tgt: findQueue @participants, toRole, 'inports', toPort
+        @broker.subscribeData binding, @_onConnectionData, callback
+
+  unsubscribeConnection: (fromRole, fromPort, toRole, toPort, callback) ->
+    waitForParticipant @, fromRole, (err) =>
+      return callback err if err
+      waitForParticipant @, toRole, (err) =>
+        return callback err if err
+        binding =
+          src: findQueue @participants, fromRole, 'outports', fromPort
+          tgt: findQueue @participants, toRole, 'inports', toPort
+        @broker.unsubscribeData binding, @_onConnectionData, callback
+        return callback null
+
   serializeGraph: (name) ->
     graph =
       properties:
