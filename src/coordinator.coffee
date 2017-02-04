@@ -25,9 +25,42 @@ iipId = (part, port) ->
 fromIipId = (id) ->
   return id.split ' '
 
+participantsByRole = (participants, role) ->
+  matchRole = (id) =>
+    part = participants[id]
+    return part.role == role
+
+  m = Object.keys(participants).filter matchRole
+  return m
+
+# XXX: there is now a mixture of participant id and role used here
+findQueue = (participants, partId, dir, portName) =>
+  part = participants[partId]
+  part = participants[participantsByRole(participants, partId)] if not part?
+  for port in part[dir]
+    return port.queue if port.id == portName
+
+connectionFromBinding = (participants, binding) ->
+  byRole = {}
+  for id, part of participants
+    byRole[part.role] = part
+
+  findNodePort = (queue, dir) ->
+    for role, part of byRole
+      for port in part[dir]
+        if port.queue == queue
+          r =
+            node: role
+            port: port.id
+          return r
+
+  connection =
+    src: findNodePort binding.src, 'outports'
+    tgt: findNodePort binding.tgt, 'inports'
+  return connection
 
 waitForParticipant = (coordinator, role, callback) ->
-  existing = coordinator.participantsByRole role
+  existing = participantsByRole coordinator.participants, role
   return callback null, coordinator.participants[existing[0]] if existing.length
 
   onTimeout = () =>
@@ -167,7 +200,7 @@ class Coordinator extends EventEmitter
     callback = defaultCallback if not callback
 
     part = @participants[participantId]
-    part = @participants[@participantsByRole(participantId)] if not part?
+    part = @participants[participantsByRole(@participants, participantId)] if not part?
     port = findPort part, 'inport', inport
     return @broker.sendTo 'inqueue', port.queue, message, callback
 
@@ -177,7 +210,7 @@ class Coordinator extends EventEmitter
     callback = defaultCallback if not callback
 
     part = @participants[participantId]
-    part = @participants[@participantsByRole(participantId)] if not part?
+    part = @participants[participantsByRole(@participants, participantId)] if not part?
 
     debug 'subscribeTo', participantId, outport
     port = findPort part, 'outport', outport
@@ -202,14 +235,6 @@ class Coordinator extends EventEmitter
   connect: (fromId, fromPort, toId, toName, callback) ->
     callback = ((err) ->) if not callback
  
-    # XXX: there is now a mixture of participant id and role used here
-
-    findQueue = (partId, dir, portName) =>
-      part = @participants[partId]
-      part = @participants[@participantsByRole(partId)] if not part?
-      for port in part[dir]
-        return port.queue if port.id == portName
-
     # NOTE: adding partial connection info to make checkParticipantConnections logic work
     edgeId = connId fromId, fromPort, toId, toName
     edge =
@@ -228,8 +253,8 @@ class Coordinator extends EventEmitter
       waitForParticipant @, toId, (err) =>
         return callback err if err
         # TODO: support roundtrip
-        @connections[edgeId].srcQueue = findQueue fromId, 'outports', fromPort
-        @connections[edgeId].tgtQueue = findQueue toId, 'inports', toName
+        @connections[edgeId].srcQueue = findQueue @participants, fromId, 'outports', fromPort
+        @connections[edgeId].tgtQueue = findQueue @participants, toId, 'inports', toName
         @emit 'graph-changed'
         @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
           return callback err
@@ -332,6 +357,31 @@ class Coordinator extends EventEmitter
     # Don't have a concept of started/stopped so far, no-op
     setTimeout callback, 10
   
+  _onConnectionData: (binding, data) =>
+    connection = connectionFromBinding @participants, binding
+    @emit 'connection-data', connection, data
+
+  subscribeConnection: (fromRole, fromPort, toRole, toPort, callback) ->
+    waitForParticipant @, fromRole, (err) =>
+      return callback err if err
+      waitForParticipant @, toRole, (err) =>
+        return callback err if err
+        binding =
+          src: findQueue @participants, fromRole, 'outports', fromPort
+          tgt: findQueue @participants, toRole, 'inports', toPort
+        @broker.subscribeData binding, @_onConnectionData, callback
+
+  unsubscribeConnection: (fromRole, fromPort, toRole, toPort, callback) ->
+    waitForParticipant @, fromRole, (err) =>
+      return callback err if err
+      waitForParticipant @, toRole, (err) =>
+        return callback err if err
+        binding =
+          src: findQueue @participants, fromRole, 'outports', fromPort
+          tgt: findQueue @participants, toRole, 'inports', toPort
+        @broker.unsubscribeData binding, @_onConnectionData, callback
+        return callback null
+
   serializeGraph: (name) ->
     graph =
       properties:
@@ -396,14 +446,6 @@ class Coordinator extends EventEmitter
         return callback err if err
         @processes = proc
         setup.bindings options, callback
-
-  participantsByRole: (role) ->
-    matchRole = (id) =>
-      part = @participants[id]
-      return part.role == role
-
-    m = Object.keys(@participants).filter matchRole
-    return m
 
 
 exports.Coordinator = Coordinator

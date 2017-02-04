@@ -4,6 +4,7 @@
 
 debug = require('debug')('msgflo:fbp')
 EventEmitter = require('events').EventEmitter
+async = require 'async'
 
 fbpPort = (port) ->
   m =
@@ -124,6 +125,18 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         graph: payload.graph
         time: new Date()
 
+  else if sub == 'network' and cmd == 'edges'
+    debug 'network:edges', payload.edges.length
+
+    # FIXME: also unsubscribe removed edges
+    subscribeEdge = (edge, cb) ->
+      proto.coordinator.subscribeConnection edge.src.node, edge.src.port, edge.tgt.node, edge.tgt.port, (err) ->
+        return cb err
+    async.map payload.edges, subscribeEdge, (err) ->
+      if err
+        return proto.transport.sendAll 'network', 'error', serializeErr(err) if err
+      proto.transport.sendAll 'network', 'edges', payload
+
   # Graph
   else if sub == 'graph'
     handleGraphMessage proto, cmd, payload, ctx
@@ -201,7 +214,11 @@ class Protocol
         info = fbpComponentFromMsgflo name, component
         @transport.sendAll 'component', 'component', info
 
-    @coordinator.on 'data', (from, fromPort, to, toPort, data) =>
+    @coordinator.on 'connection-data', (conn, data) =>
+      from = conn.src.node
+      fromPort = conn.src.port
+      to = conn.tgt.node
+      toPort = conn.tgt.port
       debug 'on data', from, fromPort, data
 
       id = "#{from}() #{fromPort.toUpperCase()} -> #{toPort.toUpperCase()} #{to}()"
