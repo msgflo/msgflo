@@ -322,3 +322,39 @@ describe 'FBP runtime protocol', () ->
         component: componentName
       ui.send 'graph', 'addnode', add
 
+  describe 'subscribing to edges', ->
+    repeatA = null
+    repeatB = null
+    before (done) ->
+      # TODO: use addnode to setup instead
+      repeatA = participants.Repeat options.broker, 'edgedata-repeat-A'
+      repeatA.start (err) ->
+        return done err if err
+        repeatB = participants.Repeat options.broker, 'edgedata-repeat-B'
+        return repeatB.start done
+    after (done) ->
+      repeatA.stop (err) ->
+        return repeatB.stop done
+
+    it 'should emit data flowing through network', (done) ->
+      edge =
+        src: { node: 'edgedata-repeat-A', port: 'out' }
+        tgt: { node: 'edgedata-repeat-B', port: 'in' }
+      ui.send 'graph', 'addedge', edge
+      indata =
+        foo: 'subscribe-edge-11'
+      onNetwork = (d, protocol, command, payload) ->
+        chai.expect(payload).to.be.a 'object'
+        if command == 'edges'
+          repeatA.send 'in', indata
+        else if command == 'data'
+          chai.expect(payload.src).to.eql edge.src
+          chai.expect(payload.tgt).to.eql edge.tgt
+          chai.expect(payload.data).to.eql indata
+          ui.removeListener 'network', onNetwork
+          return done null
+      ui.on 'message', onNetwork
+      subscribe =
+        edges: [ edge ]
+      ui.send 'network', 'edges', subscribe
+
