@@ -2,7 +2,8 @@
 
 * Date: Saturday 4th February, 2017
 * Talk accepted: https://fosdem.org/2017/schedule/event/iot_msgflo/
-* Format: 25 mins, with demo 5-10min, talk 5-10min, QA 5min.
+* Slides. [PDF](./slides.pdf) [OpenOffice](./slides.odp)
+* Example code: https://github.com/jonnor/fosdem2017-iot-msgflo
 * CfP: https://github.com/maximevince/IoT-devroom-fosdem
 
 # Proposal
