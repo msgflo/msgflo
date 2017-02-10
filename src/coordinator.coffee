@@ -120,6 +120,10 @@ class Coordinator extends EventEmitter
 
   participantDiscovered: (definition) ->
     throw new Error "Discovery message missing .id" if not definition.id
+    throw new Error "Discovery message missing .component" if not definition.component
+    throw new Error "Discovery message missing .role" if not definition.role
+    throw new Error "Discovery message missing .inports" if not definition.inports
+    throw new Error "Discovery message missing .outports" if not definition.outports
     if @participants[definition.id]
       @updateParticipant definition
     else
