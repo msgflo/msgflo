@@ -204,7 +204,9 @@ class Coordinator extends EventEmitter
     callback = defaultCallback if not callback
 
     part = @participants[participantId]
-    part = @participants[participantsByRole(@participants, participantId)] if not part?
+    id = participantsByRole(@participants, participantId)[0]
+    part = @participants[id] if not part?
+
     port = findPort part, 'inport', inport
     return @broker.sendTo 'inqueue', port.queue, message, callback
 
@@ -214,7 +216,8 @@ class Coordinator extends EventEmitter
     callback = defaultCallback if not callback
 
     part = @participants[participantId]
-    part = @participants[participantsByRole(@participants, participantId)] if not part?
+    id = participantsByRole(@participants, participantId)[0]
+    part = @participants[id] if not part?
 
     debug 'subscribeTo', participantId, outport
     port = findPort part, 'outport', outport
