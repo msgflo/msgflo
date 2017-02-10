@@ -85,7 +85,7 @@ normalizeConfig = (config) ->
   namespace = config.name or null
   config = config.msgflo if config.msgflo # Migth be under a .msgflo key, for instance in package.json
 
-  config.namespace = config.namespace or namespace
+  config.namespace = namespace if not config.namespace?
   config.components = {} if not config.components
   config.variables = {} if not config.variables
   config.handlers = {} if not config.handlers
