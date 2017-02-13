@@ -1,8 +1,10 @@
 title: MsgFlo
-permalink: /:categories/:title/
+language: en
+permalink: /:year/:month/:categories/:title/
 cover: /assets/space-obelisk.jpg
 logo: /assets/msgflo-logo.png
 color_prime: "#70A7C6"
+url: 'https://msgflo.org/'
 github_url: 'https://github.com/msgflo'
 analytics_id: 'UA-46363984-7'
 collections:

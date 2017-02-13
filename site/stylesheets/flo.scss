@@ -67,6 +67,49 @@ body.feed {
       width: 90vw;
     }
   }
+  aside {
+    text-align: center;
+    max-width: 50em;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: $color-meta;
+    padding: 18px;
+    box-sizing: border-box;
+    color: $color-text;
+    @media #{$mobile} {
+      width: 90vw;
+    }
+    h2 {
+      padding: 0;
+      margin: 0;
+      a {
+        text-decoration: none;
+        font-size: 0.5em;
+        font-weight: normal;
+        vertical-align: super;
+        &:hover {
+          color: $color-highlight;
+        }
+      }
+    }
+    ul {
+      padding: 0;
+      margin: 0;
+      li {
+        list-style: none;
+        margin-top: 9px;
+        padding-left: 18px;
+        padding-right: 18px;
+        a {
+          text-decoration: none;
+          font-weight: bold;
+          &:hover {
+            color: $color-highlight;
+          }
+        }
+      }
+    }
+  }
   section {
     max-width: 50em;
     display: flex;

@@ -11,7 +11,7 @@
     </li>
     <ul>
     {% for collection in site.collections %}
-      {% if collection.output and collection.docs.size > 0 %}
+      {% if collection.output and collection.docs.size > 0 and collection.label != 'posts'  %}
       {% assign docs = collection.docs | sort: 'score' | reverse %}
       <li>
         <a href="{{ docs[0].url }}"{% if page.collection == collection.label %} class="current"{% endif %}>
