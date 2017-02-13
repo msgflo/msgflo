@@ -120,6 +120,10 @@ class Coordinator extends EventEmitter
 
   participantDiscovered: (definition) ->
     throw new Error "Discovery message missing .id" if not definition.id
+    throw new Error "Discovery message missing .component" if not definition.component
+    throw new Error "Discovery message missing .role" if not definition.role
+    throw new Error "Discovery message missing .inports" if not definition.inports
+    throw new Error "Discovery message missing .outports" if not definition.outports
     if @participants[definition.id]
       @updateParticipant definition
     else
@@ -200,7 +204,9 @@ class Coordinator extends EventEmitter
     callback = defaultCallback if not callback
 
     part = @participants[participantId]
-    part = @participants[participantsByRole(@participants, participantId)] if not part?
+    id = participantsByRole(@participants, participantId)[0]
+    part = @participants[id] if not part?
+
     port = findPort part, 'inport', inport
     return @broker.sendTo 'inqueue', port.queue, message, callback
 
@@ -210,7 +216,8 @@ class Coordinator extends EventEmitter
     callback = defaultCallback if not callback
 
     part = @participants[participantId]
-    part = @participants[participantsByRole(@participants, participantId)] if not part?
+    id = participantsByRole(@participants, participantId)[0]
+    part = @participants[id] if not part?
 
     debug 'subscribeTo', participantId, outport
     port = findPort part, 'outport', outport
