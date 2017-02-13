@@ -15,12 +15,11 @@ body_class: feed
 <article>
   {{ content }}
 </article>
-{% if site.news and site.news.size > 0 %}
+{% if site.posts and site.posts.size > 0 %}
 <aside>
-  <h2>Project news <a href="/rss.xml">&#x1f4f0;</a></h2>
+  <h2>{{ site.title }} Updates <a href="/rss.xml">RSS</a></h2>
   <ul>
-  {% assign news = site.news | reverse %}
-  {% for post in news limit: 2 %}
+  {% for post in site.posts limit: 2 %}
     <li>
       {% if post.isBasedOnUrl %}
       <a href="{{ post.isBasedOnUrl }}">{{ post.title }}</a>

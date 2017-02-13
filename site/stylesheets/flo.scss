@@ -84,6 +84,12 @@ body.feed {
       margin: 0;
       a {
         text-decoration: none;
+        font-size: 0.5em;
+        font-weight: normal;
+        vertical-align: super;
+        &:hover {
+          color: $color-highlight;
+        }
       }
     }
     ul {
@@ -97,7 +103,7 @@ body.feed {
         a {
           text-decoration: none;
           font-weight: bold;
-          &.current, &:hover {
+          &:hover {
             color: $color-highlight;
           }
         }
