@@ -15,6 +15,24 @@ body_class: feed
 <article>
   {{ content }}
 </article>
+{% if site.news and site.news.size > 0 %}
+<aside>
+  <h2>Project news <a href="/rss.xml">&#x1f4f0;</a></h2>
+  <ul>
+  {% assign news = site.news | reverse %}
+  {% for post in news limit: 2 %}
+    <li>
+      {% if post.isBasedOnUrl %}
+      <a href="{{ post.isBasedOnUrl }}">{{ post.title }}</a>
+      {% else %}
+      <a href="{{ post.url }}">{{ post.title }}</a>
+      {% endif %}
+      {{ post.date | date_to_long_string }}
+    </li>
+  {% endfor %}
+  </ul>
+</aside>
+{% endif %}
 {% if site.features %}
   {% assign features = site.features | sort: 'score' | reverse %}
   {% for feature in features %}
