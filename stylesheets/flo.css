@@ -8,6 +8,15 @@ body.feed header h1 { font-size: 3em; font-weight: normal; max-width: 80vw; marg
 body.feed header h2 { font-weight: normal; max-width: 80vw; margin-left: auto; margin-right: auto; }
 body.feed article { max-width: 50em; margin-left: auto; margin-right: auto; }
 @media (max-width: 750px) { body.feed article { width: 90vw; } }
+body.feed aside { text-align: center; max-width: 50em; margin-left: auto; margin-right: auto; background-color: #D7B399; padding: 18px; box-sizing: border-box; color: #252525; }
+@media (max-width: 750px) { body.feed aside { width: 90vw; } }
+body.feed aside h2 { padding: 0; margin: 0; }
+body.feed aside h2 a { text-decoration: none; font-size: 0.5em; font-weight: normal; vertical-align: super; }
+body.feed aside h2 a:hover { color: #F0682C; }
+body.feed aside ul { padding: 0; margin: 0; }
+body.feed aside ul li { list-style: none; margin-top: 9px; padding-left: 18px; padding-right: 18px; }
+body.feed aside ul li a { text-decoration: none; font-weight: bold; }
+body.feed aside ul li a:hover { color: #F0682C; }
 body.feed section { max-width: 50em; display: flex; flex-direction: row; align-items: center; justify-content: center; margin-left: auto; margin-right: auto; }
 body.feed section:nth-of-type(even) { flex-direction: row-reverse; }
 body.feed section:nth-of-type(even) img { margin-left: 36px; margin-right: 0px; }
