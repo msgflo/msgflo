@@ -72,6 +72,10 @@ describe 'FBP runtime protocol', () ->
     rmrf options.componentdir
     fs.rmdirSync options.componentdir if fs.existsSync options.componentdir
     fs.mkdirSync options.componentdir
+    comp = fs.readFileSync(__dirname+'/fixtures/ProduceFoo.coffee', 'utf-8')
+    comp = comp.replace /ProduceFoo/g, 'InitiallyAvailable'
+    fs.writeFileSync path.join(options.componentdir,'InitiallyAvailable.coffee'), comp
+
     runtime = new Runtime options
     runtime.start (err, url) ->
       chai.expect(err).to.not.exist
@@ -358,3 +362,47 @@ describe 'FBP runtime protocol', () ->
         edges: [ edge ]
       ui.send 'network', 'edges', subscribe
 
+  describe 'adding an node and immediately a IIP', ->
+    # stresses the case where we probably don't have complete information about the added node yet
+    # as the discovery message will take a bit of time.
+    # When using Flowhub in project mode this is a likely case to happen. Probably also fbp-spec
+    responses = []
+    componentName = 'InitiallyAvailable'
+
+    before (done) ->
+      @timeout 10*1000
+      checkMessage = (d, protocol, command, payload) ->
+        return if command == 'component' # Ignore component update coming from instantiating
+        responses.push
+          protocol: protocol
+          command: command
+          payload: payload
+        expected = responses.filter (r) -> r.command in ['addinitial', 'addnode']
+        if expected.length >= 2
+          ui.removeListener 'message', checkMessage
+          done()
+      ui.on 'message', checkMessage
+
+      node =
+        id: 'iip-target'
+        graph: 'default/main'
+        component: componentName
+      initial =
+        tgt: { node: node.id, port: 'interval' },
+        src: { data: 0 }
+      ui.send 'graph', 'addnode', node
+      ui.send 'graph', 'addinitial', initial
+
+    it 'should have one addnode response', ->
+      addnodes = responses.filter (r) -> r.protocol == 'graph' and r.command == 'addnode'
+      chai.expect(addnodes, JSON.stringify(responses)).to.have.length 1
+      addnode = addnodes[0].payload
+      chai.expect(addnode).to.include.keys ['id', 'graph', 'component']
+    it 'should have one addinitial response', ->
+      addinitials = responses.filter (r) -> r.protocol == 'graph' and r.command == 'addinitial'
+      chai.expect(addinitials, JSON.stringify(responses)).to.have.length 1
+      addinitial = addinitials[0].payload
+      chai.expect(addinitial).to.include.keys ['tgt', 'src']
+      chai.expect(addinitial.tgt).to.include.keys ['node', 'port']
+      chai.expect(addinitial.tgt.node).to.equal 'iip-target'
+      chai.expect(addinitial.tgt.port).to.equal 'interval'
