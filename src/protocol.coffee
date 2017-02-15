@@ -44,6 +44,7 @@ serializeErr = (err) ->
 handleMessage = (proto, sub, cmd, payload, ctx) ->
   debug 'RECV:', sub, cmd, payload
 
+  # FIXME: should be 'main' or whatever came from `graph:clear`. However, Flowhub doesn't work with that??
   defaultGraph = 'default/main'
 
   if sub == 'runtime' and cmd == 'getruntime'
@@ -224,7 +225,7 @@ class Protocol
       id = "#{from}() #{fromPort.toUpperCase()} -> #{toPort.toUpperCase()} #{to}()"
       msg =
         id: id # FIXME: https://github.com/noflo/noflo-ui/issues/293
-        graph: 'default/main' # FIXME: unhardcode
+        graph: 'main' # FIXME: unhardcode
         src:
           node: from
           port: fromPort
