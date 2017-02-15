@@ -36,7 +36,9 @@ participantsByRole = (participants, role) ->
 # XXX: there is now a mixture of participant id and role used here
 findQueue = (participants, partId, dir, portName) =>
   part = participants[partId]
-  part = participants[participantsByRole(participants, partId)] if not part?
+  partIdByRole = participantsByRole(participants, partId)[0]
+  part = participants[partIdByRole] if not part?
+  throw new Error "No participant info found for '#{partId}'" if not part?
   for port in part[dir]
     return port.queue if port.id == portName
 
