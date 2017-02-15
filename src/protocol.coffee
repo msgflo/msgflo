@@ -44,6 +44,7 @@ serializeErr = (err) ->
 handleMessage = (proto, sub, cmd, payload, ctx) ->
   debug 'RECV:', sub, cmd, payload
 
+  # FIXME: should be 'main' or whatever came from `graph:clear`. However, Flowhub doesn't work with that??
   defaultGraph = 'default/main'
 
   if sub == 'runtime' and cmd == 'getruntime'
@@ -174,8 +175,9 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
 
   # IIPs
   else if cmd == 'addinitial'
-    proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data
-    proto.transport.sendAll 'graph', 'addinitial', payload
+    proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'addinitial', payload
   else if cmd == 'removeinitial'
     proto.coordinator.removeInitial payload.tgt.node, payload.tgt.port
     proto.transport.sendAll 'graph', 'removeinitial', payload
@@ -224,7 +226,7 @@ class Protocol
       id = "#{from}() #{fromPort.toUpperCase()} -> #{toPort.toUpperCase()} #{to}()"
       msg =
         id: id # FIXME: https://github.com/noflo/noflo-ui/issues/293
-        graph: 'default/main' # FIXME: unhardcode
+        graph: 'main' # FIXME: unhardcode
         src:
           node: from
           port: fromPort

@@ -36,7 +36,9 @@ participantsByRole = (participants, role) ->
 # XXX: there is now a mixture of participant id and role used here
 findQueue = (participants, partId, dir, portName) =>
   part = participants[partId]
-  part = participants[participantsByRole(participants, partId)] if not part?
+  partIdByRole = participantsByRole(participants, partId)[0]
+  part = participants[partIdByRole] if not part?
+  throw new Error "No participant info found for '#{partId}'" if not part?
   for port in part[dir]
     return port.queue if port.id == portName
 
@@ -316,10 +318,16 @@ class Coordinator extends EventEmitter
     else
       null # ignored
 
-  addInitial: (partId, portId, data) ->
+  addInitial: (partId, portId, data, callback) ->
     id = iipId partId, portId
     @iips[id] = data
-    @sendTo partId, portId, data if @started
+    waitForParticipant @, partId, (err) ->
+      return callback err if err
+      if @started
+        @sendTo partId, portId, data, (err) ->
+          return callback err
+      else
+        return callback null
 
   removeInitial: (partId, portId) -> # FIXME: implement
     # Do we need to remove it from the queue??
