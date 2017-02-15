@@ -318,10 +318,16 @@ class Coordinator extends EventEmitter
     else
       null # ignored
 
-  addInitial: (partId, portId, data) ->
+  addInitial: (partId, portId, data, callback) ->
     id = iipId partId, portId
     @iips[id] = data
-    @sendTo partId, portId, data if @started
+    waitForParticipant @, partId, (err) ->
+      return callback err if err
+      if @started
+        @sendTo partId, portId, data, (err) ->
+          return callback err
+      else
+        return callback null
 
   removeInitial: (partId, portId) -> # FIXME: implement
     # Do we need to remove it from the queue??

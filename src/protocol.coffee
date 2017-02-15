@@ -175,8 +175,9 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
 
   # IIPs
   else if cmd == 'addinitial'
-    proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data
-    proto.transport.sendAll 'graph', 'addinitial', payload
+    proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'addinitial', payload
   else if cmd == 'removeinitial'
     proto.coordinator.removeInitial payload.tgt.node, payload.tgt.port
     proto.transport.sendAll 'graph', 'removeinitial', payload
