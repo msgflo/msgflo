@@ -38,6 +38,7 @@ exports.generate = generate = (graph, options, callback) ->
   libOptions =
     configfile: options.library
   libOptions.configfile = path.join(process.cwd(), 'package.json') if not libOptions.configfile
+  libOptions.componentdir = options.components
 
   lib = new library.Library libOptions
   lib.load (err) ->
@@ -61,6 +62,7 @@ exports.parse = parse = (args) ->
     .option('--library <FILE.json>', 'Use FILE.json as the library definition', String, 'package.json')
     .option('--ignore [NODE]', 'Do not generate output for NODE. Can be specified multiple times.', addIgnore, [])
     .option('--include [DATA]', 'Include DATA as-is in generated file. Can be specified multiple times.', addInclude, [])
+    .option('--components <DIR>', 'Lookup components from DIR', String, '')
     .action (gr, env) ->
       graph = gr
     .parse args

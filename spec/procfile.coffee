@@ -52,3 +52,16 @@ describe 'msgflo-procfile', ->
         chai.expect(stderr).to.contain 'imgflo_worker'
         done()
 
+  describe "non-prefixed component with handlers", ->
+    it 'outputs a Procfile to stdout', (done) ->
+      @timeout 10*1000
+      lib = path.join __dirname, 'fixtures', 'library-handlers.json'
+      componentdir = path.join __dirname, 'fixtures'
+      options = "--library=#{lib} --components=#{componentdir} --include 'web: node index.js'"
+      msgflo_procfile 'handlers.fbp', options, (err, stdout, stderr) ->
+        chai.expect(err).to.not.exist
+        chai.expect(stdout).to.contain 'msgflo-nodejs'
+        chai.expect(stdout).to.contain 'ProduceFoo'
+        chai.expect(stdout).to.contain 'foo'
+        done()
+
