@@ -109,6 +109,9 @@ class Library extends EventEmitter
     return @components[name] if @components[name]
     withoutNamespace = path.basename name
     return @components[withoutNamespace] if @components[withoutNamespace]
+    if name.indexOf '/' == -1 and @options.config.namespace
+      withNamespace = @options.config.namespace + '/' + name
+      return @components[withNamespace] if @components[withNamespace]
     return null
 
   _updateComponents: (components) ->
