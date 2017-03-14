@@ -1,0 +1,16 @@
+component: 'my/LightBulb'
+icon: 'file-word-o'
+role: 'mybulb'
+label: 'A lightbubl that can be on or off'
+inports:
+-
+  id: 'enable'
+  type: 'boolean'
+  description: ''
+  queue: '/mylightbulb/ffo/1/set-on'
+outports:
+-
+  id: 'confirm'
+  type: 'boolean'
+  description: 'ff'
+  queue: '/mylightbulb/ffo/1/is-on'

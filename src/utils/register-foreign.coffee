@@ -42,8 +42,10 @@ main = ->
       return onError err if err
       foreigner.register messaging, definition, (err) ->
         return onError err if err
+        console.log 'Sent discovery message for', definition.id
 
         if program.forever
+          console.log '--forever enabled'
           setInterval () ->
             foreigner.register messaging, definition, (err) ->
               console.log 'Warning: Failed to send discovery message:', err if err
