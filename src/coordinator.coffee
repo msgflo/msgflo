@@ -40,7 +40,10 @@ findQueue = (participants, partId, dir, portName) =>
   part = participants[partIdByRole] if not part?
   throw new Error "No participant info found for '#{partId}'" if not part?
   for port in part[dir]
-    return port.queue if port.id == portName
+    if port.id == portName
+      throw new Error "Queue for #{dir} #{portName} missing in #{JSON.stringify(part)}" if not port.queue
+      return port.queue
+  throw new Error "No matching port found for #{portName} in #{JSON.stringify(part)}"
 
 connectionFromBinding = (participants, binding) ->
   byRole = {}
