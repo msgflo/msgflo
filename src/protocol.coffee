@@ -41,11 +41,10 @@ fbpComponentFromMsgflo = (name, component) ->
 serializeErr = (err) ->
   return { message: err.message }
 
+defaultGraph = 'default/main'
+
 handleMessage = (proto, sub, cmd, payload, ctx) ->
   debug 'RECV:', sub, cmd, payload
-
-  # FIXME: should be 'main' or whatever came from `graph:clear`. However, Flowhub doesn't work with that??
-  defaultGraph = 'default/main'
 
   if sub == 'runtime' and cmd == 'getruntime'
     runtime =
@@ -151,6 +150,7 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
 
   if cmd == 'clear'
     # FIXME: support multiple graphs
+    proto.coordinator.graphName = payload.id
   else if cmd == 'addnode'
     proto.coordinator.startParticipant payload.id, payload.component, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
@@ -226,7 +226,7 @@ class Protocol
       id = "#{from}() #{fromPort.toUpperCase()} -> #{toPort.toUpperCase()} #{to}()"
       msg =
         id: id # FIXME: https://github.com/noflo/noflo-ui/issues/293
-        graph: 'default/main' # FIXME: unhardcode
+        graph: conn.graph or defaultGraph
         src:
           node: from
           port: fromPort
