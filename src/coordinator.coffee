@@ -67,7 +67,7 @@ waitForParticipant = (coordinator, role, callback) ->
 
   onTimeout = () =>
     return callback new Error "Waiting for participant #{role} timed out"
-  timeout = setTimeout onTimeout, 10000
+  timeout = setTimeout onTimeout, coordinator.options.waitTimeout*1000
 
   onParticipantAdded = (part) =>
     if part.role == role
@@ -89,6 +89,7 @@ class Coordinator extends EventEmitter
     @exported =
       inports: {}
       outports: {}
+    @options.waitTimeout = 40 if not @options.waitTimeout?
 
     @on 'participant', @checkParticipantConnections
 
