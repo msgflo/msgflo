@@ -226,7 +226,7 @@ class Protocol
       id = "#{from}() #{fromPort.toUpperCase()} -> #{toPort.toUpperCase()} #{to}()"
       msg =
         id: id # FIXME: https://github.com/noflo/noflo-ui/issues/293
-        graph: 'main' # FIXME: unhardcode
+        graph: 'default/main' # FIXME: unhardcode
         src:
           node: from
           port: fromPort
