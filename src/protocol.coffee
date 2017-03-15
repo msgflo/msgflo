@@ -128,14 +128,16 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
   else if sub == 'network' and cmd == 'edges'
     debug 'network:edges', payload.edges.length
 
-    # FIXME: also unsubscribe removed edges
     subscribeEdge = (edge, cb) ->
       proto.coordinator.subscribeConnection edge.src.node, edge.src.port, edge.tgt.node, edge.tgt.port, (err) ->
         return cb err
-    async.map payload.edges, subscribeEdge, (err) ->
+    proto.coordinator.clearSubscriptions (err) ->
       if err
-        return proto.transport.sendAll 'network', 'error', serializeErr(err) if err
-      proto.transport.sendAll 'network', 'edges', payload
+        return proto.transport.sendAll 'network', 'error', serializeErr(err)
+      async.map payload.edges, subscribeEdge, (err) ->
+        if err
+          return proto.transport.sendAll 'network', 'error', serializeErr(err)
+        proto.transport.sendAll 'network', 'edges', payload
 
   # Graph
   else if sub == 'graph'
