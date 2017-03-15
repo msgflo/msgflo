@@ -382,6 +382,13 @@ class Coordinator extends EventEmitter
     connection.graph = @graphName
     @emit 'connection-data', connection, data
 
+  clearSubscriptions: (callback) ->
+    @broker.listSubscriptions (err, subs) =>
+      return callback err if err
+      async.map subs, (sub, cb) =>
+        @broker.unsubscribeData sub, @_onConnectionData, cb
+      , callback
+
   subscribeConnection: (fromRole, fromPort, toRole, toPort, callback) ->
     waitForParticipant @, fromRole, (err) =>
       return callback err if err
