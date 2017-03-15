@@ -90,6 +90,7 @@ class Coordinator extends EventEmitter
       inports: {}
       outports: {}
     @options.waitTimeout = 40 if not @options.waitTimeout?
+    @graphName = null
 
     @on 'participant', @checkParticipantConnections
 
@@ -375,6 +376,7 @@ class Coordinator extends EventEmitter
   
   _onConnectionData: (binding, data) =>
     connection = connectionFromBinding @participants, binding
+    connection.graph = @graphName
     @emit 'connection-data', connection, data
 
   subscribeConnection: (fromRole, fromPort, toRole, toPort, callback) ->
