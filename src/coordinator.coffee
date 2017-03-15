@@ -67,7 +67,7 @@ waitForParticipant = (coordinator, role, callback) ->
 
   onTimeout = () =>
     return callback new Error "Waiting for participant #{role} timed out"
-  timeout = setTimeout onTimeout, 10000
+  timeout = setTimeout onTimeout, coordinator.options.waitTimeout*1000
 
   onParticipantAdded = (part) =>
     if part.role == role
@@ -89,6 +89,7 @@ class Coordinator extends EventEmitter
     @exported =
       inports: {}
       outports: {}
+    @options.waitTimeout = 40 if not @options.waitTimeout?
 
     @on 'participant', @checkParticipantConnections
 
@@ -431,6 +432,7 @@ class Coordinator extends EventEmitter
     return graph
 
   loadGraphFile: (path, opts, callback) ->
+    debug 'loadGraphFile', path
     options =
       graphfile: path
       libraryfile: @library.configfile
@@ -443,7 +445,7 @@ class Coordinator extends EventEmitter
     rolesWithComponent = []
     rolesNoComponent = []
     availableComponents = Object.keys @library.components
-    common.readGraph options.graphfile, (err, graph) ->
+    common.readGraph options.graphfile, (err, graph) =>
       return callback err if err
       for role, process of graph.processes
         if process.component in availableComponents
@@ -457,10 +459,26 @@ class Coordinator extends EventEmitter
 
       options.only = rolesWithComponent
 
-      setup.participants options, (err, proc) =>
-        return callback err if err
-        @processes = proc
-        setup.bindings options, callback
+      setupParticipants = (setupCallback) =>
+        participantStartConcurrency = 10
+        async.mapLimit options.only, participantStartConcurrency, (role, cb) =>
+          componentName = graph.processes[role].component
+          @startParticipant role, componentName, cb
+        , setupCallback
 
+      setupConnections = (setupCallback) =>
+        async.map graph.connections, (c, cb) =>
+          if c.data
+            @addInitial c.tgt.process, c.tgt.port, c.data, cb
+          else
+            @connect c.src.process, c.src.port, c.tgt.process, c.tgt.port, cb
+        , setupCallback
+
+      async.parallel
+        connections: setupParticipants
+        participants: setupConnections
+      , (err, results) ->
+        return callback err if err
+        return callback null
 
 exports.Coordinator = Coordinator
