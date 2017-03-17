@@ -5,8 +5,20 @@
     <description></description>
     <link>https://msgflo.org/</link>
     <language>en</language>
-    <lastBuildDate>Wed, 15 Mar 2017 13:31:22 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 17 Mar 2017 12:31:58 +0000</lastBuildDate>
     
+    <item>
+      <title>Bosch Connected Experience: Eclipse Hono and MsgFlo</title>
+      <description>
+</description>
+      <pubDate>Fri, 17 Mar 2017 00:00:00 +0000</pubDate>
+      
+      <link>http://bergie.iki.fi/blog/bosch-iot-msgflo/</link>
+      <guid isPermaLink="true">http://bergie.iki.fi/blog/bosch-iot-msgflo/</guid>
+      
+      <author></author>
+    </item>
+  
     <item>
       <title>Live programming IoT systems with MsgFlo+Flowhub</title>
       <description>
