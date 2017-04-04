@@ -2,6 +2,7 @@
 * April 6th, 2017
 * Barcelona, Spain
 * https://ti.to/blended/orchestrate-2017
+* Demo application. https://github.com/msgflo/msgflo-example-imageresize
 
 # Abstract
 
@@ -18,26 +19,73 @@ And then how to automatically scale the workers based on their amount of tasks, 
 
 ## Format
 
+Slides, with a demo split over two sections/sessions.
+
 ## Outline
 
+The problem: Building a performant, cost-effective cloud service that is scalable. 
+Solution: Use MsgFlo to separate work into dedicated workers communicating over RabbitMQ.
+Use GuvScale to automatically scale the different workers according to their loads.
+
+### Background
+10 minutes.
+
 * whoami
+* This talk.
 * Distributed system. Definition, characteristics.
 * Example problem/system
 * What to split to background workers.
 * ? Different communication approaches
 * How AMQP/RabbitMQ works
 * Why message queues/broker
-* What MsgFlo adds
-* Deploying live service, testing with some examples
+
+### MsgFlo
+10 minutes.
+
+* What is it
+* MsgFlo adds, what it does not.
+
+### Live demo
+10 minutes.
+
+* Deploying live service on Heroku
+* Testing with some examples
 * Opening in Flowhub?? Looking at data going through?
 * Killing the worker, processing resumes when up again
 * Overwhelming the service with requests, degrades performance
+
+### QA: Msgflo
+5-10 minutes
+
+### GuvScale
+10 minutes
+
+* What is it
 * Setting up GuvScale
+* Advantages over other autoscalers. Efficiency/utilization. Predictable performance.
+Kubernetes autoscale aims for 50% utilization by default.
+https://kubernetes.io/docs/user-guide/horizontal-pod-autoscaling/walkthrough/
 * Running tests again, now autoscaling to maintain perf
 
-The problem: Building a performant, cost-effective cloud service that is scalable. 
-Solution: Use MsgFlo to separate work into dedicated workers communicating over RabbitMQ.
-Use GuvScale to automatically scale the different workers according to their loads.
+### QA: GuvScale
+5-10 minutes
+
+
+Undecided
+
+* Msgflo best practices
+* GuvScale best practices
+* Common architecture patterns.
+Syncronous request/response.
+Different processors and merge.
+Routing for quality of service.
+* Flowhub. Visually. Can instrospect and live-program
+* Summarize each main section, key points
+* Summarize everything at the end
+
+Bonus
+
+* 
 
 ## Key points
 
@@ -63,6 +111,10 @@ Maybe just mention in brief
 
 
 ## TODO
+
+Complete demo app.
+
+### Bonus
 
 msgflo-nodejs, AMQP/RabbitMQ backend
 
