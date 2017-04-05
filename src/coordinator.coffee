@@ -464,7 +464,8 @@ class Coordinator extends EventEmitter
           rolesWithComponent.push role
         else
           rolesNoComponent.push role
-      console.log 'Skipping setup for participants without component available. Assuming already setup:'
+      if rolesNoComponent.length
+        console.log 'Skipping setup for participants without component available. Assuming already setup:'
       for role in rolesNoComponent
         componentName = graph.processes[role].component
         console.log "\t#{role}(#{componentName})"
