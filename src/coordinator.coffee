@@ -185,7 +185,7 @@ class Coordinator extends EventEmitter
     commands[node] = cmd
     options =
       broker: @options.broker
-      forward: '' # whether to forward subprocess communication
+      forward: @options.forward or ''
     setup.startProcesses commands, options, (err, processes) =>
       return callback err if err
       for k, v of processes
