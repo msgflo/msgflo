@@ -1,8 +1,12 @@
 
 * April 6th, 2017
 * Barcelona, Spain
-* https://ti.to/blended/orchestrate-2017
-* Demo application. https://github.com/msgflo/msgflo-example-imageresize
+* Website: https://ti.to/blended/orchestrate-2017
+
+# Presentation
+
+* Slides [PDF](./slides.pdf) | [ODP](./slides.odp)
+* Demo application: [msgflo-example-imageresize](https://github.com/msgflo/msgflo-example-imageresize)
 
 # Abstract
 
