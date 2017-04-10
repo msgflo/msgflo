@@ -19,7 +19,7 @@ body_class: feed
 <aside>
   <h2>{{ site.title }} Updates <a href="/rss.xml">RSS</a></h2>
   <ul>
-  {% for post in site.posts limit: 2 %}
+  {% for post in site.posts limit: 5 %}
     <li>
       {% if post.isBasedOnUrl %}
       <a href="{{ post.isBasedOnUrl }}">{{ post.title }}</a>
