@@ -470,7 +470,9 @@ class Coordinator extends EventEmitter
         componentName = graph.processes[role].component
         console.log "\t#{role}(#{componentName})"
 
-      options.only = rolesWithComponent
+      rolesToSetup = rolesWithComponent.concat([]).filter (r) ->
+        return r not in options.ignore
+      options.only = rolesToSetup
 
       setupParticipants = (setupCallback) =>
         participantStartConcurrency = 10
