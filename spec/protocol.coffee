@@ -90,6 +90,7 @@ describe 'FBP runtime protocol', () ->
             done()
           ui.connect options.port
       beforeEach (done) ->
+        return done() unless type is 'AMQP'
         # Ensure we start with clear fbp queue
         drain transports[type], 'fbp', done
       after (done) ->
