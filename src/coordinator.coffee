@@ -326,7 +326,7 @@ class Coordinator extends EventEmitter
   addInitial: (partId, portId, data, callback) ->
     id = iipId partId, portId
     @iips[id] = data
-    waitForParticipant @, partId, (err) ->
+    waitForParticipant @, partId, (err) =>
       return callback err if err
       if @started
         @sendTo partId, portId, data, (err) ->
