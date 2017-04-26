@@ -215,6 +215,7 @@ class Coordinator extends EventEmitter
     part = @participants[id] if not part?
 
     port = findPort part, 'inport', inport
+    return callback new Error "Cannot find inport #{inport}" if not port
     return @broker.sendTo 'inqueue', port.queue, message, callback
 
   subscribeTo: (participantId, outport, handler, callback) ->
