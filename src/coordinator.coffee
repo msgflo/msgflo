@@ -215,6 +215,7 @@ class Coordinator extends EventEmitter
     part = @participants[id] if not part?
 
     port = findPort part, 'inport', inport
+    return callback new Error "Cannot find inport #{inport}" if not port
     return @broker.sendTo 'inqueue', port.queue, message, callback
 
   subscribeTo: (participantId, outport, handler, callback) ->
@@ -326,7 +327,7 @@ class Coordinator extends EventEmitter
   addInitial: (partId, portId, data, callback) ->
     id = iipId partId, portId
     @iips[id] = data
-    waitForParticipant @, partId, (err) ->
+    waitForParticipant @, partId, (err) =>
       return callback err if err
       if @started
         @sendTo partId, portId, data, (err) ->
