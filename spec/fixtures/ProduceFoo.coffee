@@ -10,7 +10,6 @@ ProduceFoo = (client, role) ->
       type: 'number'
       description: 'time between each Foo (in milliseconds)'
       default: 0
-      hidden: true
     ]
     outports: [
       id: 'out'
