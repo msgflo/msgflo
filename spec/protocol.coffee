@@ -11,7 +11,6 @@ Runtime = require('../src/runtime').Runtime
 
 # Note: most require running an external broker service
 transports =
-  'direct': 'direct://broker1'
   'MQTT': 'mqtt://localhost'
   'AMQP': 'amqp://localhost'
 
