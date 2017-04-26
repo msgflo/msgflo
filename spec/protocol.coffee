@@ -83,17 +83,15 @@ describe 'FBP runtime protocol', () ->
         comp = fs.readFileSync(__dirname+'/fixtures/ProduceFoo.coffee', 'utf-8')
         comp = comp.replace /ProduceFoo/g, 'InitiallyAvailable'
         fs.writeFileSync path.join(options.componentdir,'InitiallyAvailable.coffee'), comp
-
+        runtime = new Runtime options
+        runtime.start (err, url) ->
+          chai.expect(err).to.not.exist
+          ui.once 'connected', () ->
+            done()
+          ui.connect options.port
+      beforeEach (done) ->
         # Ensure we start with clear fbp queue
-        drain transports[type], 'fbp', (err) ->
-          return done err if err
-
-          runtime = new Runtime options
-          runtime.start (err, url) ->
-            chai.expect(err).to.not.exist
-            ui.once 'connected', () ->
-              done()
-            ui.connect options.port
+        drain transports[type], 'fbp', done
       after (done) ->
         ui.once 'disconnected', () ->
           runtime.stop () ->
