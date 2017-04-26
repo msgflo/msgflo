@@ -8,6 +8,7 @@ path = require 'path'
 
 participants = require './fixtures/participants'
 Runtime = require('../src/runtime').Runtime
+drain = require('../src/utils/drain').drainQueue
 
 # Note: most require running an external broker service
 transports =
@@ -83,12 +84,16 @@ describe 'FBP runtime protocol', () ->
         comp = comp.replace /ProduceFoo/g, 'InitiallyAvailable'
         fs.writeFileSync path.join(options.componentdir,'InitiallyAvailable.coffee'), comp
 
-        runtime = new Runtime options
-        runtime.start (err, url) ->
-          chai.expect(err).to.not.exist
-          ui.once 'connected', () ->
-            done()
-          ui.connect options.port
+        # Ensure we start with clear fbp queue
+        drain transports[type], 'fbp', (err) ->
+          return done err if err
+
+          runtime = new Runtime options
+          runtime.start (err, url) ->
+            chai.expect(err).to.not.exist
+            ui.once 'connected', () ->
+              done()
+            ui.connect options.port
       after (done) ->
         ui.once 'disconnected', () ->
           runtime.stop () ->
