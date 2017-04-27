@@ -245,6 +245,7 @@ exports.normalizeOptions = normalize = (options) ->
   options.extrabindings = [] if not options.extrabindings
   options.discover = false if not options.discover?
   options.forever = false if not options.forever?
+  options.timeout = 10000 if not options.timeout?
 
   return options
 
