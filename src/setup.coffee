@@ -152,7 +152,7 @@ staticGraphBindings = (broker, graph, callback) ->
   return callback null, bindings
 
 # callbacks with bindings
-discoverParticipantQueues = (broker, graph, callback) ->
+discoverParticipantQueues = (broker, graph, options, callback) ->
   foundParticipantsByRole = {}
 
   broker = transport.getBroker broker if typeof broker == 'string'
@@ -188,7 +188,7 @@ discoverParticipantQueues = (broker, graph, callback) ->
       callback new Error 'setup: Participant discovery timed out'
       callback = null
       return
-    timeout = setTimeout onTimeout, 10000
+    timeout = setTimeout onTimeout, options.timeout
 
     broker.subscribeParticipantChange (msg) =>
       data = msg.data
@@ -255,7 +255,7 @@ exports.bindings = setupBindings = (options, callback) ->
   if options.discover
     # wait for FBP discovery messsages, use queues from there
     getBindings = (broker, graph, cb) ->
-      discoverParticipantQueues options.broker, graph, (err, defs) ->
+      discoverParticipantQueues options.broker, graph, options, (err, defs) ->
         return cb err if err
         #console.log 'got defs', definitions
         bindings = bindingsFromDefinitions graph, defs
@@ -297,6 +297,7 @@ exports.parse = parse = (args) ->
     .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
     .option('--forward [stderr,stdout]', 'Forward child process stdout and/or stderr', String, '')
     .option('--discover [BOOL]', 'Whether to wait for FBP discovery messages for queue info', Boolean, false)
+    .option('--timeout <SECONDS>', 'How long to wait for discovery messages', Number, 30)
     .option('--forever [BOOL]', 'Keep running until killed by signal', Boolean, false)
     .option('--shell [shell]', 'Run participant commands in a shell', String, '')
     .action (gr, env) ->
@@ -305,6 +306,7 @@ exports.parse = parse = (args) ->
 
   program.libraryfile = program.library
   program.graphfile = graph
+  program.timeout = program.timeout*1000
   return program
 
 exports.prettyFormatBindings = pretty = (bindings) ->
