@@ -68,7 +68,7 @@ describe 'FBP runtime protocol', () ->
     host: 'localhost'
     componentdir: 'spec/protocoltemp'
     config:
-      namespace: 'msgflo-protocol-test'
+      namespace: ''
       repository: 'git://github.com/msgflo/msgflo.git'
 
   before (done) ->
@@ -120,7 +120,7 @@ describe 'FBP runtime protocol', () ->
         chai.expect(info.capabilities).to.include "component:setsource"
     it 'namespace should match namespace from config', ->
       chai.expect(info.namespace).to.be.a 'string'
-      chai.expect(info.namespace).to.equal 'msgflo-protocol-test'
+      chai.expect(info.namespace).to.equal ''
     it 'repository should match repository from config', ->
       chai.expect(info.repository).to.be.a 'string'
       chai.expect(info.repository).to.contain 'git://'
