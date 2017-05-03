@@ -206,7 +206,7 @@ class Coordinator extends EventEmitter
     for k, v of @processes
       if k == node
         processes[k] = v
-    setup.killProcesses processes, 'SIGTERM', (err) ->
+    setup.killProcesses processes, 'SIGTERM', (err) =>
       return callback err
       for k, v of processes
         delete @process[k]
@@ -281,8 +281,6 @@ class Coordinator extends EventEmitter
         @emit 'graph-changed'
         @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
           return callback err
-
-    # TODO: introduce some "spying functionality" to provide edge messages, add tests
 
   disconnect: (fromId, fromPort, toId, toPort, callback) ->
     edgeId = connId fromId, fromPort, toId, toPort
