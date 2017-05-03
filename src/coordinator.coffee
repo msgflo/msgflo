@@ -88,7 +88,11 @@ class Coordinator extends EventEmitter
     @iips = {} # iipId -> value
     @started = false
     @processes = {}
-    @library = new library.Library { configfile: @options.library, componentdir: @options.componentdir }
+    libraryOptions =
+      configfile: @options.library
+      componentdir: @options.componentdir
+      config: @options.config
+    @library = new library.Library libraryOptions
     @exported =
       inports: {}
       outports: {}
@@ -96,6 +100,14 @@ class Coordinator extends EventEmitter
     @graphName = null
 
     @on 'participant', @checkParticipantConnections
+
+  clearGraph: (graphName, callback) ->
+    @connections = {}
+    @iips = {}
+    @graphName = graphName
+    # XXX: should we clear the @participants with the roles that we started?
+    setup.killProcesses @processes, 'SIGTERM', (err) =>
+      return callback err
 
   start: (callback) ->
     @library.load (err) =>
@@ -114,10 +126,10 @@ class Coordinator extends EventEmitter
         return callback null
 
   stop: (callback) ->
-    @started = false
-    @broker.disconnect (err) =>
-      return callback err if err
-      setup.killProcesses @processes, 'SIGTERM', callback
+    @clearGraph @graphName, (clearErr) =>
+      @broker.disconnect (err) =>
+        return callback clearErr if clearErr
+        return callback err
 
   handleFbpMessage: (data) ->
     if data.protocol == 'discovery' and data.command == 'participant'
@@ -198,7 +210,7 @@ class Coordinator extends EventEmitter
     for k, v of @processes
       if k == node
         processes[k] = v
-    setup.killProcesses processes, 'SIGTERM', (err) ->
+    setup.killProcesses processes, 'SIGTERM', (err) =>
       return callback err
       for k, v of processes
         delete @process[k]
@@ -273,8 +285,6 @@ class Coordinator extends EventEmitter
         @emit 'graph-changed'
         @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
           return callback err
-
-    # TODO: introduce some "spying functionality" to provide edge messages, add tests
 
   disconnect: (fromId, fromPort, toId, toPort, callback) ->
     edgeId = connId fromId, fromPort, toId, toPort

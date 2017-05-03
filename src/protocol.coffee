@@ -58,6 +58,10 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         'component:setsource'
       ]
       graph: defaultGraph
+
+    options = proto.coordinator.library.options
+    runtime.namespace = options.config.namespace if options.config?.namespace?
+    runtime.repository = options.config.repository if options.config?.repository?
     proto.transport.send 'runtime', 'runtime', runtime, ctx
 
   else if sub == 'runtime' and cmd == 'packet'
@@ -125,6 +129,13 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         graph: payload.graph
         time: new Date()
 
+  else if sub == 'network' and cmd == 'getstatus'
+    proto.transport.sendAll 'network', 'status',
+      running: proto.coordinator.started
+      started: proto.coordinator.started
+      graph: payload.graph
+      time: new Date()
+
   else if sub == 'network' and cmd == 'edges'
     debug 'network:edges', payload.edges.length
 
@@ -152,7 +163,9 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
 
   if cmd == 'clear'
     # FIXME: support multiple graphs
-    proto.coordinator.graphName = payload.id
+    proto.coordinator.clearGraph payload.id, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'clear', payload
   else if cmd == 'addnode'
     proto.coordinator.startParticipant payload.id, payload.component, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
