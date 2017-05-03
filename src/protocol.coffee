@@ -125,6 +125,13 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         graph: payload.graph
         time: new Date()
 
+  else if sub == 'network' and cmd == 'getstatus'
+    proto.transport.sendAll 'network', 'status',
+      running: proto.coordinator.started
+      started: proto.coordinator.started
+      graph: payload.graph
+      time: new Date()
+
   else if sub == 'network' and cmd == 'edges'
     debug 'network:edges', payload.edges.length
 
