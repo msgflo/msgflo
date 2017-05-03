@@ -69,6 +69,7 @@ describe 'FBP runtime protocol', () ->
     componentdir: 'spec/protocoltemp'
     config:
       namespace: 'msgflo-protocol-test'
+      repository: 'git://github.com/msgflo/msgflo.git'
 
   before (done) ->
     rmrf options.componentdir
@@ -104,7 +105,7 @@ describe 'FBP runtime protocol', () ->
     it 'protocol version should be "0.4"', ->
       chai.expect(info.version).to.be.a "string"
       chai.expect(info.version).to.equal "0.4"
-    describe 'capabilities"', ->
+    describe 'capabilities', ->
       it 'should be an array', ->
         chai.expect(info.capabilities).to.be.an "array"
       it 'should include "protocol:component"', ->
@@ -120,6 +121,10 @@ describe 'FBP runtime protocol', () ->
     it 'namespace should match namespace from config', ->
       chai.expect(info.namespace).to.be.a 'string'
       chai.expect(info.namespace).to.equal 'msgflo-protocol-test'
+    it 'repository should match repository from config', ->
+      chai.expect(info.repository).to.be.a 'string'
+      chai.expect(info.repository).to.contain 'git://'
+      chai.expect(info.repository).to.contain 'msgflo.git'
 
   describe 'participant queues already connected', ->
     # TODO: move IIP sending into Participant class?
