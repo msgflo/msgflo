@@ -97,6 +97,14 @@ class Coordinator extends EventEmitter
 
     @on 'participant', @checkParticipantConnections
 
+  clearGraph: (graphName, callback) ->
+    @connections = {}
+    @iips = {}
+    @graphName = graphName
+    # XXX: should we clear the @participants with the roles that we started?
+    setup.killProcesses @processes, 'SIGTERM', (err) =>
+      return callback err
+
   start: (callback) ->
     @library.load (err) =>
       return callback err if err
@@ -114,10 +122,10 @@ class Coordinator extends EventEmitter
         return callback null
 
   stop: (callback) ->
-    @started = false
-    @broker.disconnect (err) =>
-      return callback err if err
-      setup.killProcesses @processes, 'SIGTERM', callback
+    @clearGraph @graphName, (clearErr) =>
+      @broker.disconnect (err) =>
+        return callback clearErr if clearErr
+        return callback err
 
   handleFbpMessage: (data) ->
     if data.protocol == 'discovery' and data.command == 'participant'

@@ -152,7 +152,9 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
 
   if cmd == 'clear'
     # FIXME: support multiple graphs
-    proto.coordinator.graphName = payload.id
+    proto.coordinator.clearGraph payload.id, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'clear', payload
   else if cmd == 'addnode'
     proto.coordinator.startParticipant payload.id, payload.component, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
