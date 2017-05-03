@@ -260,7 +260,7 @@ describe 'FBP runtime protocol', () ->
     it 'node should not produce data anymore'
 
   describe 'adding a component', ->
-    componentName = 'foo/SetSource'
+    componentName = 'SetSource'
     componentCode = fs.readFileSync(__dirname+'/fixtures/ProduceFoo.coffee', 'utf-8')
 
     it 'should become available', (done) ->
@@ -272,7 +272,7 @@ describe 'FBP runtime protocol', () ->
         if command == 'source'
           # ACK
           chai.expect(protocol).to.equal 'component'
-          chai.expect(payload).to.include.keys ['name', 'code', 'language']
+          chai.expect(payload).to.include.keys ['name', 'code', 'language', 'library']
           chai.expect(payload.language).to.equal 'coffeescript'
           chai.expect(payload.code).to.include "component: 'ProduceFoo'"
           chai.expect(payload.code).to.include "module.exports = ProduceFoo"
@@ -282,7 +282,7 @@ describe 'FBP runtime protocol', () ->
           # New component
           chai.expect(protocol).to.equal 'component'
           chai.expect(payload).to.include.keys ['name', 'subgraph', 'inPorts', 'outPorts']
-          chai.expect(payload.name).to.equal 'SetSource'
+          chai.expect(payload.name).to.equal componentName
           receivedComponent = true
           console.log 'got Component'
         else
@@ -296,8 +296,8 @@ describe 'FBP runtime protocol', () ->
 
       source =
         name: componentName
+        library: options.config.namespace
         language: 'coffeescript'
-        library: undefined
         code: componentCode
       ui.send 'component', 'source', source
     
@@ -307,7 +307,7 @@ describe 'FBP runtime protocol', () ->
         chai.expect(command, JSON.stringify(payload)).to.equal 'source'
         chai.expect(protocol).to.equal 'component'
         chai.expect(payload).to.include.keys ['name', 'code', 'language']
-        chai.expect(payload.library).to.equal 'foo'
+        chai.expect(payload.library).to.equal options.config.namespace
         chai.expect(payload.name).to.equal 'SetSource'
         chai.expect(payload.language).to.equal 'coffeescript'
         chai.expect(payload.code).to.include "component: 'ProduceFoo'"
