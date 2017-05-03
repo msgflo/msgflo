@@ -88,7 +88,11 @@ class Coordinator extends EventEmitter
     @iips = {} # iipId -> value
     @started = false
     @processes = {}
-    @library = new library.Library { configfile: @options.library, componentdir: @options.componentdir }
+    libraryOptions =
+      configfile: @options.library
+      componentdir: @options.componentdir
+      config: @options.config
+    @library = new library.Library libraryOptions
     @exported =
       inports: {}
       outports: {}

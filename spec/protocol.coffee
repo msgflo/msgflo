@@ -67,6 +67,8 @@ describe 'FBP runtime protocol', () ->
     port: 3333
     host: 'localhost'
     componentdir: 'spec/protocoltemp'
+    config:
+      namespace: 'msgflo-protocol-test'
 
   before (done) ->
     rmrf options.componentdir
@@ -115,6 +117,9 @@ describe 'FBP runtime protocol', () ->
         chai.expect(info.capabilities).to.include "component:getsource"
       it 'should include "component:setsource"', ->
         chai.expect(info.capabilities).to.include "component:setsource"
+    it 'namespace should match namespace from config', ->
+      chai.expect(info.namespace).to.be.a 'string'
+      chai.expect(info.namespace).to.equal 'msgflo-protocol-test'
 
   describe 'participant queues already connected', ->
     # TODO: move IIP sending into Participant class?

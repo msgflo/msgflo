@@ -58,6 +58,9 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         'component:setsource'
       ]
       graph: defaultGraph
+
+    options = proto.coordinator.library.options
+    runtime.namespace = options.config.namespace if options?.config?.namespace?
     proto.transport.send 'runtime', 'runtime', runtime, ctx
 
   else if sub == 'runtime' and cmd == 'packet'
