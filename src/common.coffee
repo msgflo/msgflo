@@ -1,3 +1,4 @@
+uuid = require 'uuid'
 
 # Based on Underscore.js (MIT)
 # Returns a function, that, as long as it continues to be invoked, will not
@@ -66,6 +67,8 @@ exports.normalizeOptions = (options) ->
   options.broker = process.env['MSGFLO_BROKER'] if not options.broker
   options.broker = process.env['CLOUDAMQP_URL'] if not options.broker
   options.broker = 'amqp://localhost' if not options.broker
+  options.runtimeId = process.env['MSGFLO_RUNTIME_ID'] if not options.runtimeId
+  options.runtimeId = uuid.v4() if not options.runtimeId
   return options
 
 # Note: relies on convention
