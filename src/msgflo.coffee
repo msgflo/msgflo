@@ -21,6 +21,11 @@ main = () ->
     .option('--forward <stderr,stdout>', "Forward these streams from child", String, 'stderr,stdout')
     .option('--auto-save [true|false]', "Autosave changes to graph", Boolean, false)
     .option('--wait-timeout [true|false]', "How long to wait for participants", Number, 45)
+    .option('--runtime-id <UUID>', 'Unique identifier for this runtime instance', String, '')
+    .option('--ping-url <URL>', 'An URL that can be pinged periodically to signal aliveness',
+            String, 'https://api.flowhub.io/runtimes/$RUNTIME_ID')
+    .option('--ping-method <GET|POST>', 'HTTP method to hit ping URL with', String, 'POST')
+    .option('--ping-interval <seconds>', 'How often to hit the ping URL. Default=0=never', Number, 0)
     .parse(process.argv)
 
   options = common.normalizeOptions program

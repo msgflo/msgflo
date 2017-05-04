@@ -120,7 +120,7 @@ class Runtime
     address = scheme + @options.host + ':' + @options.port
 
   liveUrl: () ->
-    params = querystring.escape "protocol=websocket&address=#{@address()}"
+    params = querystring.escape "protocol=websocket&address=#{@address()}&id=#{@options.runtimeId}"
     url = "#{@options.ide}#runtime/endpoint?#{params}"
 
   serveFrontpage: (req, res) ->

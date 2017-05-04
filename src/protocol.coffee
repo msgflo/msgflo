@@ -48,6 +48,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
   if sub == 'runtime' and cmd == 'getruntime'
     runtime =
+      id: proto.coordinator.options.runtimeId
       type: 'msgflo'
       version: '0.4'
       capabilities: [

@@ -67,6 +67,7 @@ describe 'FBP runtime protocol', () ->
     port: 3333
     host: 'localhost'
     componentdir: 'spec/protocoltemp'
+    runtimeId: '1b4628d6-a2e0-4873-92ee-eb5c4e4b06f3'
     config:
       namespace: ''
       repository: 'git://github.com/msgflo/msgflo.git'
@@ -125,6 +126,9 @@ describe 'FBP runtime protocol', () ->
       chai.expect(info.repository).to.be.a 'string'
       chai.expect(info.repository).to.contain 'git://'
       chai.expect(info.repository).to.contain 'msgflo.git'
+    it 'runtime id should match options.runtimeId', ->
+      chai.expect(info.id).to.be.a 'string'
+      chai.expect(info.id).to.equal options.runtimeId
 
   describe 'participant queues already connected', ->
     # TODO: move IIP sending into Participant class?

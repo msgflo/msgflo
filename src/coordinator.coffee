@@ -4,6 +4,8 @@ EventEmitter = require('events').EventEmitter
 fs = require 'fs'
 path = require 'path'
 async = require 'async'
+https = require 'https'
+url = require 'url'
 
 setup = require './setup'
 library = require './library'
@@ -80,6 +82,18 @@ waitForParticipant = (coordinator, role, callback) ->
       return callback null
   coordinator.on 'participant-added', onParticipantAdded
 
+pingUrl = (address, method, callback) ->
+  u = url.parse address
+  u.port = 80 if u.protocol == 'http' and not u.port
+  u.method = method
+  u.timeout = 10*1000
+  req = https.request u, (res) ->
+    status = res.statusCode
+    return callback new Error "Ping #{method} #{address} failed with #{status}" if status != 200
+    return callback null
+  req.on 'error', (err) ->
+    return callback err
+  req.end()
 
 class Coordinator extends EventEmitter
   constructor: (@broker, @options = {}) ->
@@ -98,8 +112,9 @@ class Coordinator extends EventEmitter
       outports: {}
     @options.waitTimeout = 40 if not @options.waitTimeout?
     @graphName = null
-
     @on 'participant', @checkParticipantConnections
+
+    @alivePingInterval = null
 
   clearGraph: (graphName, callback) ->
     @connections = {}
@@ -123,6 +138,15 @@ class Coordinator extends EventEmitter
           @broker.ackMessage msg
         @started = true
         debug 'started', err, @started
+
+        alivePing = () =>
+          return if not @options.pingInterval
+          pingUrl @options.pingUrl, @options.pingMethod, (err) ->
+            return debug 'alive-ping-error', err if err
+            debug 'alive-ping-success'
+        @alivePingInterval = setInterval alivePing, @options.pingInterval*1000
+        alivePing()
+
         return callback null
 
   stop: (callback) ->
