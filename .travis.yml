@@ -24,6 +24,8 @@ before_script:
 script:
 - npm test
 - grunt jekyll:dist
+after_script:
+- killall mosquitto
 after_deploy:
 - eval "$(ssh-agent -s)" #start the ssh agent
 - git config --global user.email bot+msgflo@flowhub.io
