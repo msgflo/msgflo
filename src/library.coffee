@@ -159,7 +159,10 @@ class Library extends EventEmitter
     basename = name
     library = null
     if name.indexOf('/') isnt -1
+      # FBP protocol component:getsource unfortunately bakes in library in this case
       [library, basename] = name.split '/'
+    else if @options.config?.namespace?
+      library = @options.config?.namespace
     filename = path.join @options.componentdir, "#{basename}.#{ext}"
     fs.readFile filename, 'utf-8', (err, code) ->
       debug 'component source file', filename, lang, err
@@ -175,8 +178,10 @@ class Library extends EventEmitter
     debug 'adding component', name, language
     ext = languageExtensions[language]
     ext = ext or language  # default to input lang for open-ended extensibility
-    name = path.basename name # TODO: support multiple libraries?
-    filename = path.join @options.componentdir, "#{name}.#{ext}"
+    filename = path.join @options.componentdir, "#{path.basename(name)}.#{ext}"
+
+    if name.indexOf('/') == -1 and @options.config?.namespace
+      name = "#{@options.config.namespace}/#{name}"
 
     fs.writeFile filename, code, (err) =>
       return callback err if err
