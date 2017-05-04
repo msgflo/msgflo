@@ -83,11 +83,13 @@ componentsFromDirectory = (directory, config, callback) ->
 normalizeConfig = (config) ->
   config = {} if not config
   namespace = config.name or null
+  repository = config.repository
   if config.repository?.url
     # package.json convention
-    config.repository = config.repository.url
+    repository = config.repository.url
   config = config.msgflo if config.msgflo # Migth be under a .msgflo key, for instance in package.json
 
+  config.repository = repository if not config.repository?
   config.namespace = namespace if not config.namespace?
   config.components = {} if not config.components
   config.variables = {} if not config.variables
