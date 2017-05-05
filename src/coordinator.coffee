@@ -134,7 +134,7 @@ class Coordinator extends EventEmitter
           try
             @handleFbpMessage msg.data
           catch e
-            console.log 'Participant discovery failed:', e.message
+            console.error 'Participant discovery failed:', e.message, '\n', e.stack, '\n', JSON.stringify(msg.data, 2, null)
           @broker.ackMessage msg
         @started = true
         debug 'started', err, @started
@@ -308,7 +308,15 @@ class Coordinator extends EventEmitter
         @connections[edgeId].tgtQueue = findQueue @participants, toId, 'inports', toName
         edgeWithQueues = @connections[edgeId]
         @emit 'graph-changed'
-        @broker.addBinding {type: 'pubsub', src:edgeWithQueues.srcQueue, tgt:edgeWithQueues.tgtQueue}, (err) =>
+        binding =
+          type: 'pubsub'
+          src: edgeWithQueues.srcQueue
+          tgt: edgeWithQueues.tgtQueue
+        if not binding.src
+          return callback new Error "Source queue for connection #{fromId} #{fromPort} not found"
+        if not binding.tgt
+          return callback new Error "Target queue for connection #{toName} #{toPort} not found"
+        @broker.addBinding binding, (err) =>
           return callback err
 
   disconnect: (fromId, fromPort, toId, toPort, callback) ->

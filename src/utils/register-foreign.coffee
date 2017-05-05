@@ -32,8 +32,11 @@ main = ->
     catch e
       return onError e
 
+    if not definition.component
+      return onError new Error ".component is not defined"
     definition.role = program.role if program.role
-    definition.role = path.basename defPath, path.extname defPath unless definition.role
+    if not definition.role
+      return onError new Error ".role is not defined for component #{definition.component}"
     definition.id = definition.role if not definition.id
 
     definition = foreigner.mapPorts definition
