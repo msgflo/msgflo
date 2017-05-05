@@ -134,7 +134,7 @@ class Coordinator extends EventEmitter
           try
             @handleFbpMessage msg.data
           catch e
-            console.log 'Participant discovery failed:', e.message, '\n', e.stack
+            console.error 'Participant discovery failed:', e.message, '\n', e.stack, '\n', JSON.stringify(msg.data, 2, null)
           @broker.ackMessage msg
         @started = true
         debug 'started', err, @started
