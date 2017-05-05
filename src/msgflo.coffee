@@ -20,7 +20,7 @@ main = () ->
     .option('--ignore [process]', "Don't set up these processes", collectArray, [])
     .option('--forward <stderr,stdout>', "Forward these streams from child", String, 'stderr,stdout')
     .option('--auto-save [true|false]', "Autosave changes to graph", Boolean, false)
-    .option('--wait-timeout [true|false]', "How long to wait for participants", Number, 45)
+    .option('--wait-timeout <seconds>', "How long to wait for participants", Number, 45)
     .option('--runtime-id <UUID>', 'Unique identifier for this runtime instance', String, '')
     .option('--ping-url <URL>', 'An URL that can be pinged periodically to signal aliveness',
             String, 'https://api.flowhub.io/runtimes/$RUNTIME_ID')
