@@ -306,8 +306,9 @@ class Coordinator extends EventEmitter
         # TODO: support roundtrip
         @connections[edgeId].srcQueue = findQueue @participants, fromId, 'outports', fromPort
         @connections[edgeId].tgtQueue = findQueue @participants, toId, 'inports', toName
+        edgeWithQueues = @connections[edgeId]
         @emit 'graph-changed'
-        @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
+        @broker.addBinding {type: 'pubsub', src:edgeWithQueues.srcQueue, tgt:edgeWithQueues.tgtQueue}, (err) =>
           return callback err
 
   disconnect: (fromId, fromPort, toId, toPort, callback) ->
