@@ -122,6 +122,7 @@ class Coordinator extends EventEmitter
     @graphName = graphName
     # XXX: should we clear the @participants with the roles that we started?
     setup.killProcesses @processes, 'SIGTERM', (err) =>
+      @processes = {}
       return callback err
 
   start: (callback) ->
