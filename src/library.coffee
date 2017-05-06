@@ -10,7 +10,7 @@ defaultHandlers =
   ".yml":     "msgflo-register-foreign --forever=true --role #ROLE #FILENAME"
   ".js":      "msgflo-nodejs --name #ROLE #FILENAME"
   ".coffee":  "msgflo-nodejs --name #ROLE #FILENAME"
-  ".py":  "msgflo-python #FILENAME #ROLE"
+  ".py":      "msgflo-python #FILENAME #ROLE --iips #IIPS"
   ".json":    "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
   ".fbp":     "noflo-runtime-msgflo --name #ROLE --graph #COMPONENT --iips #IIPS"
 
