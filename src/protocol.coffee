@@ -101,7 +101,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       # Regular component
       proto.coordinator.getComponentSource payload.name, (err, source) ->
         if err
-          proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
+          proto.transport.send 'component', 'error', { message: "#{payload.name} #{err.message}", name: payload.name, error: err.message }, ctx
           return
         proto.transport.send 'component', 'source', source, ctx
 
