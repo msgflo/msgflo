@@ -44,6 +44,7 @@
     "msgflo": "./bin/msgflo",
     "msgflo-jobstats-newrelic": "./bin/msgflo-jobstats-newrelic",
     "msgflo-register-foreign": "./bin/msgflo-register-foreign",
+    "msgflo-register": "./bin/msgflo-register",
     "msgflo-dump-message": "./bin/msgflo-dump-message",
     "msgflo-send-message": "./bin/msgflo-send-message",
     "msgflo-procfile": "./bin/msgflo-procfile",

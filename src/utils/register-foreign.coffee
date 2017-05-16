@@ -23,6 +23,8 @@ main = ->
     .parse(process.argv)
   program = common.normalizeOptions program
 
+  console.error "DEPRECATED: Instead use msgflo-register --role A:./filename.yaml - which also supports multiple roles"
+
   defPath = path.resolve process.cwd(), program.args[0]
   fs.readFile defPath, 'utf-8', (err, contents) ->
     return onError err if err

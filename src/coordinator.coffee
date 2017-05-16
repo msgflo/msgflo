@@ -212,6 +212,9 @@ class Coordinator extends EventEmitter
     return @library.getSource component, callback
 
   startParticipant: (node, component, callback) ->
+    if @options.ignore?.length and node in @options.ignore
+      console.log "WARNING: Not restarting ignored participant #{node}"
+      return callback null
     if not @library.components[component]?.command
       console.log "WARNING: Attempting to start participant with missing component: #{node}(#{component})"
       # XXX: should be an error, but Flowhub does this in project mode..

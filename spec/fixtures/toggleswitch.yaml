@@ -1,0 +1,10 @@
+component: 'my/ToggleSwitch'
+icon: 'file-word-o'
+label: 'A toggle switch which can turn things on or off'
+inports: []
+outports:
+-
+  id: 'state'
+  type: 'boolean'
+  description: 'ff'
+  queue: '/myswitch/#ROLE/status'
