@@ -101,20 +101,20 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       # Regular component
       proto.coordinator.getComponentSource payload.name, (err, source) ->
         if err
-          proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
+          proto.transport.send 'component', 'error', serializeErr(err), ctx
           return
         proto.transport.send 'component', 'source', source, ctx
 
   else if sub == 'component' and cmd == 'source'
     p = payload
     proto.coordinator.addComponent p.name, p.language, p.code, (err) ->
-      return proto.transport.send 'component', 'error', err, ctx if err
+      return proto.transport.send 'component', 'error', serializeErr(err), ctx if err
       return proto.transport.sendAll 'component', 'source', payload
 
   # Network
   else if sub == 'network' and cmd == 'start'
     proto.coordinator.startNetwork payload.graph, (err) ->
-      return proto.transport.sendAll 'network', 'error', err if err
+      return proto.transport.sendAll 'network', 'error', serializeErr(err) if err
       proto.transport.sendAll 'network', 'started',
         running: true
         started: true
@@ -123,7 +123,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
   else if sub == 'network' and cmd == 'stop'
     proto.coordinator.stopNetwork payload.graph, (err) ->
-      return proto.transport.sendAll 'network', 'error', err if err
+      return proto.transport.sendAll 'network', 'error', serializeErr(err) if err
       proto.transport.sendAll 'network', 'stopped',
         running: false
         started: true
