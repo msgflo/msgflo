@@ -73,7 +73,7 @@ ga('create', 'UA-46363984-7', 'auto');
     <h1>Non-MsgFlo-aware participants</h1>
     
     <p>MsgFlo can work with existing code that uses a supported message-queues system (AMQP, MQTT).
-Because the code is not MsgFlo-aware, another process needs to send the MsgFlo discovery
+Because the existing code is not MsgFlo-aware, another process needs to send the MsgFlo discovery
 message on its behalf.</p>
 
 <p>For instance if we had a system that takes data on a queue named <code class="highlighter-rouge">process/A/in</code>,
@@ -95,9 +95,9 @@ the information can be declared in a <a href="https://en.wikipedia.org/wiki/YAML
 </code></pre>
 </div>
 
-<p>And then run <code class="highlighter-rouge">msgflo-register-foreign</code> to publish the information</p>
+<p>And then run <code class="highlighter-rouge">msgflo-register</code> to publish the information</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-register-foreign participants/ProcessSomething.yaml
+<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-register --role A:./participants/ProcessSomething.yaml
 </code></pre>
 </div>
 
