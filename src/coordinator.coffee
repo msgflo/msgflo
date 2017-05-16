@@ -212,7 +212,7 @@ class Coordinator extends EventEmitter
     return @library.getSource component, callback
 
   startParticipant: (node, component, callback) ->
-    if node in @options.ignore
+    if @options.ignore?.length and node in @options.ignore
       console.log "WARNING: Not restarting ignored participant #{node}"
       return callback null
     if not @library.components[component]?.command
