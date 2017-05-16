@@ -24,7 +24,7 @@ main = ->
     .option('--broker <uri>', 'Broker address', String, '')
     .option('--roles <role:definition>', 'Map of roles and definition files', collectMap, {})
     .option('--interval <SECONDS>', 'How often to send discovery message', Number, 60)
-    .option('--forever <true>', 'Keep running forever', Boolean, false)
+    .option('--forever <true>', 'Keep running forever', Boolean, true)
     .usage('[options]')
     .parse(process.argv)
   program = common.normalizeOptions program
