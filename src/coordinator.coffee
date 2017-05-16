@@ -486,6 +486,17 @@ class Coordinator extends EventEmitter
           port: parts[3]
       graph.connections.push edge
 
+    iipIds = Object.keys(@iips).sort()
+    for id in iipIds
+      iip = @iips[id]
+      parts = fromIipId id
+      edge =
+        data: iip
+        tgt:
+          process: parts[0]
+          port: parts[1]
+      graph.connections.push edge
+
     return graph
 
   loadGraphFile: (path, opts, callback) ->
