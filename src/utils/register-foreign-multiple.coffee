@@ -55,7 +55,6 @@ main = ->
           Promise.resolve definition
   .then (definitions) ->
     onComplete() unless program.forever
-    console.log '--forever enabled'
     setInterval ->
       Promise.map definitions, (definition) ->
         register messaging, definition
