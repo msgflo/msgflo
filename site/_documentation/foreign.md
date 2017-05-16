@@ -2,7 +2,7 @@
 title: Non-MsgFlo-aware participants
 ---
 MsgFlo can work with existing code that uses a supported message-queues system (AMQP, MQTT).
-Because the code is not MsgFlo-aware, another process needs to send the MsgFlo discovery
+Because the existing code is not MsgFlo-aware, another process needs to send the MsgFlo discovery
 message on its behalf.
 
 For instance if we had a system that takes data on a queue named `process/A/in`,
@@ -24,9 +24,9 @@ outports:
     type: string
 ```
 
-And then run `msgflo-register-foreign` to publish the information
+And then run `msgflo-register` to publish the information
 
-    msgflo-register-foreign participants/ProcessSomething.yaml
+    msgflo-register --role A:./participants/ProcessSomething.yaml
 
 The `queue` key supports substituting `#ROLE`. This allows a single YAML file to declare a component
 which can be instantiated multiple times - each with a different role and queue name.
