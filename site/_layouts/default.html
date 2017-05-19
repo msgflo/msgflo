@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>{{ site.title }} | {{ page.title }}</title>
+    <link rel="stylesheet" href="/stylesheets/flo.css">
+    <link rel="stylesheet" href="/stylesheets/zenburn.css">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="alternate" type="application/rss+xml" href="/rss.xml" title="{{ site.title }} Updates">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="{{ site.color_prime }}">
+    {% include analytics.html %}
+  </head>
+  <body{% if layout.body_class %} class="{{ layout.body_class }}"{% endif %}>
+    {% include nav-main.html %}
+    {{ content }}
+  </body>
+</html>

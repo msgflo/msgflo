@@ -67,11 +67,19 @@ describe 'FBP runtime protocol', () ->
     port: 3333
     host: 'localhost'
     componentdir: 'spec/protocoltemp'
+    runtimeId: '1b4628d6-a2e0-4873-92ee-eb5c4e4b06f3'
+    config:
+      namespace: ''
+      repository: 'git://github.com/msgflo/msgflo.git'
 
   before (done) ->
     rmrf options.componentdir
     fs.rmdirSync options.componentdir if fs.existsSync options.componentdir
     fs.mkdirSync options.componentdir
+    comp = fs.readFileSync(__dirname+'/fixtures/ProduceFoo.coffee', 'utf-8')
+    comp = comp.replace /ProduceFoo/g, 'InitiallyAvailable'
+    fs.writeFileSync path.join(options.componentdir,'InitiallyAvailable.coffee'), comp
+
     runtime = new Runtime options
     runtime.start (err, url) ->
       chai.expect(err).to.not.exist
@@ -98,7 +106,7 @@ describe 'FBP runtime protocol', () ->
     it 'protocol version should be "0.4"', ->
       chai.expect(info.version).to.be.a "string"
       chai.expect(info.version).to.equal "0.4"
-    describe 'capabilities"', ->
+    describe 'capabilities', ->
       it 'should be an array', ->
         chai.expect(info.capabilities).to.be.an "array"
       it 'should include "protocol:component"', ->
@@ -111,6 +119,16 @@ describe 'FBP runtime protocol', () ->
         chai.expect(info.capabilities).to.include "component:getsource"
       it 'should include "component:setsource"', ->
         chai.expect(info.capabilities).to.include "component:setsource"
+    it 'namespace should match namespace from config', ->
+      chai.expect(info.namespace).to.be.a 'string'
+      chai.expect(info.namespace).to.equal ''
+    it 'repository should match repository from config', ->
+      chai.expect(info.repository).to.be.a 'string'
+      chai.expect(info.repository).to.contain 'git://'
+      chai.expect(info.repository).to.contain 'msgflo.git'
+    it 'runtime id should match options.runtimeId', ->
+      chai.expect(info.id).to.be.a 'string'
+      chai.expect(info.id).to.equal options.runtimeId
 
   describe 'participant queues already connected', ->
     # TODO: move IIP sending into Participant class?
@@ -246,7 +264,7 @@ describe 'FBP runtime protocol', () ->
     it 'node should not produce data anymore'
 
   describe 'adding a component', ->
-    componentName = 'foo/SetSource'
+    componentName = 'SetSource'
     componentCode = fs.readFileSync(__dirname+'/fixtures/ProduceFoo.coffee', 'utf-8')
 
     it 'should become available', (done) ->
@@ -258,7 +276,7 @@ describe 'FBP runtime protocol', () ->
         if command == 'source'
           # ACK
           chai.expect(protocol).to.equal 'component'
-          chai.expect(payload).to.include.keys ['name', 'code', 'language']
+          chai.expect(payload).to.include.keys ['name', 'code', 'language', 'library']
           chai.expect(payload.language).to.equal 'coffeescript'
           chai.expect(payload.code).to.include "component: 'ProduceFoo'"
           chai.expect(payload.code).to.include "module.exports = ProduceFoo"
@@ -268,7 +286,7 @@ describe 'FBP runtime protocol', () ->
           # New component
           chai.expect(protocol).to.equal 'component'
           chai.expect(payload).to.include.keys ['name', 'subgraph', 'inPorts', 'outPorts']
-          chai.expect(payload.name).to.equal 'SetSource'
+          chai.expect(payload.name).to.equal componentName
           receivedComponent = true
           console.log 'got Component'
         else
@@ -282,8 +300,8 @@ describe 'FBP runtime protocol', () ->
 
       source =
         name: componentName
+        library: options.config.namespace
         language: 'coffeescript'
-        library: undefined
         code: componentCode
       ui.send 'component', 'source', source
     
@@ -293,7 +311,8 @@ describe 'FBP runtime protocol', () ->
         chai.expect(command, JSON.stringify(payload)).to.equal 'source'
         chai.expect(protocol).to.equal 'component'
         chai.expect(payload).to.include.keys ['name', 'code', 'language']
-        chai.expect(payload.name).to.equal componentName
+        chai.expect(payload.library).to.equal options.config.namespace
+        chai.expect(payload.name).to.equal 'SetSource'
         chai.expect(payload.language).to.equal 'coffeescript'
         chai.expect(payload.code).to.include "component: 'ProduceFoo'"
         chai.expect(payload.code).to.include "module.exports = ProduceFoo"
@@ -321,3 +340,83 @@ describe 'FBP runtime protocol', () ->
         component: componentName
       ui.send 'graph', 'addnode', add
 
+  describe 'subscribing to edges', ->
+    repeatA = null
+    repeatB = null
+    before (done) ->
+      # TODO: use addnode to setup instead
+      repeatA = participants.Repeat options.broker, 'edgedata-repeat-A'
+      repeatA.start (err) ->
+        return done err if err
+        repeatB = participants.Repeat options.broker, 'edgedata-repeat-B'
+        return repeatB.start done
+    after (done) ->
+      repeatA.stop (err) ->
+        return repeatB.stop done
+
+    it 'should emit data flowing through network', (done) ->
+      edge =
+        src: { node: 'edgedata-repeat-A', port: 'out' }
+        tgt: { node: 'edgedata-repeat-B', port: 'in' }
+      ui.send 'graph', 'addedge', edge
+      indata =
+        foo: 'subscribe-edge-11'
+      onNetwork = (d, protocol, command, payload) ->
+        chai.expect(payload).to.be.a 'object'
+        if command == 'edges'
+          repeatA.send 'in', indata
+        else if command == 'data'
+          chai.expect(payload.src).to.eql edge.src
+          chai.expect(payload.tgt).to.eql edge.tgt
+          chai.expect(payload.data).to.eql indata
+          ui.removeListener 'network', onNetwork
+          return done null
+      ui.on 'message', onNetwork
+      subscribe =
+        edges: [ edge ]
+      ui.send 'network', 'edges', subscribe
+
+  describe 'adding an node and immediately a IIP', ->
+    # stresses the case where we probably don't have complete information about the added node yet
+    # as the discovery message will take a bit of time.
+    # When using Flowhub in project mode this is a likely case to happen. Probably also fbp-spec
+    responses = []
+    componentName = 'InitiallyAvailable'
+
+    before (done) ->
+      @timeout 10*1000
+      checkMessage = (d, protocol, command, payload) ->
+        return if command == 'component' # Ignore component update coming from instantiating
+        responses.push
+          protocol: protocol
+          command: command
+          payload: payload
+        expected = responses.filter (r) -> r.command in ['addinitial', 'addnode']
+        if expected.length >= 2
+          ui.removeListener 'message', checkMessage
+          done()
+      ui.on 'message', checkMessage
+
+      node =
+        id: 'iip-target'
+        graph: 'default/main'
+        component: componentName
+      initial =
+        tgt: { node: node.id, port: 'interval' },
+        src: { data: 0 }
+      ui.send 'graph', 'addnode', node
+      ui.send 'graph', 'addinitial', initial
+
+    it 'should have one addnode response', ->
+      addnodes = responses.filter (r) -> r.protocol == 'graph' and r.command == 'addnode'
+      chai.expect(addnodes, JSON.stringify(responses)).to.have.length 1
+      addnode = addnodes[0].payload
+      chai.expect(addnode).to.include.keys ['id', 'graph', 'component']
+    it 'should have one addinitial response', ->
+      addinitials = responses.filter (r) -> r.protocol == 'graph' and r.command == 'addinitial'
+      chai.expect(addinitials, JSON.stringify(responses)).to.have.length 1
+      addinitial = addinitials[0].payload
+      chai.expect(addinitial).to.include.keys ['tgt', 'src']
+      chai.expect(addinitial.tgt).to.include.keys ['node', 'port']
+      chai.expect(addinitial.tgt.node).to.equal 'iip-target'
+      chai.expect(addinitial.tgt.port).to.equal 'interval'

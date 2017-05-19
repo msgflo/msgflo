@@ -7,7 +7,7 @@ EventEmitter = require('events').EventEmitter
 common = require './common'
 
 defaultHandlers =
-  ".yml":     "msgflo-register-foreign --forever=true --role #ROLE #FILENAME"
+  ".yml":     "msgflo-register --role #ROLE:#FILENAME"
   ".js":      "msgflo-nodejs --name #ROLE #FILENAME"
   ".coffee":  "msgflo-nodejs --name #ROLE #FILENAME"
   ".py":  "msgflo-python #FILENAME #ROLE"
@@ -21,7 +21,7 @@ languageExtensions =
   'yaml': 'yml'
 extensionToLanguage = {}
 for lang, ext of languageExtensions
-  extensionToLanguage[ext] = lang
+  extensionToLanguage[".#{ext}"] = lang
 
 replaceMarker = (str, marker, value) ->
   marker = '#'+marker.toUpperCase()
@@ -70,6 +70,8 @@ componentsFromDirectory = (directory, config, callback) ->
         ext = path.extname filename
         lang = extensionToLanguage[ext]
         component = path.basename(filename, ext)
+        if config.namespace
+          component = "#{config.namespace}/#{component}"
         debug 'loading component from file', filename, component
         filepath = path.join directory, filename
         components[component] =
@@ -80,8 +82,15 @@ componentsFromDirectory = (directory, config, callback) ->
 
 normalizeConfig = (config) ->
   config = {} if not config
+  namespace = config.name or null
+  repository = config.repository
+  if config.repository?.url
+    # package.json convention
+    repository = config.repository.url
   config = config.msgflo if config.msgflo # Migth be under a .msgflo key, for instance in package.json
 
+  config.repository = repository if not config.repository?
+  config.namespace = namespace if not config.namespace?
   config.components = {} if not config.components
   config.variables = {} if not config.variables
   config.handlers = {} if not config.handlers
@@ -100,19 +109,31 @@ class Library extends EventEmitter
 
     @components = {} # "name" -> { command: "", language: ''|null }.  lazy-loaded using load()
 
+  getComponent: (name) ->
+    # Direct match
+    return @components[name] if @components[name]
+    withoutNamespace = path.basename name
+    return @components[withoutNamespace] if @components[withoutNamespace]
+    if name.indexOf '/' == -1 and @options.config.namespace
+      withNamespace = @options.config.namespace + '/' + name
+      return @components[withNamespace] if @components[withNamespace]
+    return null
+
   _updateComponents: (components) ->
     names = Object.keys components
     for name, comp of components
       if not comp
         # removed
         @components[name] = null
-      else if not @components[name]
+        continue
+      existing = @getComponent name
+      unless existing
         # added
         @components[name] = comp
-      else
-        # update
-        for k, v of comp
-          @components[name][k] = v
+        continue
+      # update
+      for k, v of comp
+        existing[k] = v
 
     @emit 'components-changed', names, @components
 
@@ -133,25 +154,36 @@ class Library extends EventEmitter
 
   getSource: (name, callback) ->
     debug 'requesting component source', name
-    name = path.basename name # TODO: support multiple libraries?
-    return callback new Error "Component not found for #{name}" if not @components[name]?
-    lang = @components[name].language
+    component = @getComponent name
+    return callback new Error "Component not found for #{name}" unless component
+    lang = component.language
     ext = languageExtensions[lang]
-    filename = path.join @options.componentdir, "#{name}.#{ext}"
+    basename = name
+    library = null
+    if name.indexOf('/') isnt -1
+      # FBP protocol component:getsource unfortunately bakes in library in this case
+      [library, basename] = name.split '/'
+    else if @options.config?.namespace?
+      library = @options.config?.namespace
+    filename = path.join @options.componentdir, "#{basename}.#{ext}"
     fs.readFile filename, 'utf-8', (err, code) ->
       debug 'component source file', filename, lang, err
       return callback new Error "Could not find component source for #{name}" if err
       source =
-        language: 'coffeescript' # FIXME don't hardcode
+        name: basename
+        library: library
         code: code
+        language: component.language
       return callback null, source
 
   addComponent: (name, language, code, callback) ->
     debug 'adding component', name, language
     ext = languageExtensions[language]
     ext = ext or language  # default to input lang for open-ended extensibility
-    name = path.basename name # TODO: support multiple libraries?
-    filename = path.join @options.componentdir, "#{name}.#{ext}"
+    filename = path.join @options.componentdir, "#{path.basename(name)}.#{ext}"
+
+    if name.indexOf('/') == -1 and @options.config?.namespace
+      name = "#{@options.config.namespace}/#{name}"
 
     fs.writeFile filename, code, (err) =>
       return callback err if err
@@ -163,9 +195,7 @@ class Library extends EventEmitter
       return callback null
 
   componentCommand: (component, role, iips={}) ->
-    cmd = @components[component]?.command
-    componentName = path.basename component
-    cmd = @components[componentName]?.command if not cmd
+    cmd = @getComponent(component)?.command
     throw new Error "No component #{component} defined for role #{role}" if not cmd
 
     vars =

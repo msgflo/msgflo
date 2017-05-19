@@ -4,6 +4,7 @@
 
 debug = require('debug')('msgflo:fbp')
 EventEmitter = require('events').EventEmitter
+async = require 'async'
 
 fbpPort = (port) ->
   m =
@@ -19,7 +20,7 @@ fbpComponentFromMsgflo = (name, component) ->
     # full info available
     info =
       name: name
-      description: component.label or component.cmd or ""
+      description: component.definition.label or component.cmd or ""
       icon: component.definition.icon
       subgraph: false
       inPorts: component.definition.inports.map fbpPort
@@ -40,13 +41,14 @@ fbpComponentFromMsgflo = (name, component) ->
 serializeErr = (err) ->
   return { message: err.message }
 
+defaultGraph = 'default/main'
+
 handleMessage = (proto, sub, cmd, payload, ctx) ->
   debug 'RECV:', sub, cmd, payload
 
-  defaultGraph = 'default/main'
-
   if sub == 'runtime' and cmd == 'getruntime'
     runtime =
+      id: proto.coordinator.options.runtimeId
       type: 'msgflo'
       version: '0.4'
       capabilities: [
@@ -57,6 +59,10 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
         'component:setsource'
       ]
       graph: defaultGraph
+
+    options = proto.coordinator.library.options
+    runtime.namespace = options.config.namespace if options.config?.namespace?
+    runtime.repository = options.config.repository if options.config?.repository?
     proto.transport.send 'runtime', 'runtime', runtime, ctx
 
   else if sub == 'runtime' and cmd == 'packet'
@@ -80,7 +86,6 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     debug 'sent components', components.length
 
   else if sub == 'component' and cmd == 'getsource'
-
     sendMainGraphSource = () ->
       graph = proto.coordinator.serializeGraph 'main'
       resp =
@@ -96,24 +101,20 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       # Regular component
       proto.coordinator.getComponentSource payload.name, (err, source) ->
         if err
-          # return empty component response, as clients handle errors badly...
-          source =
-            language: 'javascript'
-            code: ""
-          proto.transport.send 'component', 'error', { name: payload.name, error: err.message }, ctx
-        source.name = payload.name
+          proto.transport.send 'component', 'error', serializeErr(err), ctx
+          return
         proto.transport.send 'component', 'source', source, ctx
 
   else if sub == 'component' and cmd == 'source'
     p = payload
     proto.coordinator.addComponent p.name, p.language, p.code, (err) ->
-      return proto.transport.send 'component', 'error', err, ctx if err
+      return proto.transport.send 'component', 'error', serializeErr(err), ctx if err
       return proto.transport.sendAll 'component', 'source', payload
 
   # Network
   else if sub == 'network' and cmd == 'start'
     proto.coordinator.startNetwork payload.graph, (err) ->
-      return proto.transport.sendAll 'network', 'error', err if err
+      return proto.transport.sendAll 'network', 'error', serializeErr(err) if err
       proto.transport.sendAll 'network', 'started',
         running: true
         started: true
@@ -122,12 +123,33 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
 
   else if sub == 'network' and cmd == 'stop'
     proto.coordinator.stopNetwork payload.graph, (err) ->
-      return proto.transport.sendAll 'network', 'error', err if err
+      return proto.transport.sendAll 'network', 'error', serializeErr(err) if err
       proto.transport.sendAll 'network', 'stopped',
         running: false
         started: true
         graph: payload.graph
         time: new Date()
+
+  else if sub == 'network' and cmd == 'getstatus'
+    proto.transport.sendAll 'network', 'status',
+      running: proto.coordinator.started
+      started: proto.coordinator.started
+      graph: payload.graph
+      time: new Date()
+
+  else if sub == 'network' and cmd == 'edges'
+    debug 'network:edges', payload.edges.length
+
+    subscribeEdge = (edge, cb) ->
+      proto.coordinator.subscribeConnection edge.src.node, edge.src.port, edge.tgt.node, edge.tgt.port, (err) ->
+        return cb err
+    proto.coordinator.clearSubscriptions (err) ->
+      if err
+        return proto.transport.sendAll 'network', 'error', serializeErr(err)
+      async.map payload.edges, subscribeEdge, (err) ->
+        if err
+          return proto.transport.sendAll 'network', 'error', serializeErr(err)
+        proto.transport.sendAll 'network', 'edges', payload
 
   # Graph
   else if sub == 'graph'
@@ -142,6 +164,9 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
 
   if cmd == 'clear'
     # FIXME: support multiple graphs
+    proto.coordinator.clearGraph payload.id, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'clear', payload
   else if cmd == 'addnode'
     proto.coordinator.startParticipant payload.id, payload.component, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
@@ -166,8 +191,9 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
 
   # IIPs
   else if cmd == 'addinitial'
-    proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data
-    proto.transport.sendAll 'graph', 'addinitial', payload
+    proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'addinitial', payload
   else if cmd == 'removeinitial'
     proto.coordinator.removeInitial payload.tgt.node, payload.tgt.port
     proto.transport.sendAll 'graph', 'removeinitial', payload
@@ -206,13 +232,17 @@ class Protocol
         info = fbpComponentFromMsgflo name, component
         @transport.sendAll 'component', 'component', info
 
-    @coordinator.on 'data', (from, fromPort, to, toPort, data) =>
+    @coordinator.on 'connection-data', (conn, data) =>
+      from = conn.src.node
+      fromPort = conn.src.port
+      to = conn.tgt.node
+      toPort = conn.tgt.port
       debug 'on data', from, fromPort, data
 
       id = "#{from}() #{fromPort.toUpperCase()} -> #{toPort.toUpperCase()} #{to}()"
       msg =
         id: id # FIXME: https://github.com/noflo/noflo-ui/issues/293
-        graph: 'default/main' # FIXME: unhardcode
+        graph: conn.graph or defaultGraph
         src:
           node: from
           port: fromPort

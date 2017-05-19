@@ -1,0 +1,333 @@
+---
+---
+@import "typography";
+@import "color";
+
+$mobile: "(max-width: 750px)";
+$tablet: "(max-width: 950px)";
+
+body {
+  font-family: $text-font;
+  background-color: $color-box;
+  color: $color-text;
+  margin: 0;
+  padding: 0;
+  padding-bottom: 72px;
+}
+body.feed {
+  header {
+    margin-top: 72px;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    min-height: 24em;
+    justify-content: center;
+    {% if site.cover %}
+    position: relative;
+    background-color: rgba(lighten($color-prime, 20%), 0.5);
+    margin-bottom: 36px;
+    &:before {
+      content: ' ';
+      position: absolute;
+      background-color: $color-prime;
+      background-image: url('{{ site.cover }}');
+      background-size: cover;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    {% endif %}
+    img.logo {
+      max-width: 40vw;
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h1 {
+      font-size: 3em;
+      font-weight: normal;
+      max-width: 80vw;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    h2 {
+      font-weight: normal;
+      max-width: 80vw;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  }
+  article {
+    max-width: 50em;
+    margin-left: auto;
+    margin-right: auto;
+    @media #{$mobile} {
+      width: 90vw;
+    }
+  }
+  aside {
+    text-align: center;
+    max-width: 50em;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: $color-meta;
+    padding: 18px;
+    box-sizing: border-box;
+    color: $color-text;
+    @media #{$mobile} {
+      width: 90vw;
+    }
+    h2 {
+      padding: 0;
+      margin: 0;
+      a {
+        text-decoration: none;
+        font-size: 0.5em;
+        font-weight: normal;
+        vertical-align: super;
+        &:hover {
+          color: $color-highlight;
+        }
+      }
+    }
+    ul {
+      padding: 0;
+      margin: 0;
+      li {
+        list-style: none;
+        margin-top: 9px;
+        padding-left: 18px;
+        padding-right: 18px;
+        a {
+          text-decoration: none;
+          font-weight: bold;
+          &:hover {
+            color: $color-highlight;
+          }
+        }
+      }
+    }
+  }
+  section {
+    max-width: 50em;
+    display: flex;
+    flex-direction: row;
+    &:nth-of-type(even) {
+      flex-direction: row-reverse;
+      img {
+        margin-left: 36px;
+        margin-right: 0px;
+      }
+      @media #{$tablet} {
+        flex-direction: column;
+        img {
+          margin-left: 0px;
+        }
+      }
+    }
+    @media #{$tablet} {
+      flex-direction: column;
+    }
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    img {
+      max-width: 40vw;
+      object-fit: contain;
+      margin-right: 36px;
+      margin-left: 0px;
+      @media #{$tablet} {
+        margin-right: 0px;
+        margin-left: 0px;
+        max-width: 95vw;
+      }
+    }
+  }
+}
+
+body.page {
+  header {
+    margin-top: 72px;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    justify-content: center;
+    min-height: 24em;
+    position: relative;
+    margin-bottom: 36px;
+    background-color: rgba(lighten($color-prime, 20%), 0.5);
+    img {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background-color: $color-prime;
+      object-fit: cover;
+    }
+    h1 {
+      max-width: 80vw;
+    }
+    h2 {
+      max-width: 80vw;
+    }
+  }
+  main {
+    display: flex;
+    flex-direction: row;
+    margin-top: 72px;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 70em;
+    @media #{$tablet} {
+      flex-direction: column;
+    }
+    nav {
+      margin: 36px;
+      box-sizing: border-box;
+      ul {
+        width: 10em;
+        background-color: $color-meta;
+        list-style: none;
+        padding: 18px;
+        margin: 0;
+        li {
+          font-size: 1em;
+          margin-bottom: 1em;
+          &:last-child {
+            margin-bottom: 0;
+          }
+          a {
+            text-decoration: none;
+            &.current, &:hover {
+              color: $color-text;
+              font-weight: bold;
+            }
+          }
+        }
+      }
+    }
+    article {
+      margin-left: 36px;
+      margin-right: 36px;
+      width: 50em;
+      @media #{$tablet} {
+        width: 85vw;
+      }
+      pre {
+        max-width: 90%;
+        overflow-x: scroll;
+      }
+      img {
+        display: block;
+        max-width: 60%;
+        object-fit: cover;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+  }
+  header+main {
+    margin-top: 0px;
+  }
+}
+
+nav.main {
+  position: fixed;
+  display: block;
+  top: 0;
+  width: 100vw;
+  background-color: $color-prime;
+  z-index: 1;
+  > ul {
+    min-height: 72px;
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    @media #{$mobile} {
+      flex-direction: column;
+      justify-content: center;
+    }
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    li {
+      padding: 0;
+      margin: 0;
+      padding-left: 36px;
+      padding-right: 36px;
+      text-transform: uppercase;
+      font-size: 0.8em;
+      &.home {
+        img {
+          width: 108px;
+        }
+        flex-grow: 1;
+        font-weight: bold;
+        text-transform: none;
+        font-size: 0.9em;
+        @media #{$mobile} {
+          position: absolute;
+          left: 0px;
+          flex-grow: 0;
+        }
+      }
+      a {
+        text-decoration: none;
+        &.current, &:hover {
+          color: $color-text;
+          font-weight: bold;
+        }
+      }
+    }
+    ul { 
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      transition: max-height 0.5s ease-in;
+      @media #{$mobile} {
+        max-height: 0px;
+        margin-top: 36px;
+        margin-bottom: 36px;
+        overflow: hidden;
+        padding-left: 36px;
+      }
+      li {
+        display: inline;
+        @media #{$mobile} {
+          display: block;
+          padding-top: 9px;
+          padding-bottom: 9px;
+        }
+      }
+    }
+    &:hover, &:focus, &:active {
+      ul {
+        @media #{$mobile} {
+          cursor: pointer;
+          flex-direction: column;
+          max-height: 100vh;
+        }
+      }
+    }
+  }
+}
+
+h1, h2, h3 {
+  font-family: $display-font;
+}
+
+a {
+  color: $color-text;
+  cursor: pointer;
+  &:hover {
+    color: $color-prime;
+  }
+}
+

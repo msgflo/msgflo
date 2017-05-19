@@ -1,3 +1,4 @@
+uuid = require 'uuid'
 
 # Based on Underscore.js (MIT)
 # Returns a function, that, as long as it continues to be invoked, will not
@@ -66,6 +67,19 @@ exports.normalizeOptions = (options) ->
   options.broker = process.env['MSGFLO_BROKER'] if not options.broker
   options.broker = process.env['CLOUDAMQP_URL'] if not options.broker
   options.broker = 'amqp://localhost' if not options.broker
+
+  options.runtimeId = process.env['MSGFLO_RUNTIME_ID'] if not options.runtimeId
+  options.runtimeId = uuid.v4() if not options.runtimeId
+
+  if not options.pingInterval and process.env['MSGFLO_PING_INTERVAL']
+    options.pingInterval = parseInt process.env['MSGFLO_PING_INTERVAL']
+  options.pingInterval = 0 if not options.pingInterval # default: never
+  options.pingMethod = process.env['MSGFLO_PING_METHOD'] if not options.pingMethod
+  options.pingMethod = 'POST' if not options.pingMethod
+  options.pingUrl = process.env['MSGFLO_PING_URL'] if not options.pingUrl
+  options.pingUrl = "https://api.flowhub.io/runtimes/$RUNTIME_ID" if not options.pingUrl
+  options.pingUrl = options.pingUrl.replace '$RUNTIME_ID', options.runtimeId
+
   return options
 
 # Note: relies on convention

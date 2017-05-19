@@ -1,0 +1,32 @@
+<nav class="main">
+  <ul onclick="void(0)">
+    <li class="home">
+      <a href="/">
+        {% if site.logo %}
+        <img class="logo" src="{{ site.logo }}" alt="{{site.title}}">
+        {% else %}
+        {{ site.title }}
+        {% endif %}
+      </a>
+    </li>
+    <ul>
+    {% for collection in site.collections %}
+      {% if collection.output and collection.docs.size > 0 and collection.label != 'posts'  %}
+      {% assign docs = collection.docs | sort: 'score' | reverse %}
+      <li>
+        <a href="{{ docs[0].url }}"{% if page.collection == collection.label %} class="current"{% endif %}>
+          {% if collection.title %}
+          {{ collection.title }}
+          {% else %}
+          {{ collection.label }}
+          {% endif %}
+        </a>
+      </li>
+        {% endif %}
+      {% endfor %}
+      {% if site.github_url %}
+      <li><a href="{{ site.github_url }}">GitHub</a></li>
+      {% endif %}
+    </ul>
+  </ul>
+</nav>

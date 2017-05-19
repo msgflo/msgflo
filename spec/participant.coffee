@@ -6,6 +6,13 @@ chai = require 'chai' unless chai
 
 describe 'Participant', ->
   address = 'direct://broker3'
+  broker = null
+
+  before (done) ->
+    broker = msgflo.transport.getBroker address
+    return broker.connect done
+  after (done) ->
+    return broker.disconnect done
 
   describe 'Source participant', ->
     source = null
@@ -27,12 +34,11 @@ describe 'Participant', ->
     describe 'running data', ->
       messages = []
       beforeEach (done) ->
-        broker = msgflo.transport.getBroker address
-        broker.connect (err) ->
-          chai.expect(err).to.be.a 'null'
-          source.start done
+        source.start done
+      afterEach (done) ->
+        source.stop done
+
       it 'does nothing when just started'
-        
 
       it 'produces data when sending interval=100', (done) ->
         onOutput = (msg) ->

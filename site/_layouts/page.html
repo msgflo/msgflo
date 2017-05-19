@@ -1,0 +1,23 @@
+---
+layout: default
+body_class: page
+---
+{% if page.cover %}
+<header>
+  <img src="{{ page.cover }}">
+  <h1>{{ page.title }}</h1>
+  {% if page.subtitle %}
+  <h2>{{ page.subtitle }}</h2>
+  {% endif %}
+</header>
+{% endif %}
+<main>
+  <article>
+    {% if page.cover %}
+    {% else %}
+    <h1>{{ page.title }}</h1>
+    {% endif %}
+    {{ content }}
+  </article>
+  {% include nav-page.html %}
+</main>

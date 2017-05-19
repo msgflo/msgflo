@@ -10,6 +10,13 @@ collectArray = (val, list) ->
   return list
 
 main = () ->
+  # Include default into description, so it shows in --help
+  originalOption = program.option
+  program.option = (flags, desc, type, def) ->
+    desc += ". Default: #{JSON.stringify(def)}" if def.toString()
+    originalOption.call this, flags, desc, type, def
+    return program
+
   program
     .option('--host <hostname>', 'Host', String, 'localhost')
     .option('--port <port>', 'Port', Number, 3569)
@@ -18,9 +25,16 @@ main = () ->
     .option('--library <FILE.json>', 'Library configuration file', String, 'package.json')
     .option('--graph <file.json>', 'Initial graph to load', String, '')
     .option('--ignore [process]', "Don't set up these processes", collectArray, [])
-    .option('--forward stderr,stdout', "Forward these streams from child", String, 'stderr,stdout')
+    .option('--forward <stderr,stdout>', "Forward these streams from child", String, 'stderr,stdout')
     .option('--auto-save [true|false]', "Autosave changes to graph", Boolean, false)
-    .parse(process.argv)
+    .option('--wait-timeout <seconds>', "How long to wait for participants", Number, 45)
+    .option('--runtime-id <UUID>', 'Unique identifier for this runtime instance', String, '')
+    .option('--ping-url <URL>', 'An URL that will be pinged periodically',
+            String, 'https://api.flowhub.io/runtimes/$RUNTIME_ID')
+    .option('--ping-method <GET|POST>', 'HTTP method to hit ping URL with', String, 'POST')
+    .option('--ping-interval <seconds>', 'How often to hit the ping URL, 0=never', Number, 0)
+
+  program = program.parse(process.argv)
 
   options = common.normalizeOptions program
   r = new runtime.Runtime options

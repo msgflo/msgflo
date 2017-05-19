@@ -1,7 +1,8 @@
 module.exports = ->
+  pkg = @file.readJSON 'package.json'
   # Project configuration
   @initConfig
-    pkg: @file.readJSON 'package.json'
+    pkg: pkg
 
     # BDD tests on Node.js
     mochaTest:
@@ -30,13 +31,42 @@ module.exports = ->
       fbp_test:
         command: 'fbp-test --colors'
 
+    # Building the website
+    jekyll:
+      options:
+        src: 'site/'
+        dest: 'dist/'
+        bundleExec: true
+      dist:
+        options:
+          dest: 'dist/'
+      serve:
+        options:
+          dest: 'dist/'
+          serve: true
+          watch: true
+          host: process.env.HOSTNAME or 'localhost'
+          port: process.env.PORT or 4000
+    # Deploying the website
+    'gh-pages':
+      options:
+        base: 'dist/',
+        clone: 'gh-pages'
+        message: "Release #{pkg.name} #{process.env.TRAVIS_TAG}"
+        repo: 'git@github.com:msgflo/msgflo.git'
+        silent: false # Must be set to true if using GH_TOKEN
+      src: '**/*'
 
   # Grunt plugins used for building
+  @loadNpmTasks 'grunt-jekyll'
 
   # Grunt plugins used for testing
   @loadNpmTasks 'grunt-mocha-test'
   @loadNpmTasks 'grunt-coffeelint'
   @loadNpmTasks 'grunt-shell-spawn'
+
+  # For deploying
+  @loadNpmTasks 'grunt-gh-pages'
 
   # Our local tasks
   @registerTask 'fbp-test', [
@@ -45,13 +75,14 @@ module.exports = ->
     'shell:msgflo:kill'
   ]
 
-  @registerTask 'build', 'Build the chosen target platform', (target = 'all') =>
-    # nothing
-
   @registerTask 'test', 'Build and run automated tests', (target = 'all') =>
     @task.run 'coffeelint'
-    @task.run 'build'
     @task.run 'mochaTest'
 #    @task.run 'fbp-test'
 
   @registerTask 'default', ['test']
+
+  @registerTask 'sitedeploy', [
+    'jekyll:dist'
+    'gh-pages'
+  ]

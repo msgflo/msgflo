@@ -1,0 +1,31 @@
+title: MsgFlo
+language: en
+permalink: /:year/:month/:categories/:title/
+cover: /assets/space-obelisk.jpg
+logo: /assets/msgflo-logo.png
+color_prime: "#70A7C6"
+url: 'https://msgflo.org/'
+github_url: 'https://github.com/msgflo'
+analytics_id: 'UA-46363984-7'
+collections:
+  features:
+    output: false
+  documentation:
+    title: Documentation
+    output: true
+    permalink: /docs/:title/index.html
+  examples:
+    title: Examples
+    output: true
+    permalink: /examples/:title/index.html
+defaults:
+  - scope:
+      path: ""
+      type: documentation
+    values:
+      layout: page
+  - scope:
+      path: ""
+      type: examples
+    values:
+      layout: page

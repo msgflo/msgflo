@@ -65,7 +65,7 @@ participantCommands = (graph, library, only, ignore) ->
 
   commands = {}
   participants = Object.keys(graph.processes)
-  participants = only if only?.length > 0
+  participants = only if only?
   participants = participants.filter isParticipant
   for name in participants
     continue if ignore.indexOf(name) != -1
@@ -152,7 +152,7 @@ staticGraphBindings = (broker, graph, callback) ->
   return callback null, bindings
 
 # callbacks with bindings
-discoverParticipantQueues = (broker, graph, callback) ->
+discoverParticipantQueues = (broker, graph, options, callback) ->
   foundParticipantsByRole = {}
 
   broker = transport.getBroker broker if typeof broker == 'string'
@@ -188,7 +188,7 @@ discoverParticipantQueues = (broker, graph, callback) ->
       callback new Error 'setup: Participant discovery timed out'
       callback = null
       return
-    timeout = setTimeout onTimeout, 10000
+    timeout = setTimeout onTimeout, options.timeout
 
     broker.subscribeParticipantChange (msg) =>
       data = msg.data
@@ -239,12 +239,13 @@ exports.normalizeOptions = normalize = (options) ->
   options.only = options.only.split(',') if typeof options.only == 'string' and options.only
   options.ignore = options.ignore.split(',') if typeof options.ignore == 'string' and options.ignore
   options.forward = options.forward.split(',') if typeof options.forward == 'string' and options.forward
-  options.only = [] if not options.only
+  options.only = null if not options.only
   options.ignore = [] if not options.ignore
   options.forward = [] if not options.forward
   options.extrabindings = [] if not options.extrabindings
   options.discover = false if not options.discover?
   options.forever = false if not options.forever?
+  options.timeout = 10000 if not options.timeout?
 
   return options
 
@@ -255,7 +256,7 @@ exports.bindings = setupBindings = (options, callback) ->
   if options.discover
     # wait for FBP discovery messsages, use queues from there
     getBindings = (broker, graph, cb) ->
-      discoverParticipantQueues options.broker, graph, (err, defs) ->
+      discoverParticipantQueues options.broker, graph, options, (err, defs) ->
         return cb err if err
         #console.log 'got defs', definitions
         bindings = bindingsFromDefinitions graph, defs
@@ -293,10 +294,11 @@ exports.parse = parse = (args) ->
     .option('--broker <URL>', 'URL of broker to connect to', String, null)
     .option('--participants [BOOL]', 'Also set up participants, not just bindings', Boolean, false)
     .option('--only <one,two,three>', 'Only set up participants for these roles', String, '')
-    .option('--ignore <one,two,three>', 'Do not set up participants for these roles', String, '')
+    .option('--ignore <one,two,three>', 'Do not set up participants for these roles', String, null)
     .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
     .option('--forward [stderr,stdout]', 'Forward child process stdout and/or stderr', String, '')
     .option('--discover [BOOL]', 'Whether to wait for FBP discovery messages for queue info', Boolean, false)
+    .option('--timeout <SECONDS>', 'How long to wait for discovery messages', Number, 30)
     .option('--forever [BOOL]', 'Keep running until killed by signal', Boolean, false)
     .option('--shell [shell]', 'Run participant commands in a shell', String, '')
     .action (gr, env) ->
@@ -305,6 +307,7 @@ exports.parse = parse = (args) ->
 
   program.libraryfile = program.library
   program.graphfile = graph
+  program.timeout = program.timeout*1000
   return program
 
 exports.prettyFormatBindings = pretty = (bindings) ->

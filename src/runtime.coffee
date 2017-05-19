@@ -39,6 +39,9 @@ class WebSocketTransport extends EventEmitter
         @connections.splice connIndex, 1
 
   send: (protocol, command, payload, ctx) ->
+    if command == 'error'
+      console.error "#{protocol}:error", payload.message
+
     connection = ctx
     msg =
       protocol: protocol
@@ -48,6 +51,9 @@ class WebSocketTransport extends EventEmitter
     send connection, msg
 
   sendAll: (protocol, command, payload) ->
+    if command == 'error'
+      console.error "#{protocol}:error", payload.message
+
     msg =
       protocol: protocol
       command: command
@@ -120,7 +126,7 @@ class Runtime
     address = scheme + @options.host + ':' + @options.port
 
   liveUrl: () ->
-    params = querystring.escape "protocol=websocket&address=#{@address()}"
+    params = querystring.escape "protocol=websocket&address=#{@address()}&id=#{@options.runtimeId}"
     url = "#{@options.ide}#runtime/endpoint?#{params}"
 
   serveFrontpage: (req, res) ->

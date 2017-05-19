@@ -1,0 +1,55 @@
+---
+layout: default
+body_class: feed
+---
+<header>
+  <article>
+    {% if site.logo %}
+    <img class="logo" src="{{ site.logo }}" alt="{{site.title}}">
+    {% else %}
+    <h1>{{ site.title }}</h1>
+    {% endif %}
+    <h2>{{ page.title }}</h2>
+  </article>
+</header>
+<article>
+  {{ content }}
+</article>
+{% if site.posts and site.posts.size > 0 %}
+<aside>
+  <h2>{{ site.title }} Updates <a href="/rss.xml">RSS</a></h2>
+  <ul>
+  {% for post in site.posts limit: 5 %}
+    <li>
+      {% if post.isBasedOnUrl %}
+      <a href="{{ post.isBasedOnUrl }}">{{ post.title }}</a>
+      {% else %}
+      <a href="{{ post.url }}">{{ post.title }}</a>
+      {% endif %}
+      {{ post.date | date_to_long_string }}
+    </li>
+  {% endfor %}
+  </ul>
+</aside>
+{% endif %}
+{% if site.features %}
+  {% assign features = site.features | sort: 'score' | reverse %}
+  {% for feature in features %}
+<section class="feature">
+  {% if feature.cover %}
+  <img src="{{ feature.cover }}">
+  {% endif %}
+  <article>
+    <h1>
+      {{ feature.title }}
+      {% if feature.subtitle %}
+      &mdash; {{ feature.subtitle }}
+      {% endif %}
+    </h1>
+    <p>
+    {{ feature.content }}
+    </p>
+  </article>
+</section>
+  {% endfor %}
+{% endif %}

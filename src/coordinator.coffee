@@ -4,9 +4,12 @@ EventEmitter = require('events').EventEmitter
 fs = require 'fs'
 path = require 'path'
 async = require 'async'
+https = require 'https'
+url = require 'url'
 
 setup = require './setup'
 library = require './library'
+common = require './common'
 
 findPort = (def, type, portName) ->
   ports = if type == 'inport' then def.inports else def.outports
@@ -24,14 +27,52 @@ iipId = (part, port) ->
 fromIipId = (id) ->
   return id.split ' '
 
+participantsByRole = (participants, role) ->
+  matchRole = (id) =>
+    part = participants[id]
+    return part.role == role
+
+  m = Object.keys(participants).filter matchRole
+  return m
+
+# XXX: there is now a mixture of participant id and role used here
+findQueue = (participants, partId, dir, portName) =>
+  part = participants[partId]
+  partIdByRole = participantsByRole(participants, partId)[0]
+  part = participants[partIdByRole] if not part?
+  throw new Error "No participant info found for '#{partId}'" if not part?
+  for port in part[dir]
+    if port.id == portName
+      throw new Error "Queue for #{dir} '#{portName}' missing in #{JSON.stringify(part)}" if not port.queue
+      return port.queue
+  throw new Error "No matching port found for #{dir} '#{portName}' in #{JSON.stringify(part)}"
+
+connectionFromBinding = (participants, binding) ->
+  byRole = {}
+  for id, part of participants
+    byRole[part.role] = part
+
+  findNodePort = (queue, dir) ->
+    for role, part of byRole
+      for port in part[dir]
+        if port.queue == queue
+          r =
+            node: role
+            port: port.id
+          return r
+
+  connection =
+    src: findNodePort binding.src, 'outports'
+    tgt: findNodePort binding.tgt, 'inports'
+  return connection
 
 waitForParticipant = (coordinator, role, callback) ->
-  existing = coordinator.participantsByRole role
+  existing = participantsByRole coordinator.participants, role
   return callback null, coordinator.participants[existing[0]] if existing.length
 
   onTimeout = () =>
     return callback new Error "Waiting for participant #{role} timed out"
-  timeout = setTimeout onTimeout, 10000
+  timeout = setTimeout onTimeout, coordinator.options.waitTimeout*1000
 
   onParticipantAdded = (part) =>
     if part.role == role
@@ -41,6 +82,18 @@ waitForParticipant = (coordinator, role, callback) ->
       return callback null
   coordinator.on 'participant-added', onParticipantAdded
 
+pingUrl = (address, method, callback) ->
+  u = url.parse address
+  u.port = 80 if u.protocol == 'http' and not u.port
+  u.method = method
+  u.timeout = 10*1000
+  req = https.request u, (res) ->
+    status = res.statusCode
+    return callback new Error "Ping #{method} #{address} failed with #{status}" if status != 200
+    return callback null
+  req.on 'error', (err) ->
+    return callback err
+  req.end()
 
 class Coordinator extends EventEmitter
   constructor: (@broker, @options = {}) ->
@@ -49,12 +102,28 @@ class Coordinator extends EventEmitter
     @iips = {} # iipId -> value
     @started = false
     @processes = {}
-    @library = new library.Library { configfile: @options.library, componentdir: @options.componentdir }
+    libraryOptions =
+      configfile: @options.library
+      componentdir: @options.componentdir
+      config: @options.config
+    @library = new library.Library libraryOptions
     @exported =
       inports: {}
       outports: {}
-
+    @options.waitTimeout = 40 if not @options.waitTimeout?
+    @graphName = null
     @on 'participant', @checkParticipantConnections
+
+    @alivePingInterval = null
+
+  clearGraph: (graphName, callback) ->
+    @connections = {}
+    @iips = {}
+    @graphName = graphName
+    # XXX: should we clear the @participants with the roles that we started?
+    setup.killProcesses @processes, 'SIGTERM', (err) =>
+      @processes = {}
+      return callback err
 
   start: (callback) ->
     @library.load (err) =>
@@ -63,26 +132,65 @@ class Coordinator extends EventEmitter
         debug 'connected', err
         return callback err if err
         @broker.subscribeParticipantChange (msg) =>
-          @handleFbpMessage msg.data
+          try
+            @handleFbpMessage msg.data
+          catch e
+            console.error 'Participant discovery failed:', e.message, '\n', e.stack, '\n', JSON.stringify(msg.data, 2, null)
           @broker.ackMessage msg
         @started = true
         debug 'started', err, @started
+
+        alivePing = () =>
+          return if not @options.pingInterval
+          pingUrl @options.pingUrl, @options.pingMethod, (err) ->
+            return debug 'alive-ping-error', err if err
+            debug 'alive-ping-success'
+        @alivePingInterval = setInterval alivePing, @options.pingInterval*1000
+        alivePing()
+
         return callback null
 
   stop: (callback) ->
-    @started = false
-    @broker.disconnect (err) =>
-      return callback err if err
-      setup.killProcesses @processes, 'SIGTERM', callback
+    @clearGraph @graphName, (clearErr) =>
+      @broker.disconnect (err) =>
+        return callback clearErr if clearErr
+        return callback err
 
   handleFbpMessage: (data) ->
     if data.protocol == 'discovery' and data.command == 'participant'
-      @addParticipant data.payload
+      @participantDiscovered data.payload
     else
-      throw new Error 'Unknown FBP message'
+      throw new Error "Unknown FBP message: #{typeof(data)} #{data?.protocol}:#{data?.command}"
+
+  participantDiscovered: (definition) ->
+    throw new Error "Discovery message missing .id" if not definition.id
+    throw new Error "Discovery message missing .component" if not definition.component
+    throw new Error "Discovery message missing .role" if not definition.role
+    throw new Error "Discovery message missing .inports" if not definition.inports
+    throw new Error "Discovery message missing .outports" if not definition.outports
+    if @participants[definition.id]
+      @updateParticipant definition
+    else
+      @addParticipant definition
+
+  updateParticipant: (definition) ->
+    debug 'updateParticipant', definition.id
+    original = @participants[definition.id]
+    definition.extra = {} if not definition.extra
+    definition.extra.lastSeen = new Date
+    newDefinition = common.clone definition
+    for k, v of original
+      newDefinition[k] = v if not newDefinition[k]
+    @participants[definition.id] = newDefinition
+    @library._updateDefinition newDefinition.component, newDefinition
+    @emit 'participant-updated', newDefinition
+    @emit 'participant', 'updated', newDefinition
 
   addParticipant: (definition) ->
     debug 'addParticipant', definition.id
+    definition.extra = {} if not definition.extra
+    definition.extra.firstSeen = new Date
+    definition.extra.lastSeen = new Date
     @participants[definition.id] = definition
     @library._updateDefinition definition.component, definition
     @emit 'participant-added', definition
@@ -91,6 +199,7 @@ class Coordinator extends EventEmitter
 
   removeParticipant: (id) ->
     definition = @participants[id]
+    delete @participants[id]
     @emit 'participant-removed', definition
     @library._updateDefinition definition.component, null
     @emit 'participant', 'removed', definition
@@ -103,13 +212,20 @@ class Coordinator extends EventEmitter
     return @library.getSource component, callback
 
   startParticipant: (node, component, callback) ->
+    if @options.ignore?.length and node in @options.ignore
+      console.log "WARNING: Not restarting ignored participant #{node}"
+      return callback null
+    if not @library.components[component]?.command
+      console.log "WARNING: Attempting to start participant with missing component: #{node}(#{component})"
+      # XXX: should be an error, but Flowhub does this in project mode..
+      return callback null
     iips = {}
     cmd = @library.componentCommand component, node, iips
     commands = {}
     commands[node] = cmd
     options =
       broker: @options.broker
-      forward: '' # whether to forward subprocess communication
+      forward: @options.forward or ''
     setup.startProcesses commands, options, (err, processes) =>
       return callback err if err
       for k, v of processes
@@ -122,7 +238,7 @@ class Coordinator extends EventEmitter
     for k, v of @processes
       if k == node
         processes[k] = v
-    setup.killProcesses processes, 'SIGTERM', (err) ->
+    setup.killProcesses processes, 'SIGTERM', (err) =>
       return callback err
       for k, v of processes
         delete @process[k]
@@ -135,8 +251,11 @@ class Coordinator extends EventEmitter
     callback = defaultCallback if not callback
 
     part = @participants[participantId]
-    part = @participants[@participantsByRole(participantId)] if not part?
+    id = participantsByRole(@participants, participantId)[0]
+    part = @participants[id] if not part?
+
     port = findPort part, 'inport', inport
+    return callback new Error "Cannot find inport #{inport}" if not port
     return @broker.sendTo 'inqueue', port.queue, message, callback
 
   subscribeTo: (participantId, outport, handler, callback) ->
@@ -145,7 +264,8 @@ class Coordinator extends EventEmitter
     callback = defaultCallback if not callback
 
     part = @participants[participantId]
-    part = @participants[@participantsByRole(participantId)] if not part?
+    id = participantsByRole(@participants, participantId)[0]
+    part = @participants[id] if not part?
 
     debug 'subscribeTo', participantId, outport
     port = findPort part, 'outport', outport
@@ -170,14 +290,6 @@ class Coordinator extends EventEmitter
   connect: (fromId, fromPort, toId, toName, callback) ->
     callback = ((err) ->) if not callback
  
-    # XXX: there is now a mixture of participant id and role used here
-
-    findQueue = (partId, dir, portName) =>
-      part = @participants[partId]
-      part = @participants[@participantsByRole(partId)] if not part?
-      for port in part[dir]
-        return port.queue if port.id == portName
-
     # NOTE: adding partial connection info to make checkParticipantConnections logic work
     edgeId = connId fromId, fromPort, toId, toName
     edge =
@@ -196,13 +308,20 @@ class Coordinator extends EventEmitter
       waitForParticipant @, toId, (err) =>
         return callback err if err
         # TODO: support roundtrip
-        @connections[edgeId].srcQueue = findQueue fromId, 'outports', fromPort
-        @connections[edgeId].tgtQueue = findQueue toId, 'inports', toName
+        @connections[edgeId].srcQueue = findQueue @participants, fromId, 'outports', fromPort
+        @connections[edgeId].tgtQueue = findQueue @participants, toId, 'inports', toName
+        edgeWithQueues = @connections[edgeId]
         @emit 'graph-changed'
-        @broker.addBinding {type: 'pubsub', src:edge.srcQueue, tgt:edge.tgtQueue}, (err) =>
+        binding =
+          type: 'pubsub'
+          src: edgeWithQueues.srcQueue
+          tgt: edgeWithQueues.tgtQueue
+        if not binding.src
+          return callback new Error "Source queue for connection #{fromId} #{fromPort} not found"
+        if not binding.tgt
+          return callback new Error "Target queue for connection #{toName} #{toPort} not found"
+        @broker.addBinding binding, (err) =>
           return callback err
-
-    # TODO: introduce some "spying functionality" to provide edge messages, add tests
 
   disconnect: (fromId, fromPort, toId, toPort, callback) ->
     edgeId = connId fromId, fromPort, toId, toPort
@@ -252,10 +371,16 @@ class Coordinator extends EventEmitter
     else
       null # ignored
 
-  addInitial: (partId, portId, data) ->
+  addInitial: (partId, portId, data, callback) ->
     id = iipId partId, portId
     @iips[id] = data
-    @sendTo partId, portId, data if @started
+    waitForParticipant @, partId, (err) =>
+      return callback err if err
+      if @started
+        @sendTo partId, portId, data, (err) ->
+          return callback err
+      else
+        return callback null
 
   removeInitial: (partId, portId) -> # FIXME: implement
     # Do we need to remove it from the queue??
@@ -300,6 +425,39 @@ class Coordinator extends EventEmitter
     # Don't have a concept of started/stopped so far, no-op
     setTimeout callback, 10
   
+  _onConnectionData: (binding, data) =>
+    connection = connectionFromBinding @participants, binding
+    connection.graph = @graphName
+    @emit 'connection-data', connection, data
+
+  clearSubscriptions: (callback) ->
+    @broker.listSubscriptions (err, subs) =>
+      return callback err if err
+      async.map subs, (sub, cb) =>
+        @broker.unsubscribeData sub, @_onConnectionData, cb
+      , callback
+
+  subscribeConnection: (fromRole, fromPort, toRole, toPort, callback) ->
+    waitForParticipant @, fromRole, (err) =>
+      return callback err if err
+      waitForParticipant @, toRole, (err) =>
+        return callback err if err
+        binding =
+          src: findQueue @participants, fromRole, 'outports', fromPort
+          tgt: findQueue @participants, toRole, 'inports', toPort
+        @broker.subscribeData binding, @_onConnectionData, callback
+
+  unsubscribeConnection: (fromRole, fromPort, toRole, toPort, callback) ->
+    waitForParticipant @, fromRole, (err) =>
+      return callback err if err
+      waitForParticipant @, toRole, (err) =>
+        return callback err if err
+        binding =
+          src: findQueue @participants, fromRole, 'outports', fromPort
+          tgt: findQueue @participants, toRole, 'inports', toPort
+        @broker.unsubscribeData binding, @_onConnectionData, callback
+        return callback null
+
   serializeGraph: (name) ->
     graph =
       properties:
@@ -311,12 +469,16 @@ class Coordinator extends EventEmitter
       inports: []
       outports: []
 
-    for id, part of @participants
+    participantNames = Object.keys(@participants).sort()
+    for id in participantNames
+      part = @participants[id]
       name = part.role
       graph.processes[name] =
         component: part.component
 
-    for id, conn of @connections
+    connectionIds = Object.keys(@connections).sort()
+    for id in connectionIds
+      conn = @connections[id]
       parts = fromConnId id
       edge =
         src:
@@ -327,26 +489,70 @@ class Coordinator extends EventEmitter
           port: parts[3]
       graph.connections.push edge
 
+    iipIds = Object.keys(@iips).sort()
+    for id in iipIds
+      iip = @iips[id]
+      parts = fromIipId id
+      edge =
+        data: iip
+        tgt:
+          process: parts[0]
+          port: parts[1]
+      graph.connections.push edge
+
     return graph
 
   loadGraphFile: (path, opts, callback) ->
+    debug 'loadGraphFile', path
     options =
       graphfile: path
       libraryfile: @library.configfile
     for k, v of opts
       options[k] = v
-    setup.participants options, (err, proc) =>
+
+    # Avoid trying to instantiate
+    # Probably these are external participants, which *should* be running
+    # TODO: check whether the participants do indeed show up
+    rolesWithComponent = []
+    rolesNoComponent = []
+    availableComponents = Object.keys @library.components
+    common.readGraph options.graphfile, (err, graph) =>
       return callback err if err
-      @processes = proc
-      setup.bindings options, callback
+      for role, process of graph.processes
+        if process.component in availableComponents
+          rolesWithComponent.push role
+        else
+          rolesNoComponent.push role
+      if rolesNoComponent.length
+        console.log 'Skipping setup for participants without component available. Assuming already setup:'
+      for role in rolesNoComponent
+        componentName = graph.processes[role].component
+        console.log "\t#{role}(#{componentName})"
 
-  participantsByRole: (role) ->
-    matchRole = (id) =>
-      part = @participants[id]
-      return part.role == role
+      rolesToSetup = rolesWithComponent.concat([]).filter (r) ->
+        return r not in options.ignore
+      options.only = rolesToSetup
 
-    m = Object.keys(@participants).filter matchRole
-    return m
+      setupParticipants = (setupCallback) =>
+        participantStartConcurrency = 10
+        async.mapLimit options.only, participantStartConcurrency, (role, cb) =>
+          componentName = graph.processes[role].component
+          @startParticipant role, componentName, cb
+        , setupCallback
 
+      setupConnections = (setupCallback) =>
+        async.map graph.connections, (c, cb) =>
+          if c.data
+            @addInitial c.tgt.process, c.tgt.port, c.data, cb
+          else
+            @connect c.src.process, c.src.port, c.tgt.process, c.tgt.port, cb
+        , setupCallback
+
+      async.parallel
+        connections: setupParticipants
+        participants: setupConnections
+      , (err, results) ->
+        return callback err if err
+        return callback null
 
 exports.Coordinator = Coordinator
