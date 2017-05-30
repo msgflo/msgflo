@@ -168,7 +168,7 @@ class Library extends EventEmitter
     filename = path.join @options.componentdir, "#{basename}.#{ext}"
     fs.readFile filename, 'utf-8', (err, code) ->
       debug 'component source file', filename, lang, err
-      return callback new Error "Could not find component source for #{name}" if err
+      return callback new Error "Could not find component source for #{name}: #{err.message}" if err
       source =
         name: basename
         library: library
