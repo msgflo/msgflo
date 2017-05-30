@@ -18,6 +18,8 @@ languageExtensions =
   'python': 'py'
   'coffeescript': 'coffee'
   'javascript': 'js'
+  'c++': 'cpp'
+  'rust': 'rs'
   'yaml': 'yml'
 extensionToLanguage = {}
 for lang, ext of languageExtensions
