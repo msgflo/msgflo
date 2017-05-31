@@ -158,9 +158,9 @@ class Library extends EventEmitter
         names.push name if names.indexOf(name) is -1
         continue
 
-    # Skip sending components-changed if nothing changed
-    return unless names.length
-    @emit 'components-changed', names, @components
+    # Send components-changed only if something changed
+    if names.length
+      @emit 'components-changed', names, @components
 
   load: (callback) ->
     componentsFromDirectory @options.componentdir, @options.config, (err, components) =>
