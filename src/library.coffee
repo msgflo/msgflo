@@ -102,6 +102,20 @@ normalizeConfig = (config) ->
 
   return config
 
+# Remove instance-specific data like role and extra from library data
+cleanComponentDefinition = (discovered) ->
+  return discovered unless discovered?.definition
+  # Start by cloning the definition
+  component = JSON.parse JSON.stringify discovered
+  return component unless component?.definition
+  delete component.definition.extra
+  delete component.definition.id
+  for port in component.definition.inports
+    delete port.queue
+  for port in component.definition.outports
+    delete port.queue
+  return component
+
 class Library extends EventEmitter
   constructor: (options) ->
     options.config = JSON.parse(fs.readFileSync options.configfile, 'utf-8') if options.configfile
@@ -129,20 +143,18 @@ class Library extends EventEmitter
         @components[name] = null
         names.push name if names.indexOf(name) is -1
         continue
+      discovered = cleanComponentDefinition comp
       existing = @getComponent name
       unless existing?.definition
         # added
-        @components[name] = comp
+        @components[name] = discovered
         names.push name if names.indexOf(name) is -1
         continue
-      # update
-      for k, v of comp.definition
-        if existing.definition[k]
-          # Check if value has changed
-          continue if JSON.stringify(existing.definition[k]) is JSON.stringify(v)
-        existing.definition[k] = v
-        continue if k in ['extra', 'id']
+      unless JSON.stringify(existing.definition) is JSON.stringify(discovered.definition)
+        # updated
+        @components[name] = discovered
         names.push name if names.indexOf(name) is -1
+        continue
 
     # Skip sending components-changed if nothing changed
     return unless names.length
