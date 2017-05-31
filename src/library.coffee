@@ -153,7 +153,8 @@ class Library extends EventEmitter
         continue
       unless JSON.stringify(existing.definition) is JSON.stringify(discovered.definition)
         # updated
-        @components[name] = discovered
+        for k, v of discovered
+          @components[name][k] = v
         names.push name if names.indexOf(name) is -1
         continue
 
