@@ -65,7 +65,7 @@ describe 'Coordinator', ->
             else
               return done new Error "Unexpected event #{event}"
           coordinator.on 'participant', eventListener
- 
+
           # send two times
           client.registerParticipant definition, (err) ->
             return done err if err
@@ -96,8 +96,44 @@ describe 'Coordinator', ->
         # it 'should not be a new FBP node' # XXX: should be tested in ./protocol.coffee instead?
 
       describe 'discovery message changes component data', ->
-        it 'should send component-changed'
-        it 'should not send new participant'
+        added = []
+        updated = []
+        definition =
+          id: 'multiple-discovery-11'
+          role: 'multiple-discovery'
+          component: 'MultipleDiscovery'
+          inports: [
+            id: 'in'
+            type: 'string'
+            queue: 'foo'
+          ]
+          outports: []
+        eventListener = null
+        before (done) ->
+          eventListener = (event, def) ->
+            console.log event, def
+            if event == 'added'
+              added.push common.clone(def)
+            else if event == 'updated'
+              updated.push common.clone(def)
+              return done()
+            else
+              return done new Error "Unexpected event #{event}"
+          coordinator.on 'participant', eventListener
+
+          # send new definition
+          client.registerParticipant definition, (err) ->
+            done err if err
+
+        after (done) ->
+          coordinator.removeListener 'participant', eventListener
+          return done null
+        it 'should send component-changed', ->
+          chai.expect(updated).to.have.length 1
+          d = updated[0]
+          chai.expect(d.id).to.equal definition.id
+        it 'should not send new participant', ->
+          chai.expect(added).to.have.length 0
 
       describe 'receiving discovery message for pending connection', ->
         it 'should setup the connection'
