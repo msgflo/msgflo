@@ -111,7 +111,6 @@ describe 'Coordinator', ->
         eventListener = null
         before (done) ->
           eventListener = (event, def) ->
-            console.log event, def
             if event == 'added'
               added.push common.clone(def)
             else if event == 'updated'
