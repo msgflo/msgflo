@@ -62,7 +62,7 @@ exports.parse = parse = (args) ->
     .option('--library <FILE.json>', 'Use FILE.json as the library definition', String, 'package.json')
     .option('--ignore [NODE]', 'Do not generate output for NODE. Can be specified multiple times.', addIgnore, [])
     .option('--include [DATA]', 'Include DATA as-is in generated file. Can be specified multiple times.', addInclude, [])
-    .option('--components <DIR>', 'Lookup components from DIR', String, '')
+    .option('--components <DIR>', 'Lookup components from DIR', String, 'participants')
     .action (gr, env) ->
       graph = gr
     .parse args

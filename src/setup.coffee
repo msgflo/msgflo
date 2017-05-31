@@ -281,7 +281,7 @@ exports.participants = setupParticipants = (options, callback) ->
   common.readGraph options.graphfile, (err, graph) ->
     return callback err if err
 
-    lib = new Library { configfile: options.libraryfile }
+    lib = new Library { configfile: options.libraryfile, componentdir: options.componentdir }
     lib.load (err) ->
       return callback err if err
       commands = participantCommands graph, lib, options.only, options.ignore
@@ -296,6 +296,7 @@ exports.parse = parse = (args) ->
     .option('--only <one,two,three>', 'Only set up participants for these roles', String, '')
     .option('--ignore <one,two,three>', 'Do not set up participants for these roles', String, null)
     .option('--library <FILE.json>', 'Library definition to use', String, 'package.json')
+    .option('--componentdir <DIR>', 'Directory where components are located', String, '')
     .option('--forward [stderr,stdout]', 'Forward child process stdout and/or stderr', String, '')
     .option('--discover [BOOL]', 'Whether to wait for FBP discovery messages for queue info', Boolean, false)
     .option('--timeout <SECONDS>', 'How long to wait for discovery messages', Number, 30)

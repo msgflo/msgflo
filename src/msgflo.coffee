@@ -23,6 +23,7 @@ main = () ->
     .option('--broker <uri>', 'Broker address', String, '')
     .option('--ide <uri>', 'FBP IDE address', String, 'http://app.flowhub.io')
     .option('--library <FILE.json>', 'Library configuration file', String, 'package.json')
+    .option('--componentdir <dirname>', 'Library directory', String, '')
     .option('--graph <file.json>', 'Initial graph to load', String, '')
     .option('--ignore [process]', "Don't set up these processes", collectArray, [])
     .option('--forward <stderr,stdout>', "Forward these streams from child", String, 'stderr,stdout')
