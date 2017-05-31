@@ -47,6 +47,7 @@ describe 'Coordinator', ->
       describe 'receiving same discovery message multiple times', ->
         added = []
         updated = []
+        libraryChanged = []
         definition =
           id: 'multiple-discovery-11'
           role: 'multiple-discovery'
@@ -54,6 +55,7 @@ describe 'Coordinator', ->
           inports: []
           outports: []
         eventListener = null
+        libraryListener = null
 
         before (done) ->
           eventListener = (event, def) ->
@@ -65,7 +67,10 @@ describe 'Coordinator', ->
             else
               return done new Error "Unexpected event #{event}"
           coordinator.on 'participant', eventListener
- 
+          libraryListener = (names) ->
+            libraryChanged.push names
+          coordinator.library.on 'components-changed', libraryListener
+
           # send two times
           client.registerParticipant definition, (err) ->
             return done err if err
@@ -76,6 +81,7 @@ describe 'Coordinator', ->
 
         after (done) ->
           coordinator.removeListener 'participant', eventListener
+          coordinator.library.removeListener 'components-changed', libraryListener
           return done null
 
         it 'should emit participant-added only once', () ->
@@ -90,15 +96,62 @@ describe 'Coordinator', ->
           chai.expect(d.id).to.equal definition.id
           diff = d.extra.lastSeen.getTime() - added[0].extra.lastSeen.getTime()
           chai.expect(diff, 'time difference').to.be.above 0
-
+        it 'should emit library components-changed only once', ->
+          chai.expect(libraryChanged).to.eql [
+            ['MultipleDiscovery']
+          ]
 
       describe.skip 'discovery for multiple participants with same role', ->
         # it 'should not be a new FBP node' # XXX: should be tested in ./protocol.coffee instead?
 
       describe 'discovery message changes component data', ->
-        it 'should send component-changed'
-        it 'should not send new participant'
+        added = []
+        updated = []
+        libraryChanged = []
+        definition =
+          id: 'multiple-discovery-11'
+          role: 'multiple-discovery'
+          component: 'MultipleDiscovery'
+          inports: [
+            id: 'in'
+            type: 'string'
+            queue: 'foo'
+          ]
+          outports: []
+        eventListener = null
+        libraryListener = null
+        before (done) ->
+          eventListener = (event, def) ->
+            if event == 'added'
+              added.push common.clone(def)
+            else if event == 'updated'
+              updated.push common.clone(def)
+              return done()
+            else
+              return done new Error "Unexpected event #{event}"
+          coordinator.on 'participant', eventListener
+          libraryListener = (names) ->
+            libraryChanged.push names
+          coordinator.library.on 'components-changed', libraryListener
 
+          # send new definition
+          client.registerParticipant definition, (err) ->
+            done err if err
+
+        after (done) ->
+          coordinator.removeListener 'participant', eventListener
+          coordinator.library.removeListener 'components-changed', libraryListener
+          return done null
+        it 'should send component-changed', ->
+          chai.expect(updated).to.have.length 1
+          d = updated[0]
+          chai.expect(d.id).to.equal definition.id
+        it 'should not send new participant', ->
+          chai.expect(added).to.have.length 0
+        it 'should emit library components-changed', ->
+          chai.expect(libraryChanged).to.eql [
+            ['MultipleDiscovery']
+          ]
       describe 'receiving discovery message for pending connection', ->
         it 'should setup the connection'
 

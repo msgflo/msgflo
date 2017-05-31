@@ -102,6 +102,21 @@ normalizeConfig = (config) ->
 
   return config
 
+# Remove instance-specific data like role and extra from library data
+cleanComponentDefinition = (discovered) ->
+  return discovered unless discovered?.definition
+  # Start by cloning the definition
+  component = common.clone discovered
+  return component unless component?.definition
+  delete component.definition.extra
+  delete component.definition.id
+  delete component.definition.role
+  for port in component.definition.inports
+    delete port.queue
+  for port in component.definition.outports
+    delete port.queue
+  return component
+
 class Library extends EventEmitter
   constructor: (options) ->
     options.config = JSON.parse(fs.readFileSync options.configfile, 'utf-8') if options.configfile
@@ -122,22 +137,30 @@ class Library extends EventEmitter
     return null
 
   _updateComponents: (components) ->
-    names = Object.keys components
+    names = []
     for name, comp of components
       if not comp
         # removed
         @components[name] = null
+        names.push name if names.indexOf(name) is -1
         continue
+      discovered = cleanComponentDefinition comp
       existing = @getComponent name
-      unless existing
+      unless existing?.definition
         # added
-        @components[name] = comp
+        @components[name] = discovered
+        names.push name if names.indexOf(name) is -1
         continue
-      # update
-      for k, v of comp
-        existing[k] = v
+      unless JSON.stringify(existing.definition) is JSON.stringify(discovered.definition)
+        # updated
+        for k, v of discovered
+          @components[name][k] = v
+        names.push name if names.indexOf(name) is -1
+        continue
 
-    @emit 'components-changed', names, @components
+    # Send components-changed only if something changed
+    if names.length
+      @emit 'components-changed', names, @components
 
   load: (callback) ->
     componentsFromDirectory @options.componentdir, @options.config, (err, components) =>
