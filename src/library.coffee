@@ -122,19 +122,18 @@ class Library extends EventEmitter
     return null
 
   _updateComponents: (components) ->
-    names = Object.keys components
-    updated = false
+    names = []
     for name, comp of components
       if not comp
         # removed
         @components[name] = null
-        updated = true
+        names.push name if names.indexOf(name) is -1
         continue
       existing = @getComponent name
       unless existing
         # added
         @components[name] = comp
-        updated = true
+        names.push name if names.indexOf(name) is -1
         continue
       # update
       for k, v of comp
@@ -142,10 +141,10 @@ class Library extends EventEmitter
           # Check if value has changed
           continue if JSON.stringify(existing[k]) is JSON.stringify(v)
         existing[k] = v
-        updated = true
+        names.push name if names.indexOf(name) is -1
 
     # Skip sending components-changed if nothing changed
-    return unless updated
+    return unless names.length
     @emit 'components-changed', names, @components
 
   load: (callback) ->
