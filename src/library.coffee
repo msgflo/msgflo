@@ -106,7 +106,7 @@ normalizeConfig = (config) ->
 cleanComponentDefinition = (discovered) ->
   return discovered unless discovered?.definition
   # Start by cloning the definition
-  component = JSON.parse JSON.stringify discovered
+  component = common.clone discovered
   return component unless component?.definition
   delete component.definition.extra
   delete component.definition.id
