@@ -110,6 +110,7 @@ cleanComponentDefinition = (discovered) ->
   return component unless component?.definition
   delete component.definition.extra
   delete component.definition.id
+  delete component.definition.role
   for port in component.definition.inports
     delete port.queue
   for port in component.definition.outports
