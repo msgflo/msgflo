@@ -130,17 +130,18 @@ class Library extends EventEmitter
         names.push name if names.indexOf(name) is -1
         continue
       existing = @getComponent name
-      unless existing
+      unless existing?.definition
         # added
         @components[name] = comp
         names.push name if names.indexOf(name) is -1
         continue
       # update
-      for k, v of comp
-        if existing[k]
+      for k, v of comp.definition
+        if existing.definition[k]
           # Check if value has changed
-          continue if JSON.stringify(existing[k]) is JSON.stringify(v)
-        existing[k] = v
+          continue if JSON.stringify(existing.definition[k]) is JSON.stringify(v)
+        existing.definition[k] = v
+        continue if k in ['extra', 'id']
         names.push name if names.indexOf(name) is -1
 
     # Skip sending components-changed if nothing changed
