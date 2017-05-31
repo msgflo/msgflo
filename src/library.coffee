@@ -106,7 +106,7 @@ class Library extends EventEmitter
   constructor: (options) ->
     options.config = JSON.parse(fs.readFileSync options.configfile, 'utf-8') if options.configfile
     if not options.componentdir
-      console.error 'WARNING:', 'Default components directory for MsgFlo will change to "components" in next release'
+      console.log 'WARNING:', 'Default components directory for MsgFlo will change to "components" in next release'
       options.componentdir = 'participants'
     options.config = normalizeConfig options.config
     @options = options
