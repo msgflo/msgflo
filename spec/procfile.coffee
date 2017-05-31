@@ -19,7 +19,7 @@ describe 'msgflo-procfile', ->
       
       """
       lib = path.join __dirname, 'fixtures', 'library-imgflo.json'
-      options = "--library #{lib} --ignore=imgflo_jobs --ignore=imgflo_api --ignore drop --include 'web: node index.js'"
+      options = "--components participants --library #{lib} --ignore=imgflo_jobs --ignore=imgflo_api --ignore drop --include 'web: node index.js'"
       msgflo_procfile 'imgflo-server.fbp', options, (err, stdout) ->
         chai.expect(err).to.not.exist
         chai.expect(stdout).to.equal expected
@@ -44,7 +44,7 @@ describe 'msgflo-procfile', ->
   describe "missing component in library", ->
     it 'should error with helpful message', (done) ->
       @timeout 4000
-      options = "--ignore=imgflo_jobs --ignore=imgflo_api --ignore drop --include 'web: node index.js'"
+      options = "--components participants --ignore=imgflo_jobs --ignore=imgflo_api --ignore drop --include 'web: node index.js'"
       msgflo_procfile 'imgflo-server.fbp', options, (err, stdout, stderr) ->
         chai.expect(err).to.exist
         chai.expect(stderr).to.contain 'No component'
