@@ -148,7 +148,7 @@ class Library extends EventEmitter
         continue
       discovered = cleanComponentDefinition comp
       existing = @getComponent name
-      unless existing?.definition
+      unless existing
         # added
         @components[name] = discovered
         names.push name if names.indexOf(name) is -1
