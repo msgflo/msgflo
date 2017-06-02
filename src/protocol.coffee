@@ -168,19 +168,23 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'clear', payload
   else if cmd == 'addnode'
-    proto.coordinator.startParticipant payload.id, payload.component, (err) ->
+    proto.coordinator.startParticipant payload.id, payload.component, payload.metadata, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addnode', payload
   else if cmd == 'removenode'
     proto.coordinator.stopParticipant payload.id, payload.component, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'removenode', payload
+  else if cmd == 'changenode'
+    proto.coordinator.updateNodeMetadata payload.id, payload.metadata, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'changenode', payload
 
   # Connections
   else if cmd == 'addedge'
     debug 'addedge', payload
     p = payload
-    proto.coordinator.connect p.src.node, p.src.port, p.tgt.node, p.tgt.port, (err) ->
+    proto.coordinator.connect p.src.node, p.src.port, p.tgt.node, p.tgt.port, p.metadata, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addedge', payload
   else if cmd == 'removeedge'
@@ -188,10 +192,15 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
     proto.coordinator.disconnect p.src.node, p.src.port, p.tgt.node, p.tgt.port, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'removeedge', payload
+  else if cmd == 'changeedge'
+    p = payload
+    proto.coordinator.updateEdge p.src.node, p.src.port, p.tgt.node, p.tgt.port, p.metadata, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'changeedge', payload
 
   # IIPs
   else if cmd == 'addinitial'
-    proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data, (err) ->
+    proto.coordinator.addInitial payload.tgt.node, payload.tgt.port, payload.src.data, payload.metadata, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addinitial', payload
   else if cmd == 'removeinitial'
@@ -200,11 +209,11 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
 
   # exported ports
   else if cmd == 'addinport'
-    proto.coordinator.exportPort 'inport', payload.public, payload.node, payload.port, (err) ->
+    proto.coordinator.exportPort 'inport', payload.public, payload.node, payload.port, payload.metadata, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addinport', payload
   else if cmd == 'addoutport'
-    proto.coordinator.exportPort 'outport', payload.public, payload.node, payload.port, (err) ->
+    proto.coordinator.exportPort 'outport', payload.public, payload.node, payload.port, payload.metadata, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addoutport', payload
 
