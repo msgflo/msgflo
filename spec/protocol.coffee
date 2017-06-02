@@ -172,7 +172,6 @@ describe 'FBP runtime protocol', () ->
             ui.send 'component', 'getsource', { name: 'default/main' }
           , 500
 
-    # TODO: automatically represent multiple participants of same class as subgraph
   describe 'stopping a running network', ->
     it 'should succeed'
     it 'network:getstatus shows not running'
@@ -544,3 +543,31 @@ describe 'FBP runtime protocol', () ->
       chai.expect(addinitial.tgt).to.include.keys ['node', 'port']
       chai.expect(addinitial.tgt.node).to.equal 'iip-target'
       chai.expect(addinitial.tgt.port).to.equal 'interval'
+
+    it 'clearing the graph should remove processes and IIPs', (done) ->
+      responses = []
+      graphName = 'default/main'
+      checkMessage = (d, protocol, command, payload) ->
+        responses.push
+          protocol: protocol
+          command: command
+          payload: payload
+        if command == 'clear'
+          chai.expect(payload).to.include.keys ['id']
+          chai.expect(payload.id).to.equal graphName
+          ui.send 'component', 'getsource', { name: graphName }
+        else if command == 'source'
+          chai.expect(payload).to.include.keys ['name', 'code', 'language']
+          chai.expect(payload.name).to.equal 'main'
+          graph = JSON.parse payload.code
+          roles = Object.keys graph.processes
+          inports = Object.keys graph.inports
+          outports = Object.keys graph.outports
+          chai.expect(roles, JSON.stringify(roles)).to.have.length 0
+          chai.expect(graph.connections, JSON.stringify(graph.connections)).to.have.length 0
+          chai.expect(inports).to.have.length 0
+          chai.expect(outports).to.have.length 0
+          return done()
+
+      ui.on 'message', checkMessage
+      ui.send 'graph', 'clear', { id: graphName }
