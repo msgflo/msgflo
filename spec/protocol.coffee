@@ -275,13 +275,77 @@ describe 'FBP runtime protocol', () ->
 
     it 'data should now not be forwarded'
 
-  describe 'adding a node', ->
-    it 'should succeed'
-    it 'node should produce data'
+  describe 'adding and removing a node', ->
+    responses = []
+    nodeName = 'add-remove-node'
+    componentName = 'InitiallyAvailable'
+    onNewMessage = null
+    checkMessage = (d, protocol, command, payload) ->
+      responses.push
+        protocol: protocol
+        command: command
+        payload: payload
+      if onNewMessage
+        onNewMessage()
 
-  describe 'removing a node', ->
-    it 'should succeed'
-    it 'node should not produce data anymore'
+    beforeEach () ->
+      responses = []
+      ui.on 'message', checkMessage
+    afterEach () ->
+      ui.removeListener 'message', checkMessage
+      onNewMessage = null
+
+    it 'adding should have one addnode response', (done) ->
+      onNewMessage = () ->
+        addnodes = responses.filter (r) -> r.protocol == 'graph' and r.command == 'addnode'
+        return if not addnodes.length # still waiting
+
+        chai.expect(addnodes, JSON.stringify(responses)).to.have.length 1
+        addnode = addnodes[0].payload
+        chai.expect(addnode).to.include.keys ['id', 'graph', 'component']
+        chai.expect(addnode.id).to.equal nodeName
+        chai.expect(addnode.component).to.equal componentName
+        return done()
+
+      node =
+        id: nodeName
+        graph: 'default/main'
+        component: componentName
+      ui.send 'graph', 'addnode', node
+
+    it 'removing should have one removenode response', (done) ->
+      onNewMessage = () ->
+        removenodes = responses.filter (r) -> r.protocol == 'graph' and r.command == 'removenode'
+        return if not removenodes.length # still waiting
+
+        chai.expect(removenodes, JSON.stringify(responses)).to.have.length 1
+        response = removenodes[0].payload
+        chai.expect(response).to.include.keys ['id', 'graph', 'component']
+        chai.expect(response.id).to.equal nodeName
+        chai.expect(response.component).to.equal componentName
+        return done()
+
+      remove =
+        id: nodeName
+        graph: 'default/main'
+        component: componentName
+      ui.send 'graph', 'removenode', remove
+
+    it 'after removing should not be in graph source', (done) ->
+      onNewMessage = () ->
+        sources = responses.filter (r) -> r.protocol == 'component' and r.command == 'source'
+        return if not sources.length # still waiting
+
+        payload = sources[0].payload
+        chai.expect(payload).to.include.keys ['name', 'code', 'language']
+        chai.expect(payload.language).to.equal 'json'
+        graph = JSON.parse payload.code
+        chai.expect(graph).to.include.keys ['processes']
+        chai.expect(graph.processes).to.not.include.keys [ nodeName ]
+        return done()
+
+      ui.send 'component', 'getsource',
+        name: 'default/main'
 
   describe 'adding a component', ->
     componentName = 'SetSource'
