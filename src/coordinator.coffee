@@ -99,7 +99,7 @@ class Coordinator extends EventEmitter
   constructor: (@broker, @options = {}) ->
     @participants = {}
     @connections = {} # connId -> { queue: opt String, handler: opt function }
-    @iips = {} # iipId -> value
+    @iips = {} # iipId -> { metadata, data }
     @started = false
     @processes = {}
     libraryOptions =
@@ -211,7 +211,10 @@ class Coordinator extends EventEmitter
   getComponentSource: (component, callback) ->
     return @library.getSource component, callback
 
-  startParticipant: (node, component, callback) ->
+  startParticipant: (node, component, metadata, callback) ->
+    if typeof metadata is 'function'
+      callback = metadata
+      metadata = {}
     if @options.ignore?.length and node in @options.ignore
       console.log "WARNING: Not restarting ignored participant #{node}"
       return callback null
@@ -230,6 +233,7 @@ class Coordinator extends EventEmitter
       return callback err if err
       for k, v of processes
         @processes[k] = v
+        @processes[k].metadata = metadata
       waitForParticipant @, node, (err) ->
         return callback err, processes
 
@@ -287,7 +291,10 @@ class Coordinator extends EventEmitter
 
   unsubscribeFrom: () -> # FIXME: implement
 
-  connect: (fromId, fromPort, toId, toName, callback) ->
+  connect: (fromId, fromPort, toId, toName, metadata, callback) ->
+    if typeof metadata is 'function'
+      callback = metadata
+      metadata = {}
     callback = ((err) ->) if not callback
  
     # NOTE: adding partial connection info to make checkParticipantConnections logic work
@@ -299,6 +306,7 @@ class Coordinator extends EventEmitter
       toName: toName
       srcQueue: null
       tgtQueue: null
+      metadata: metadata
     debug 'connect', edge
     @connections[edgeId] = edge
 
@@ -371,9 +379,14 @@ class Coordinator extends EventEmitter
     else
       null # ignored
 
-  addInitial: (partId, portId, data, callback) ->
+  addInitial: (partId, portId, data, metadata, callback) ->
+    if typeof metadata is 'function'
+      callback = metadata
+      metadata = {}
     id = iipId partId, portId
-    @iips[id] = data
+    @iips[id] =
+      data: data
+      metadata: metadata
     waitForParticipant @, partId, (err) =>
       return callback err if err
       if @started
@@ -385,7 +398,10 @@ class Coordinator extends EventEmitter
   removeInitial: (partId, portId) -> # FIXME: implement
     # Do we need to remove it from the queue??
 
-  exportPort: (direction, external, node, internal, callback) ->
+  exportPort: (direction, external, node, internal, metadata, callback) ->
+    if typeof metadata is 'function'
+      callback = metadata
+      metadata = {}
     target = if direction.indexOf("in") == 0 then @exported.inports else @exported.outports
     target[external] =
       role: node
@@ -475,6 +491,7 @@ class Coordinator extends EventEmitter
       name = part.role
       graph.processes[name] =
         component: part.component
+        metadata: @participants[id].metadata
 
     connectionIds = Object.keys(@connections).sort()
     for id in connectionIds
@@ -487,6 +504,7 @@ class Coordinator extends EventEmitter
         tgt:
           process: parts[2]
           port: parts[3]
+        metadata: @connections[id].metadata
       graph.connections.push edge
 
     iipIds = Object.keys(@iips).sort()
@@ -494,10 +512,11 @@ class Coordinator extends EventEmitter
       iip = @iips[id]
       parts = fromIipId id
       edge =
-        data: iip
+        data: iip.data
         tgt:
           process: parts[0]
           port: parts[1]
+        metadata: iip.metadata
       graph.connections.push edge
 
     return graph
@@ -537,15 +556,16 @@ class Coordinator extends EventEmitter
         participantStartConcurrency = 10
         async.mapLimit options.only, participantStartConcurrency, (role, cb) =>
           componentName = graph.processes[role].component
-          @startParticipant role, componentName, cb
+          metadata = graph.processes[role].metadata or {}
+          @startParticipant role, componentName, metadata, cb
         , setupCallback
 
       setupConnections = (setupCallback) =>
         async.map graph.connections, (c, cb) =>
           if c.data
-            @addInitial c.tgt.process, c.tgt.port, c.data, cb
+            @addInitial c.tgt.process, c.tgt.port, c.data, c.metadata, cb
           else
-            @connect c.src.process, c.src.port, c.tgt.process, c.tgt.port, cb
+            @connect c.src.process, c.src.port, c.tgt.process, c.tgt.port, c.metadata, cb
         , setupCallback
 
       async.parallel
