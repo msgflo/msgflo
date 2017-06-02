@@ -121,7 +121,8 @@ class Coordinator extends EventEmitter
     @connections = {}
     @iips = {}
     @graphName = graphName
-    # XXX: should we clear the @participants with the roles that we started?
+    @nodes = {}
+    @participants = {} # NOTE: also removes discovered things, not setup by us. But should soon be discovered again
     setup.killProcesses @processes, 'SIGTERM', (err) =>
       @processes = {}
       return callback err
