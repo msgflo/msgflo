@@ -379,6 +379,25 @@ describe 'FBP runtime protocol', () ->
           label: 'mycoffeeproducer'
           x: 2
       ui.send 'graph', 'changenode', change
+    it 'should include node metadata in JSON result', (done) ->
+      checkMessage = (d, protocol, command, payload) ->
+        return unless protocol is 'component'
+        ui.removeListener 'message', checkMessage
+        chai.expect(command, JSON.stringify(payload)).to.equal 'source'
+        chai.expect(payload).to.include.keys ['name', 'code', 'language']
+        chai.expect(payload.language).to.equal 'json'
+        graph = JSON.parse payload.code
+        chai.expect(graph).to.include.keys ['connections', 'processes']
+        chai.expect(graph.processes).to.include.keys ['mycoffeescriptproducer']
+        chai.expect(graph.processes.mycoffeescriptproducer).to.eql
+          component: 'ProduceFoo'
+          metadata:
+            label: 'mycoffeeproducer'
+            x: 2
+        done()
+      ui.on 'message', checkMessage
+      ui.send 'component', 'getsource',
+        name: 'default/main'
 
   describe 'subscribing to edges', ->
     repeatA = null
