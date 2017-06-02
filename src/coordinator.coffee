@@ -252,12 +252,12 @@ class Coordinator extends EventEmitter
   updateNodeMetadata: (node, metadata, callback) ->
     metadata = {} unless metadata
     process = null
-    for k, v of @processes
-      if k == node
+    for k, v of @participants
+      if v.role is node
         process = v
     unless process
       return callback new Error "Node #{node} not defined"
-    @processes[k].metadata = metadata
+    process.metadata = metadata
     return callback null
 
   sendTo: (participantId, inport, message, callback) ->
@@ -514,7 +514,7 @@ class Coordinator extends EventEmitter
       name = part.role
       graph.processes[name] =
         component: part.component
-        metadata: @processes[id].metadata or {}
+        metadata: @participants[id].metadata or {}
 
     connectionIds = Object.keys(@connections).sort()
     for id in connectionIds
