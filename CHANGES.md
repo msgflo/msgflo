@@ -1,3 +1,7 @@
+## 0.10.23 | released 02.06.2017
+
+* Fix `getSource` for participants started by the runtime
+
 ## 0.8.0 | released 03.08.2016
 
 * Fix spec/heterogenous participant test enforcing wrong discovery message.
