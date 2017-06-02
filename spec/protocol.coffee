@@ -200,19 +200,39 @@ describe 'FBP runtime protocol', () ->
       edge =
         src: { node: 'addedge-repeat-A', port: 'out' }
         tgt: { node: 'addedge-repeat-B', port: 'in' }
+        metadata:
+          route: 1
       ui.once 'message', (d, protocol, command, payload) ->
         chai.expect(payload).to.be.a 'object'
         chai.expect(command, JSON.stringify(payload)).to.equal 'addedge'
         chai.expect(protocol).to.equal 'graph'
-        chai.expect(payload).to.have.keys ['src', 'tgt']
+        chai.expect(payload).to.have.keys ['src', 'tgt', 'metadata']
         chai.expect(payload.src.node).to.equal edge.src.node
         chai.expect(payload.src.port).to.equal edge.src.port
         chai.expect(payload.tgt.node).to.equal edge.tgt.node
         chai.expect(payload.tgt.port).to.equal edge.tgt.port
+        chai.expect(payload.metadata).to.eql edge.metadata
         return done()
       ui.send 'graph', 'addedge', edge
 
     it 'data should now be forwarded'
+
+    it 'should be possible to change edge metadata', (done) ->
+      checkMessage = (d, protocol, command, payload) ->
+        chai.expect(command, JSON.stringify(payload)).to.equal 'changeedge'
+        chai.expect(protocol).to.equal 'graph'
+        chai.expect(payload).to.be.an 'object'
+        chai.expect(payload).to.include.keys ['src', 'tgt', 'metadata']
+        chai.expect(payload.metadata).to.eql change.metadata
+        ui.removeListener 'message', checkMessage
+        done()
+      ui.on 'message', checkMessage
+      change =
+        src: { node: 'addedge-repeat-A', port: 'out' }
+        tgt: { node: 'addedge-repeat-B', port: 'in' }
+        metadata:
+          route: 5
+      ui.send 'graph', 'changeedge', change
 
   describe 'removing a connected edge', ->
     repeatA = null
