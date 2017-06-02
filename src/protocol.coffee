@@ -175,6 +175,10 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
     proto.coordinator.stopParticipant payload.id, payload.component, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'removenode', payload
+  else if cmd == 'changenode'
+    proto.coordinator.updateParticipant payload.id, payload.metadata, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'changenode', payload
 
   # Connections
   else if cmd == 'addedge'
@@ -188,6 +192,11 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
     proto.coordinator.disconnect p.src.node, p.src.port, p.tgt.node, p.tgt.port, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'removeedge', payload
+  else if cmd == 'changeedge'
+    p = payload
+    proto.coordinator.updateEdge p.src.node, p.src.port, p.tgt.node, p.tgt.port, p.metadata, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'changeedge', payload
 
   # IIPs
   else if cmd == 'addinitial'

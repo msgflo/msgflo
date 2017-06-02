@@ -248,6 +248,16 @@ class Coordinator extends EventEmitter
         delete @process[k]
       return callback null, processes
 
+  updateParticipant: (node, metadata, callback) ->
+    process = null
+    for k, v of @processes
+      if k == node
+        process = v
+    unless process
+      return callback new Error "Node #{node} not defined"
+    @processes[k].metadata = metadata
+    return callback null
+
   sendTo: (participantId, inport, message, callback) ->
     debug 'sendTo', participantId, inport, message
     defaultCallback = (err) ->
@@ -341,6 +351,13 @@ class Coordinator extends EventEmitter
       delete @connections[edgeId]
       @emit 'graph-changed'
       return callback null
+
+  updateEdge: (fromId, fromPort, toId, toPort, metadata, callback) ->
+    edgeId = connId fromId, fromPort, toId, toPort
+    edge = @connections[edgeId]
+    return callback new Error "Could not find connection #{edgeId}" if not edge
+    @connections[edgeId].metadata = metadata
+    return callback null
 
   checkParticipantConnections: (action, participant) ->
     findConnectedPorts = (dir, srcPort) =>
