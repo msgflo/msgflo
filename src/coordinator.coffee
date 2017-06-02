@@ -97,9 +97,10 @@ pingUrl = (address, method, callback) ->
 
 class Coordinator extends EventEmitter
   constructor: (@broker, @options = {}) ->
-    @participants = {}
+    @participants = {} # participantId -> Definition (from discovery)
     @connections = {} # connId -> { queue: opt String, handler: opt function }
     @iips = {} # iipId -> { metadata, data }
+    @nodes = {} # role -> { metadata: {} }
     @started = false
     @processes = {}
     libraryOptions =
@@ -216,6 +217,8 @@ class Coordinator extends EventEmitter
       callback = metadata
       metadata = {}
     metadata = {} unless metadata
+    @nodes[node] = { metadata: {} } if not @nodes[node]
+    @nodes[node].metadata = metadata
     if @options.ignore?.length and node in @options.ignore
       console.log "WARNING: Not restarting ignored participant #{node}"
       return callback null
@@ -234,7 +237,6 @@ class Coordinator extends EventEmitter
       return callback err if err
       for k, v of processes
         @processes[k] = v
-        @processes[k].metadata = metadata
       waitForParticipant @, node, (err) ->
         return callback err, processes
 
@@ -252,12 +254,9 @@ class Coordinator extends EventEmitter
   updateNodeMetadata: (node, metadata, callback) ->
     metadata = {} unless metadata
     process = null
-    for k, v of @participants
-      if v.role is node
-        process = v
-    unless process
-      return callback new Error "Node #{node} not defined"
-    process.metadata = metadata
+    if not @nodes[node]
+      return callback new Error "Node #{node} not found"
+    @nodes[node].metadata = metadata
     return callback null
 
   sendTo: (participantId, inport, message, callback) ->
@@ -514,7 +513,7 @@ class Coordinator extends EventEmitter
       name = part.role
       graph.processes[name] =
         component: part.component
-        metadata: @participants[id].metadata or {}
+        metadata: @nodes[name]?.metadata or {}
 
     connectionIds = Object.keys(@connections).sort()
     for id in connectionIds
