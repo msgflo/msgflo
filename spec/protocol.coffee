@@ -390,7 +390,7 @@ describe 'FBP runtime protocol', () ->
         chai.expect(graph).to.include.keys ['connections', 'processes']
         chai.expect(graph.processes).to.include.keys ['mycoffeescriptproducer']
         chai.expect(graph.processes.mycoffeescriptproducer).to.eql
-          component: 'ProduceFoo'
+          component: 'ProduceFoo' # NOTE: Different from the name the component was registered as
           metadata:
             label: 'mycoffeeproducer'
             x: 2
