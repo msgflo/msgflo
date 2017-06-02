@@ -260,9 +260,9 @@ class Coordinator extends EventEmitter
     removeDiscoveredParticipants node
     @emit 'graph-changed'
     setup.killProcesses processes, 'SIGTERM', (err) =>
-      return callback err
+      return callback err if err
       for k, v of processes
-        delete @process[k]
+        delete @processes[k]
       # might have been discovered again during shutdown
       removeDiscoveredParticipants node
       return callback null, processes
