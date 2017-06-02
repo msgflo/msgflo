@@ -5,8 +5,20 @@
     <description></description>
     <link>https://msgflo.org/</link>
     <language>en</language>
-    <lastBuildDate>Wed, 31 May 2017 19:33:13 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 02 Jun 2017 08:44:16 +0000</lastBuildDate>
     
+    <item>
+      <title>How The Grid manages their AI workloads with MsgFlo</title>
+      <description>
+</description>
+      <pubDate>Wed, 31 May 2017 00:00:00 +0000</pubDate>
+      
+      <link>https://www.cloudamqp.com/blog/2017-05-31-work-queues-in-rabbitmq-for-resource-intensive-tasks.html</link>
+      <guid isPermaLink="true">https://www.cloudamqp.com/blog/2017-05-31-work-queues-in-rabbitmq-for-resource-intensive-tasks.html</guid>
+      
+      <author></author>
+    </item>
+  
     <item>
       <title>Orchestrate 2017: Building scalable cloud systems using message queues</title>
       <description>
