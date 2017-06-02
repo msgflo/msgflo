@@ -331,6 +331,7 @@ describe 'FBP runtime protocol', () ->
         chai.expect(payload).to.be.an 'object'
         chai.expect(payload).to.include.keys ['id', 'graph', 'component']
         chai.expect(payload.component).to.equal componentName
+        chai.expect(payload.metadata).to.eql add.metadata
         ui.removeListener 'message', checkMessage
         done()
       ui.on 'message', checkMessage
@@ -338,7 +339,26 @@ describe 'FBP runtime protocol', () ->
         id: 'mycoffeescriptproducer'
         graph: 'default/main'
         component: componentName
+        metadata:
+          label: 'myproducer'
       ui.send 'graph', 'addnode', add
+    it 'should be possible to change node metadata', (done) ->
+      checkMessage = (d, protocol, command, payload) ->
+        chai.expect(command, JSON.stringify(payload)).to.equal 'changenode'
+        chai.expect(protocol).to.equal 'graph'
+        chai.expect(payload).to.be.an 'object'
+        chai.expect(payload).to.include.keys ['id', 'graph', 'metadata']
+        chai.expect(payload.metadata).to.eql change.metadata
+        ui.removeListener 'message', checkMessage
+        done()
+      ui.on 'message', checkMessage
+      change =
+        id: 'mycoffeescriptproducer'
+        graph: 'default/main'
+        metadata:
+          label: 'mycoffeeproducer'
+          x: 2
+      ui.send 'graph', 'changenode', change
 
   describe 'subscribing to edges', ->
     repeatA = null
