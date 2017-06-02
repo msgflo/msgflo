@@ -514,7 +514,7 @@ class Coordinator extends EventEmitter
       name = part.role
       graph.processes[name] =
         component: part.component
-        metadata: @participants[id].metadata
+        metadata: @processes[id].metadata or {}
 
     connectionIds = Object.keys(@connections).sort()
     for id in connectionIds
