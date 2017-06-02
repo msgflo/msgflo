@@ -286,6 +286,7 @@ describe 'FBP runtime protocol', () ->
   describe 'adding a component', ->
     componentName = 'SetSource'
     componentCode = fs.readFileSync(__dirname+'/fixtures/ProduceFoo.coffee', 'utf-8')
+    componentCode = componentCode.replace(/ProduceFoo/g, componentName)
 
     it 'should become available', (done) ->
       receivedAck = false
@@ -298,8 +299,8 @@ describe 'FBP runtime protocol', () ->
           chai.expect(protocol).to.equal 'component'
           chai.expect(payload).to.include.keys ['name', 'code', 'language', 'library']
           chai.expect(payload.language).to.equal 'coffeescript'
-          chai.expect(payload.code).to.include "component: 'ProduceFoo'"
-          chai.expect(payload.code).to.include "module.exports = ProduceFoo"
+          chai.expect(payload.code).to.include "component: '#{componentName}'"
+          chai.expect(payload.code).to.include "module.exports = #{componentName}"
           receivedAck = true
           console.log 'got ACK'
         else if command == 'component'
@@ -334,8 +335,8 @@ describe 'FBP runtime protocol', () ->
         chai.expect(payload.library).to.equal options.config.namespace
         chai.expect(payload.name).to.equal 'SetSource'
         chai.expect(payload.language).to.equal 'coffeescript'
-        chai.expect(payload.code).to.include "component: 'ProduceFoo'"
-        chai.expect(payload.code).to.include "module.exports = ProduceFoo"
+        chai.expect(payload.code).to.include "component: '#{componentName}'"
+        chai.expect(payload.code).to.include "module.exports = #{componentName}"
         done()
 
       source =
@@ -390,7 +391,7 @@ describe 'FBP runtime protocol', () ->
         chai.expect(graph).to.include.keys ['connections', 'processes']
         chai.expect(graph.processes).to.include.keys ['mycoffeescriptproducer']
         chai.expect(graph.processes.mycoffeescriptproducer).to.eql
-          component: 'ProduceFoo' # NOTE: Different from the name the component was registered as
+          component: componentName
           metadata:
             label: 'mycoffeeproducer'
             x: 2
