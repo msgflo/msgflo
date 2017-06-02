@@ -215,6 +215,7 @@ class Coordinator extends EventEmitter
     if typeof metadata is 'function'
       callback = metadata
       metadata = {}
+    metadata = {} unless metadata
     if @options.ignore?.length and node in @options.ignore
       console.log "WARNING: Not restarting ignored participant #{node}"
       return callback null
@@ -249,6 +250,7 @@ class Coordinator extends EventEmitter
       return callback null, processes
 
   updateParticipantMetadata: (node, metadata, callback) ->
+    metadata = {} unless metadata
     process = null
     for k, v of @processes
       if k == node
@@ -305,6 +307,7 @@ class Coordinator extends EventEmitter
     if typeof metadata is 'function'
       callback = metadata
       metadata = {}
+    metadata = {} unless metadata
     callback = ((err) ->) if not callback
  
     # NOTE: adding partial connection info to make checkParticipantConnections logic work
@@ -353,6 +356,7 @@ class Coordinator extends EventEmitter
       return callback null
 
   updateEdge: (fromId, fromPort, toId, toPort, metadata, callback) ->
+    metadata = {} unless metadata
     edgeId = connId fromId, fromPort, toId, toPort
     edge = @connections[edgeId]
     return callback new Error "Could not find connection #{edgeId}" if not edge
@@ -400,6 +404,7 @@ class Coordinator extends EventEmitter
     if typeof metadata is 'function'
       callback = metadata
       metadata = {}
+    metadata = {} unless metadata
     id = iipId partId, portId
     @iips[id] =
       data: data
@@ -419,6 +424,7 @@ class Coordinator extends EventEmitter
     if typeof metadata is 'function'
       callback = metadata
       metadata = {}
+    metadata = {} unless metadata
     target = if direction.indexOf("in") == 0 then @exported.inports else @exported.outports
     target[external] =
       role: node
