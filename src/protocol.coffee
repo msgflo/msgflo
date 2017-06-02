@@ -176,7 +176,7 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'removenode', payload
   else if cmd == 'changenode'
-    proto.coordinator.updateParticipantMetadata payload.id, payload.metadata, (err) ->
+    proto.coordinator.updateNodeMetadata payload.id, payload.metadata, (err) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'changenode', payload
 

@@ -249,7 +249,7 @@ class Coordinator extends EventEmitter
         delete @process[k]
       return callback null, processes
 
-  updateParticipantMetadata: (node, metadata, callback) ->
+  updateNodeMetadata: (node, metadata, callback) ->
     metadata = {} unless metadata
     process = null
     for k, v of @processes
