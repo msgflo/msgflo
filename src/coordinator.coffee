@@ -193,6 +193,11 @@ class Coordinator extends EventEmitter
     definition.extra.firstSeen = new Date
     definition.extra.lastSeen = new Date
     @participants[definition.id] = definition
+
+    # Ensure we have a node also for discovered participants
+    @nodes[definition.role] = { metadata: {} } if not @nodes[definition.role]
+    @nodes[definition.role].component = definition.component
+
     @library._updateDefinition definition.component, definition
     @emit 'participant-added', definition
     @emit 'participant', 'added', definition
