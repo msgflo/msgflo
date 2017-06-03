@@ -515,13 +515,12 @@ class Coordinator extends EventEmitter
       inports: []
       outports: []
 
-    participantNames = Object.keys(@participants).sort()
-    for id in participantNames
-      part = @participants[id]
-      name = part.role
+    nodeNames = Object.keys(@nodes).sort()
+    for name in nodeNames
+      node = @nodes[id]
       graph.processes[name] =
-        component: part.component
-        metadata: @nodes[name]?.metadata or {}
+        component: node.component
+        metadata: node.metadata or {}
 
     connectionIds = Object.keys(@connections).sort()
     for id in connectionIds
