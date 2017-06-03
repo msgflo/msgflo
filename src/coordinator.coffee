@@ -517,7 +517,7 @@ class Coordinator extends EventEmitter
 
     nodeNames = Object.keys(@nodes).sort()
     for name in nodeNames
-      node = @nodes[id]
+      node = @nodes[name]
       graph.processes[name] =
         component: node.component
         metadata: node.metadata or {}
