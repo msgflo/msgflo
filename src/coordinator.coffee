@@ -386,19 +386,19 @@ class Coordinator extends EventEmitter
       return @connections[id]?
 
     if action == 'added'
-      id = participant.id
+      role = participant.role
       # inbound
       for port in participant.inports
         matches = findConnectedPorts 'outports', port
         for m in matches
-          e = [m.part.id, m.port.id, id, port.id]
+          e = [m.part.role, m.port.id, role, port.id]
           @connect e[0], e[1], e[2], e[3] if not isConnected e
 
       # outbound
       for port in participant.outports
         matches = findConnectedPorts 'inports', port
         for m in matches
-          e = [id, port.id, m.part.id, m.port.id]
+          e = [role, port.id, m.part.role, m.port.id]
           @connect e[0], e[1], e[2], e[3] if not isConnected e
 
     else if action == 'removed'

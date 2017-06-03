@@ -160,9 +160,9 @@ describe 'FBP runtime protocol', () ->
             chai.expect(graph).to.include.keys ['connections', 'processes']
             chai.expect(graph.connections).to.have.length 1
             conn = graph.connections[0]
-            chai.expect(conn.src.process).to.contain 'say'
+            chai.expect(conn.src.process).to.equal 'say'
             chai.expect(conn.src.port).to.equal 'out'
-            chai.expect(conn.tgt.process).to.contain 'sink'
+            chai.expect(conn.tgt.process).to.equal 'sink'
             chai.expect(conn.tgt.port).to.equal 'drop'
             ui.removeListener 'message', checkMessage
             done()
