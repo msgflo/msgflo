@@ -222,8 +222,6 @@ class Coordinator extends EventEmitter
       callback = metadata
       metadata = {}
     metadata = {} unless metadata
-    @nodes[node] = { metadata: {} } if not @nodes[node]
-    @nodes[node].metadata = metadata
     if @options.ignore?.length and node in @options.ignore
       console.log "WARNING: Not restarting ignored participant #{node}"
       return callback null
@@ -231,6 +229,11 @@ class Coordinator extends EventEmitter
       console.log "WARNING: Attempting to start participant with missing component: #{node}(#{component})"
       # XXX: should be an error, but Flowhub does this in project mode..
       return callback null
+
+    @nodes[node] = { metadata: {} } if not @nodes[node]
+    @nodes[node].metadata = metadata
+    @nodes[node].component = component
+
     iips = {}
     cmd = @library.componentCommand component, node, iips
     commands = {}
