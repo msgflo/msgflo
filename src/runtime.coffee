@@ -119,7 +119,11 @@ class Runtime
           onLoaded null
 
   stop: (callback) ->
-    @server.close callback
+    @coordinator.stop (stopErr) =>
+      @server.close (closeErr) ->
+        return callback stopErr if stopErr
+        return callback closeErr if closeErr
+        return callback null
 
   address: () ->
     scheme = 'ws://'

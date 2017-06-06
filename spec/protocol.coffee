@@ -172,7 +172,6 @@ describe 'FBP runtime protocol', () ->
             ui.send 'component', 'getsource', { name: 'default/main' }
           , 500
 
-    # TODO: automatically represent multiple participants of same class as subgraph
   describe 'stopping a running network', ->
     it 'should succeed'
     it 'network:getstatus shows not running'
@@ -275,17 +274,82 @@ describe 'FBP runtime protocol', () ->
 
     it 'data should now not be forwarded'
 
-  describe 'adding a node', ->
-    it 'should succeed'
-    it 'node should produce data'
+  describe 'adding and removing a node', ->
+    responses = []
+    nodeName = 'add-remove-node'
+    componentName = 'InitiallyAvailable'
+    onNewMessage = null
+    checkMessage = (d, protocol, command, payload) ->
+      responses.push
+        protocol: protocol
+        command: command
+        payload: payload
+      if onNewMessage
+        onNewMessage()
 
-  describe 'removing a node', ->
-    it 'should succeed'
-    it 'node should not produce data anymore'
+    beforeEach () ->
+      responses = []
+      ui.on 'message', checkMessage
+    afterEach () ->
+      ui.removeListener 'message', checkMessage
+      onNewMessage = null
+
+    it 'adding should have one addnode response', (done) ->
+      onNewMessage = () ->
+        addnodes = responses.filter (r) -> r.protocol == 'graph' and r.command == 'addnode'
+        return if not addnodes.length # still waiting
+
+        chai.expect(addnodes, JSON.stringify(responses)).to.have.length 1
+        addnode = addnodes[0].payload
+        chai.expect(addnode).to.include.keys ['id', 'graph', 'component']
+        chai.expect(addnode.id).to.equal nodeName
+        chai.expect(addnode.component).to.equal componentName
+        return done()
+
+      node =
+        id: nodeName
+        graph: 'default/main'
+        component: componentName
+      ui.send 'graph', 'addnode', node
+
+    it 'removing should have one removenode response', (done) ->
+      onNewMessage = () ->
+        removenodes = responses.filter (r) -> r.protocol == 'graph' and r.command == 'removenode'
+        return if not removenodes.length # still waiting
+
+        chai.expect(removenodes, JSON.stringify(responses)).to.have.length 1
+        response = removenodes[0].payload
+        chai.expect(response).to.include.keys ['id', 'graph', 'component']
+        chai.expect(response.id).to.equal nodeName
+        chai.expect(response.component).to.equal componentName
+        return done()
+
+      remove =
+        id: nodeName
+        graph: 'default/main'
+        component: componentName
+      ui.send 'graph', 'removenode', remove
+
+    it 'after removing should not be in graph source', (done) ->
+      onNewMessage = () ->
+        sources = responses.filter (r) -> r.protocol == 'component' and r.command == 'source'
+        return if not sources.length # still waiting
+
+        payload = sources[0].payload
+        chai.expect(payload).to.include.keys ['name', 'code', 'language']
+        chai.expect(payload.language).to.equal 'json'
+        graph = JSON.parse payload.code
+        chai.expect(graph).to.include.keys ['processes']
+        chai.expect(graph.processes).to.not.include.keys [ nodeName ]
+        return done()
+
+      ui.send 'component', 'getsource',
+        name: 'default/main'
 
   describe 'adding a component', ->
     componentName = 'SetSource'
     componentCode = fs.readFileSync(__dirname+'/fixtures/ProduceFoo.coffee', 'utf-8')
+    componentCode = componentCode.replace(/ProduceFoo/g, componentName)
 
     it 'should become available', (done) ->
       receivedAck = false
@@ -298,8 +362,8 @@ describe 'FBP runtime protocol', () ->
           chai.expect(protocol).to.equal 'component'
           chai.expect(payload).to.include.keys ['name', 'code', 'language', 'library']
           chai.expect(payload.language).to.equal 'coffeescript'
-          chai.expect(payload.code).to.include "component: 'ProduceFoo'"
-          chai.expect(payload.code).to.include "module.exports = ProduceFoo"
+          chai.expect(payload.code).to.include "component: '#{componentName}'"
+          chai.expect(payload.code).to.include "module.exports = #{componentName}"
           receivedAck = true
           console.log 'got ACK'
         else if command == 'component'
@@ -334,8 +398,8 @@ describe 'FBP runtime protocol', () ->
         chai.expect(payload.library).to.equal options.config.namespace
         chai.expect(payload.name).to.equal 'SetSource'
         chai.expect(payload.language).to.equal 'coffeescript'
-        chai.expect(payload.code).to.include "component: 'ProduceFoo'"
-        chai.expect(payload.code).to.include "module.exports = ProduceFoo"
+        chai.expect(payload.code).to.include "component: '#{componentName}'"
+        chai.expect(payload.code).to.include "module.exports = #{componentName}"
         done()
 
       source =
@@ -390,7 +454,7 @@ describe 'FBP runtime protocol', () ->
         chai.expect(graph).to.include.keys ['connections', 'processes']
         chai.expect(graph.processes).to.include.keys ['mycoffeescriptproducer']
         chai.expect(graph.processes.mycoffeescriptproducer).to.eql
-          component: 'ProduceFoo' # NOTE: Different from the name the component was registered as
+          component: componentName
           metadata:
             label: 'mycoffeeproducer'
             x: 2
@@ -479,3 +543,31 @@ describe 'FBP runtime protocol', () ->
       chai.expect(addinitial.tgt).to.include.keys ['node', 'port']
       chai.expect(addinitial.tgt.node).to.equal 'iip-target'
       chai.expect(addinitial.tgt.port).to.equal 'interval'
+
+    it 'clearing the graph should remove processes and IIPs', (done) ->
+      responses = []
+      graphName = 'default/main'
+      checkMessage = (d, protocol, command, payload) ->
+        responses.push
+          protocol: protocol
+          command: command
+          payload: payload
+        if command == 'clear'
+          chai.expect(payload).to.include.keys ['id']
+          chai.expect(payload.id).to.equal graphName
+          ui.send 'component', 'getsource', { name: graphName }
+        else if command == 'source'
+          chai.expect(payload).to.include.keys ['name', 'code', 'language']
+          chai.expect(payload.name).to.equal 'main'
+          graph = JSON.parse payload.code
+          roles = Object.keys graph.processes
+          inports = Object.keys graph.inports
+          outports = Object.keys graph.outports
+          chai.expect(roles, JSON.stringify(roles)).to.have.length 0
+          chai.expect(graph.connections, JSON.stringify(graph.connections)).to.have.length 0
+          chai.expect(inports).to.have.length 0
+          chai.expect(outports).to.have.length 0
+          return done()
+
+      ui.on 'message', checkMessage
+      ui.send 'graph', 'clear', { id: graphName }

@@ -121,7 +121,8 @@ class Coordinator extends EventEmitter
     @connections = {}
     @iips = {}
     @graphName = graphName
-    # XXX: should we clear the @participants with the roles that we started?
+    @nodes = {}
+    @participants = {} # NOTE: also removes discovered things, not setup by us. But should soon be discovered again
     setup.killProcesses @processes, 'SIGTERM', (err) =>
       @processes = {}
       return callback err
@@ -241,14 +242,30 @@ class Coordinator extends EventEmitter
         return callback err, processes
 
   stopParticipant: (node, component, callback) ->
+    return callback new Error "stopParticipant(): Missing node argument" if not (node? and typeof node == 'string')
+
     processes = {}
     for k, v of @processes
       if k == node
         processes[k] = v
+    delete @nodes[node]
+
+    removeDiscoveredParticipants = (role) =>
+      keep = {}
+      for id, def of @participants
+        match = def.role == role
+        keep[id] = def if not match
+      @participants = keep
+
+    # we know it should stop sending discovery, pre-emptively remove
+    removeDiscoveredParticipants node
+    @emit 'graph-changed'
     setup.killProcesses processes, 'SIGTERM', (err) =>
-      return callback err
+      return callback err if err
       for k, v of processes
-        delete @process[k]
+        delete @processes[k]
+      # might have been discovered again during shutdown
+      removeDiscoveredParticipants node
       return callback null, processes
 
   updateNodeMetadata: (node, metadata, callback) ->
