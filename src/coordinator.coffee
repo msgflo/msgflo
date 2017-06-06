@@ -194,6 +194,11 @@ class Coordinator extends EventEmitter
     definition.extra.firstSeen = new Date
     definition.extra.lastSeen = new Date
     @participants[definition.id] = definition
+
+    # Ensure we have a node also for discovered participants
+    @nodes[definition.role] = { metadata: {} } if not @nodes[definition.role]
+    @nodes[definition.role].component = definition.component
+
     @library._updateDefinition definition.component, definition
     @emit 'participant-added', definition
     @emit 'participant', 'added', definition
@@ -218,8 +223,6 @@ class Coordinator extends EventEmitter
       callback = metadata
       metadata = {}
     metadata = {} unless metadata
-    @nodes[node] = { metadata: {} } if not @nodes[node]
-    @nodes[node].metadata = metadata
     if @options.ignore?.length and node in @options.ignore
       console.log "WARNING: Not restarting ignored participant #{node}"
       return callback null
@@ -227,6 +230,11 @@ class Coordinator extends EventEmitter
       console.log "WARNING: Attempting to start participant with missing component: #{node}(#{component})"
       # XXX: should be an error, but Flowhub does this in project mode..
       return callback null
+
+    @nodes[node] = { metadata: {} } if not @nodes[node]
+    @nodes[node].metadata = metadata
+    @nodes[node].component = component
+
     iips = {}
     cmd = @library.componentCommand component, node, iips
     commands = {}
@@ -395,19 +403,19 @@ class Coordinator extends EventEmitter
       return @connections[id]?
 
     if action == 'added'
-      id = participant.id
+      role = participant.role
       # inbound
       for port in participant.inports
         matches = findConnectedPorts 'outports', port
         for m in matches
-          e = [m.part.id, m.port.id, id, port.id]
+          e = [m.part.role, m.port.id, role, port.id]
           @connect e[0], e[1], e[2], e[3] if not isConnected e
 
       # outbound
       for port in participant.outports
         matches = findConnectedPorts 'inports', port
         for m in matches
-          e = [id, port.id, m.part.id, m.port.id]
+          e = [role, port.id, m.part.role, m.port.id]
           @connect e[0], e[1], e[2], e[3] if not isConnected e
 
     else if action == 'removed'
@@ -524,13 +532,12 @@ class Coordinator extends EventEmitter
       inports: []
       outports: []
 
-    participantNames = Object.keys(@participants).sort()
-    for id in participantNames
-      part = @participants[id]
-      name = part.role
+    nodeNames = Object.keys(@nodes).sort()
+    for name in nodeNames
+      node = @nodes[name]
       graph.processes[name] =
-        component: part.component
-        metadata: @nodes[name]?.metadata or {}
+        component: node.component
+        metadata: node.metadata or {}
 
     connectionIds = Object.keys(@connections).sort()
     for id in connectionIds
