@@ -16,6 +16,7 @@ RUN npm install
 # Install msgflo-python
 RUN apt-get update && apt-get install -y \
   python \
+  python-dev \
   python-pip
 RUN pip install msgflo
 
