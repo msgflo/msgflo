@@ -51,6 +51,7 @@
     "msgflo-setup": "./bin/msgflo-setup"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test",
+    "start": "./bin/msgflo"
   }
 }

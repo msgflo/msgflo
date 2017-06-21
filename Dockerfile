@@ -23,4 +23,4 @@ RUN pip install msgflo
 # Map the volumes
 VOLUME /var/app/graphs /var/app/participants /var/app/tests
 
-CMD node ./bin/msgflo
+CMD npm start
