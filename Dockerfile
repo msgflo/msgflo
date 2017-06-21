@@ -10,7 +10,7 @@ RUN mkdir -p /var/app
 WORKDIR /var/app
 
 # Install MsgFlo and dependencies
-COPY package.json /var/app
+COPY . /var/app
 RUN npm install
 
 # Install msgflo-python
