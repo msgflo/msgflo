@@ -91,7 +91,7 @@ normalizeConfig = (config) ->
     repository = config.repository.url
   config = config.msgflo if config.msgflo # Migth be under a .msgflo key, for instance in package.json
 
-  config.repository = repository if not config.repository?
+  config.repository = repository unless typeof config.repository is 'string'
   config.namespace = namespace if not config.namespace?
   config.components = {} if not config.components
   config.variables = {} if not config.variables

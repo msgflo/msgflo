@@ -63,8 +63,6 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     options = proto.coordinator.library.options
     runtime.namespace = options.config.namespace if options.config?.namespace?
     runtime.repository = options.config.repository if options.config?.repository?
-    if typeof runtime.repository is 'object' and runtime.repository.url
-      runtime.repository = runtime.repository.url
     proto.transport.send 'runtime', 'runtime', runtime, ctx
 
   else if sub == 'runtime' and cmd == 'packet'
