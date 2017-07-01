@@ -552,8 +552,8 @@ class Coordinator extends EventEmitter
         name: name
         environment:
           type: 'msgflo'
-      inports: []
-      outports: []
+      inports: {}
+      outports: {}
       groups: []
       processes: {}
       connections: []
