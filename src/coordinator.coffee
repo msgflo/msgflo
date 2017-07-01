@@ -552,10 +552,11 @@ class Coordinator extends EventEmitter
         name: name
         environment:
           type: 'msgflo'
-      processes: {}
-      connections: []
       inports: []
       outports: []
+      groups: []
+      processes: {}
+      connections: []
 
     nodeNames = Object.keys(@nodes).sort()
     for name in nodeNames
@@ -563,6 +564,12 @@ class Coordinator extends EventEmitter
       graph.processes[name] =
         component: node.component
         metadata: node.metadata or {}
+
+    for name, groupData of @groups
+      graph.groups.push
+        name: name
+        nodes: groupData.nodes
+        metadata: groupData.metadata or {}
 
     connectionIds = Object.keys(@connections).sort()
     for id in connectionIds
@@ -608,6 +615,13 @@ class Coordinator extends EventEmitter
     availableComponents = Object.keys @library.components
     common.readGraph options.graphfile, (err, graph) =>
       return callback err if err
+
+      if graph.groups?.length
+        for group in graph.groups
+          @groups[group.name] =
+            nodes: group.nodes or []
+            metadata: group.metadata or {}
+
       for role, process of graph.processes
         if process.component in availableComponents
           rolesWithComponent.push role
