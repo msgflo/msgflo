@@ -494,12 +494,12 @@ class Coordinator extends EventEmitter
     @groups[name].metadata = metadata if metadata
     callback null
 
-  removeGroup: (name) ->
+  removeGroup: (name, callback) ->
     return callback new Error "Group #{name} not found" unless @groups[name]
     delete @groups[name]
     callback null
 
-  renameGroup: (fromName, toName) ->
+  renameGroup: (fromName, toName, callback) ->
     return callback new Error "Group #{name} not found" unless @groups[fromName]
     @groups[toName] = @groups[fromName]
     delete @groups[fromName]
