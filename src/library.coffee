@@ -198,8 +198,8 @@ class Library extends EventEmitter
       source =
         name: basename
         library: library
-        code: '' # TODO: discovery data in YAML
-        language: 'yaml'
+        code: JSON.stringify(component.definition or {}, null, 2)
+        language: 'discovery'
       return callback null, source
 
     lang = component.language
