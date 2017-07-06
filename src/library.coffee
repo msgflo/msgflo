@@ -183,8 +183,7 @@ class Library extends EventEmitter
     debug 'requesting component source', name
     component = @getComponent name
     return callback new Error "Component not found for #{name}" unless component
-    lang = component.language
-    ext = languageExtensions[lang]
+
     basename = name
     library = null
     if name.indexOf('/') isnt -1
@@ -192,6 +191,19 @@ class Library extends EventEmitter
       [library, basename] = name.split '/'
     else if @options.config?.namespace?
       library = @options.config?.namespace
+
+    unless component.language
+      # Component that doesn't come from handlers, send discovery info since source isn't available
+      debug 'component without source', name, component.command
+      source =
+        name: basename
+        library: library
+        code: '' # TODO: discovery data in YAML
+        language: 'yaml'
+      return callback null, source
+
+    lang = component.language
+    ext = languageExtensions[lang]
     filename = path.join @options.componentdir, "#{basename}.#{ext}"
     fs.readFile filename, 'utf-8', (err, code) ->
       debug 'component source file', filename, lang, err
