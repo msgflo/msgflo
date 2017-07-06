@@ -1,6 +1,7 @@
 
 fs = require 'fs'
 path = require 'path'
+yaml = require 'js-yaml'
 debug = require('debug')('msgflo:library')
 EventEmitter = require('events').EventEmitter
 
@@ -198,7 +199,7 @@ class Library extends EventEmitter
       source =
         name: basename
         library: library
-        code: JSON.stringify(component.definition or {}, null, 2)
+        code: yaml.safeDump component.definition or {}
         language: 'discovery'
       return callback null, source
 
