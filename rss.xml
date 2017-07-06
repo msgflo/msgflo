@@ -5,8 +5,32 @@
     <description></description>
     <link>https://msgflo.org/</link>
     <language>en</language>
-    <lastBuildDate>Thu, 06 Jul 2017 15:20:20 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 06 Jul 2017 15:59:44 +0000</lastBuildDate>
     
+    <item>
+      <title>MsgFlo IoT workshop at Bitraf: sensors, access control, and more</title>
+      <description>
+</description>
+      <pubDate>Tue, 04 Jul 2017 00:00:00 +0000</pubDate>
+      
+      <link>http://bergie.iki.fi/blog/flowhub-iot-workshop-bitraf/</link>
+      <guid isPermaLink="true">http://bergie.iki.fi/blog/flowhub-iot-workshop-bitraf/</guid>
+      
+      <author></author>
+    </item>
+  
+    <item>
+      <title>Two hackathons in a week: thoughts on NoFlo and MsgFlo</title>
+      <description>
+</description>
+      <pubDate>Mon, 19 Jun 2017 00:00:00 +0000</pubDate>
+      
+      <link>http://bergie.iki.fi/blog/msgflo-noflo-in-hackathons/</link>
+      <guid isPermaLink="true">http://bergie.iki.fi/blog/msgflo-noflo-in-hackathons/</guid>
+      
+      <author></author>
+    </item>
+  
     <item>
       <title>How The Grid manages their AI workloads with MsgFlo</title>
       <description>
