@@ -11,6 +11,7 @@ fbpPort = (port) ->
     id: port.id
     type: port.type or "any"
     description: port.description or ""
+    schema: port.schema # optional
     addressable: false
     required: false # TODO: implement
   return m
