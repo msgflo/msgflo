@@ -34,12 +34,14 @@ The message `payload` contains the following information:
   - `id`: port name
   - `queue`: the message queue the process listens to
   - `type`: port datatype, for example `boolean`
+  - `description`: (optional) Human-readable description of the port and its function
   - `schema`: (optional) URL to a JSON schema for data expected on port
   - `options`: (optional) queue options as specified by the message queue implementation
 * `outports`: list of outports containing:
   - `id`: port name
   - `queue`: the message queue the process transmits to
   - `type`: port datatype, for example `boolean`
+  - `description`: (optional) Human-readable description of the port and its function
   - `schema`: (optional) URL to a JSON schema for data sent on port
   - `options`: (optional) queue options as specified by the message queue implementation
 
