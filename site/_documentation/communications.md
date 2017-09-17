@@ -23,9 +23,7 @@ The network coordinator subscribes to a queue named `fbp`.
 Once a participant becomes available, it announces its availability by sending a message to this queue
 with `protocol`: 'discovery' and `command`: 'participant'.
 
-In case of systems incapable of communicating via FBP protocol
-but which can nonetheless be connected to a network,
-the message `payload` contains the following information:
+The message `payload` contains the following information:
 
 * `id`: short unique name for the participant. Ex: measure1
 * `role`: the role this participant has in the network. Used to group multiple partipants. Ex: measure
@@ -36,12 +34,14 @@ the message `payload` contains the following information:
   - `id`: port name
   - `queue`: the message queue the process listens to
   - `type`: port datatype, for example `boolean`
-  - `options`: queue options as specified by the message queue implementation
+  - `schema`: (optional) URL to a JSON schema for data expected on port
+  - `options`: (optional) queue options as specified by the message queue implementation
 * `outports`: list of outports containing:
   - `id`: port name
   - `queue`: the message queue the process transmits to
   - `type`: port datatype, for example `boolean`
-  - `options`: queue options as specified by the message queue implementation
+  - `schema`: (optional) URL to a JSON schema for data sent on port
+  - `options`: (optional) queue options as specified by the message queue implementation
 
 If the participant is itself implemented using FBP and supports the
 [FBP runtime protocol](https://flowbased.github.io/fbp-protocol/), these additional keys should be defined.
