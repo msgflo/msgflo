@@ -2,10 +2,10 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>MsgFlo</title>
-    <description></description>
+    <description>Distributed Flow-Based Programming via message queues</description>
     <link>https://msgflo.org/</link>
     <language>en</language>
-    <lastBuildDate>Thu, 06 Jul 2017 15:59:44 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 17 Sep 2017 17:31:38 +0000</lastBuildDate>
     
     <item>
       <title>MsgFlo IoT workshop at Bitraf: sensors, access control, and more</title>

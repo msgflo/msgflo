@@ -94,9 +94,7 @@ these also pass through a queue.</p>
 <p>Once a participant becomes available, it announces its availability by sending a message to this queue
 with <code class="highlighter-rouge">protocol</code>: ‘discovery’ and <code class="highlighter-rouge">command</code>: ‘participant’.</p>
 
-<p>In case of systems incapable of communicating via FBP protocol
-but which can nonetheless be connected to a network,
-the message <code class="highlighter-rouge">payload</code> contains the following information:</p>
+<p>The message <code class="highlighter-rouge">payload</code> contains the following information:</p>
 
 <ul>
   <li><code class="highlighter-rouge">id</code>: short unique name for the participant. Ex: measure1</li>
@@ -109,7 +107,9 @@ the message <code class="highlighter-rouge">payload</code> contains the followin
       <li><code class="highlighter-rouge">id</code>: port name</li>
       <li><code class="highlighter-rouge">queue</code>: the message queue the process listens to</li>
       <li><code class="highlighter-rouge">type</code>: port datatype, for example <code class="highlighter-rouge">boolean</code></li>
-      <li><code class="highlighter-rouge">options</code>: queue options as specified by the message queue implementation</li>
+      <li><code class="highlighter-rouge">description</code>: (optional) Human-readable description of the port and its function</li>
+      <li><code class="highlighter-rouge">schema</code>: (optional) URL to a JSON schema for data expected on port</li>
+      <li><code class="highlighter-rouge">options</code>: (optional) queue options as specified by the message queue implementation</li>
     </ul>
   </li>
   <li><code class="highlighter-rouge">outports</code>: list of outports containing:
@@ -117,7 +117,9 @@ the message <code class="highlighter-rouge">payload</code> contains the followin
       <li><code class="highlighter-rouge">id</code>: port name</li>
       <li><code class="highlighter-rouge">queue</code>: the message queue the process transmits to</li>
       <li><code class="highlighter-rouge">type</code>: port datatype, for example <code class="highlighter-rouge">boolean</code></li>
-      <li><code class="highlighter-rouge">options</code>: queue options as specified by the message queue implementation</li>
+      <li><code class="highlighter-rouge">description</code>: (optional) Human-readable description of the port and its function</li>
+      <li><code class="highlighter-rouge">schema</code>: (optional) URL to a JSON schema for data sent on port</li>
+      <li><code class="highlighter-rouge">options</code>: (optional) queue options as specified by the message queue implementation</li>
     </ul>
   </li>
 </ul>
