@@ -12,16 +12,6 @@ module.exports = ->
           reporter: 'spec'
           grep: process.env.TESTS
 
-    # Coding standards
-    coffeelint:
-      components:
-        files:
-          src: ['spec/*.coffee', 'src/*.coffee', 'src/runtimes/*.coffee', 'src/utils/*.coffee']
-        options:
-          max_line_length:
-            value: 100
-            level: 'warn'
-
     # Protocol tests
     shell:
       msgflo:
@@ -62,7 +52,6 @@ module.exports = ->
 
   # Grunt plugins used for testing
   @loadNpmTasks 'grunt-mocha-test'
-  @loadNpmTasks 'grunt-coffeelint'
   @loadNpmTasks 'grunt-shell-spawn'
 
   # For deploying
@@ -76,7 +65,6 @@ module.exports = ->
   ]
 
   @registerTask 'test', 'Build and run automated tests', (target = 'all') =>
-    @task.run 'coffeelint'
     @task.run 'mochaTest'
 #    @task.run 'fbp-test'
 
