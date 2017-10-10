@@ -26,18 +26,17 @@
   },
   "devDependencies": {
     "amqplib": "^0.5.1",
-    "chai": "~4.1.0",
+    "chai": "^4.1.0",
     "coffeelint": "^1.14.2",
     "fbp-protocol": "^0.8.0",
     "fbp-spec": "^0.2.0",
     "grunt": "~1.0.1",
-    "grunt-coffeelint": "~0.0.6",
     "grunt-gh-pages": "^2.0.0",
     "grunt-jekyll": "^0.4.6",
     "grunt-mocha-test": "^0.13.2",
     "grunt-shell-spawn": "^0.3.1",
-    "mocha": "~3.4.0",
-    "mqtt": "~2.13.0"
+    "mocha": "^4.0.1",
+    "mqtt": "^2.13.0"
   },
   "keywords": [],
   "bin": {
