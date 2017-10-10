@@ -114,7 +114,7 @@ describe 'Setup bindings', ->
         client.subscribeToQueue 's_worker.OUT', onMessage, (err) ->
           chai.expect(err).to.not.exist
           client.sendTo 'inqueue', 's_api.IN', input, (err) ->
-            chai.expect(err).to.not.exit
+            chai.expect(err).to.not.exist
 
     it 'should have set up deadlettering'
 
