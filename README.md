@@ -56,7 +56,7 @@ Please refer to <https://msgflo.org>
 ## Support
 [![Flowhub logo](https://flowhub.io/assets/banner-github.png)](https://flowhub.io)
 
-MsgFlo is a part of [Flowhub](https://flowhub.io), a platform for building robust [IoT systems](https://flowhub.io/iot) and web sevices.<br>
+MsgFlo is a part of [Flowhub](https://flowhub.io), a platform for building robust [IoT systems](https://flowhub.io/iot) and web services.<br>
 We offer an [Integrated Development Environment](https://app.flowhub.io) and [consulting services](https://flowhub.io/consulting).
 
 ## Debugging
