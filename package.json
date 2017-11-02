@@ -32,6 +32,7 @@
     "fbp-protocol": "^0.8.0",
     "fbp-spec": "^0.2.0",
     "grunt": "~1.0.1",
+    "grunt-contrib-coffee": "^2.0.0",
     "grunt-gh-pages": "^2.0.0",
     "grunt-jekyll": "^0.4.6",
     "grunt-mocha-test": "^0.13.2",

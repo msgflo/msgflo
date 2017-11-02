@@ -4,5 +4,6 @@ mosquitto*
 spec/protocoltemp/
 Gemfile.lock
 dist/
+lib/
 *.pem
 
