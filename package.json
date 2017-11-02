@@ -27,7 +27,7 @@
   "devDependencies": {
     "amqplib": "^0.5.1",
     "chai": "^4.1.0",
-    "coffeelint": "^1.14.2",
+    "coffeelint": "^2.0.0",
     "fbp-protocol": "^0.8.0",
     "fbp-spec": "^0.2.0",
     "grunt": "~1.0.1",
