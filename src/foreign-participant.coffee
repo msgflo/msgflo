@@ -5,6 +5,7 @@ library = require './library'
 
 class ForeignParticipant extends EventEmitter
   constructor: (client, def) ->
+    super()
     client = msgflo_nodejs.transport.getClient(client) if typeof client == 'string'
     @messaging = client
     @definition = def

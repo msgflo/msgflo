@@ -120,6 +120,7 @@ cleanComponentDefinition = (discovered) ->
 
 class Library extends EventEmitter
   constructor: (options) ->
+    super()
     options.config = JSON.parse(fs.readFileSync options.configfile, 'utf-8') if options.configfile
     if not options.componentdir
       console.log 'WARNING:', 'Default components directory for MsgFlo will change to "components" in next release'

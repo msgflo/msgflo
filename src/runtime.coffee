@@ -14,7 +14,9 @@ send = (connection, msg) ->
   connection.sendUTF JSON.stringify msg
 
 class WebSocketTransport extends EventEmitter
-  constructor: (@server) ->
+  constructor: (server) ->
+    super()
+    @server = server
     @connections = []
     ws = new WebSocketServer { httpServer: @server }
 

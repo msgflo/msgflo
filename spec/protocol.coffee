@@ -24,6 +24,7 @@ rmrf = (dir) ->
 
 class MockUi extends EventEmitter
   constructor: ->
+    super()
     @connection = null
     @client = new websocket.client()
     @client.on 'connect', (connection) =>
