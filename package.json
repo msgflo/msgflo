@@ -14,7 +14,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "bluebird": "^3.0.5",
-    "coffee-script": "^1.8.0",
+    "coffeescript": "^2.0.2",
     "commander": "^2.6.0",
     "debug": "^2.1.2",
     "fbp": "^1.1.4",
