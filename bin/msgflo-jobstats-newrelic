@@ -1,4 +1,2 @@
 #!/usr/bin/env node
-
-require('coffeescript/register')
-require('../src/utils/newrelic').main()
+require('../lib/utils/newrelic').main()

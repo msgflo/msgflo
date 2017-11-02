@@ -1,4 +1,2 @@
 #!/usr/bin/env node
-
-require('coffeescript/register')
-require('../src/setup').main()
+require('../lib/setup').main()
