@@ -1,0 +1,8 @@
+mosquitto*
+spec/protocoltemp/
+Gemfile.lock
+dist/
+*.pem
+fbp-config.json
+.travis.yml
+Gemfile
