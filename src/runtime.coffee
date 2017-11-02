@@ -104,7 +104,7 @@ class Runtime
   start: (callback) ->
     @server = http.createServer()
     @transport = new WebSocketTransport @server
-    @protocol = protocol.Protocol @transport, @coordinator
+    @protocol = new protocol.Protocol @transport, @coordinator
 
     @server.on 'request', (request, response) =>
       @serveFrontpage request, response
