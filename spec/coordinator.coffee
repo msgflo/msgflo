@@ -77,7 +77,7 @@ describe 'Coordinator', ->
             setTimeout () ->
               client.registerParticipant definition, (err) ->
                 return done err if err
-            , 20 # ensure there is time difference
+            , 200 # ensure there is time difference
 
         after (done) ->
           coordinator.removeListener 'participant', eventListener
