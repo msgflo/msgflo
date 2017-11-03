@@ -36,6 +36,7 @@ after_deploy:
 deploy:
   provider: npm
   email: jononor@gmail.com
+  skip_cleanup: true
   api_key:
     secure: MaBahjfJntupij63O69PyjK4TMgWox1/NRmLl1nM59fZlvLa0TKjxwUksIxvjghLZzJxbrvQyMY3F6aV6FSW5lLbANWVKND6gGniucMBw8xxamF1Dvzkb8KT/2vpEogFHJLycL1dDsGK11nAaYs39NTVSOYY6YBLrc+2OxiKZqo=
   on:

@@ -1,7 +1,3 @@
 #!/usr/bin/env node
 // vim: set filetype=javascript:
-
-require('coffeescript/register');
-require('../src/msgflo').procfile.main();
-
-
+require('../lib/msgflo').procfile.main();

@@ -4,6 +4,25 @@ module.exports = ->
   @initConfig
     pkg: pkg
 
+    # CoffeeScript compilation
+    coffee:
+      library:
+        options:
+          bare: true
+        expand: true
+        cwd: 'src'
+        src: ['**.coffee']
+        dest: 'lib'
+        ext: '.js'
+      utils:
+        options:
+          bare: true
+        expand: true
+        cwd: 'src/utils'
+        src: ['**.coffee']
+        dest: 'lib/utils'
+        ext: '.js'
+
     # BDD tests on Node.js
     mochaTest:
       nodejs:
@@ -48,6 +67,7 @@ module.exports = ->
       src: '**/*'
 
   # Grunt plugins used for building
+  @loadNpmTasks 'grunt-contrib-coffee'
   @loadNpmTasks 'grunt-jekyll'
 
   # Grunt plugins used for testing
@@ -65,6 +85,7 @@ module.exports = ->
   ]
 
   @registerTask 'test', 'Build and run automated tests', (target = 'all') =>
+    @task.run 'coffee'
     @task.run 'mochaTest'
 #    @task.run 'fbp-test'
 

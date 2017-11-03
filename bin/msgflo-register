@@ -1,4 +1,2 @@
 #!/usr/bin/env node
-
-require('coffeescript/register')
-require('../src/utils/register-foreign-multiple').main()
+require('../lib/utils/register-foreign-multiple').main()

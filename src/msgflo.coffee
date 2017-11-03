@@ -47,13 +47,13 @@ main = () ->
 exports.main = main
 exports.transport = require('msgflo-nodejs').transport
 exports.participant = require('msgflo-nodejs').participant
-exports.foreignParticipant = require '../src/foreign-participant'
+exports.foreignParticipant = require './foreign-participant'
 
-exports.coordinator = require '../src/coordinator'
-exports.runtime = require '../src/runtime'
-exports.common = require '../src/common'
-exports.setup = require '../src/setup'
-exports.library = require '../src/library'
-exports.procfile = require '../src/procfile'
+exports.coordinator = require './coordinator'
+exports.runtime = require './runtime'
+exports.common = require './common'
+exports.setup = require './setup'
+exports.library = require './library'
+exports.procfile = require './procfile'
 exports.utils =
-  spy: require '../src/utils/spy'
+  spy: require './utils/spy'

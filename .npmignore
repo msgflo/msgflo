@@ -1,9 +1,8 @@
-node_modules
-.DS_Store
 mosquitto*
 spec/protocoltemp/
 Gemfile.lock
 dist/
-lib/
 *.pem
-
+fbp-config.json
+.travis.yml
+Gemfile
