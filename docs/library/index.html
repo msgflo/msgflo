@@ -75,24 +75,22 @@ ga('create', 'UA-46363984-7', 'auto');
     <p>A component is a piece of code which can instantiate a MsgFlo participant.
 By default such component code is placed in <code class="highlighter-rouge">./participants/</code> directory of a project.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>cp ./node_modules/msgflo-nodejs/examples/Repeat.coffee ./participants/
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cp ./node_modules/msgflo-nodejs/examples/Repeat.coffee ./participants/
+</code></pre></div></div>
 
 <p>Declaring a command template in <code class="highlighter-rouge">package.json</code> tells MsgFlo how to instantiate them.
 This can be done per component, or by specifying a handler for a given file extension,
 which makes each matching file in the component directory (here: <code class="highlighter-rouge">Repeat</code>) automatically available as a component.</p>
 
-<div class="language-json highlighter-rouge"><pre class="highlight"><code><span class="w">  </span><span class="s2">"msgflo"</span><span class="err">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-    </span><span class="nt">"handlers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-      </span><span class="nt">".coffee"</span><span class="p">:</span><span class="w"> </span><span class="s2">"msgflo-nodejs --name #ROLE #FILENAME"</span><span class="w">
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="w">  </span><span class="s2">"msgflo"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+    </span><span class="s2">"handlers"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">".coffee"</span><span class="p">:</span><span class="w"> </span><span class="s2">"msgflo-nodejs --name #ROLE #FILENAME"</span><span class="w">
     </span><span class="p">},</span><span class="w">
-    </span><span class="nt">"components"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
-      </span><span class="nt">"Output"</span><span class="p">:</span><span class="w"> </span><span class="s2">"noflo-runtime-msgflo --name out --graph core/Output --broker amqp://localhost"</span><span class="w">
+    </span><span class="s2">"components"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+      </span><span class="s2">"Output"</span><span class="p">:</span><span class="w"> </span><span class="s2">"noflo-runtime-msgflo --name out --graph core/Output --broker amqp://localhost"</span><span class="w">
      </span><span class="p">}</span><span class="w">
    </span><span class="p">}</span><span class="w">
-</span></code></pre>
-</div>
+</span></code></pre></div></div>
 <p>The component command template supports substituting several variables, including:</p>
 
 <ul>
@@ -105,17 +103,15 @@ which makes each matching file in the component directory (here: <code class="hi
 <p>Now the example service above can be started with a single command:
 By enabling <code class="highlighter-rouge">--participants</code> MsgFlo will start the individual participants.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-setup ./myservice.fbp --broker amqp://localhost --participants --forward=stdout
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msgflo-setup ./myservice.fbp --broker amqp://localhost --participants --forward=stdout
+</code></pre></div></div>
 
 <p>Using <code class="highlighter-rouge">--forward stdout</code> enables seeing the output from the <code class="highlighter-rouge">Output</code> participant, which is in a child process.</p>
 
 <p>Send message again, and it should be repeated on stdout.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-send-message --queue repeater.IN --json '{ "foo": "bar-with-componentlib" }'
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msgflo-send-message --queue repeater.IN --json '{ "foo": "bar-with-componentlib" }'
+</code></pre></div></div>
 
 <p>Having component handlers facilitates live-programming from Flowhub IDE:
 Adding a new component with Python code will get a .py file extension,

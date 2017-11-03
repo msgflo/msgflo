@@ -80,26 +80,24 @@ message on its behalf.</p>
 transforms it and then sends the results on queue <code class="highlighter-rouge">process/A/out</code>,
 the information can be declared in a <a href="https://en.wikipedia.org/wiki/YAML">YAML</a> file:</p>
 
-<div class="language-yaml highlighter-rouge"><pre class="highlight"><code> <span class="c1"># File: participants/ProcessSomething.yaml</span>
-<span class="s">component</span><span class="pi">:</span> <span class="s">ProcessSomething</span>
-<span class="s">label</span><span class="pi">:</span> <span class="s">Process input and send some output</span>
-<span class="s">icon</span><span class="pi">:</span> <span class="s">ambulance</span>
-<span class="s">inports</span><span class="pi">:</span>
-  <span class="s">in</span><span class="pi">:</span>
-    <span class="s">queue</span><span class="pi">:</span> <span class="s">process/A/in</span>
-    <span class="s">type</span><span class="pi">:</span> <span class="s">string</span>
-<span class="s">outports</span><span class="pi">:</span>
-  <span class="s">out</span><span class="pi">:</span>
-    <span class="s">queue</span><span class="pi">:</span> <span class="s">process/A/out</span>
-    <span class="s">type</span><span class="pi">:</span> <span class="s">string</span>
-</code></pre>
-</div>
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c1"># File: participants/ProcessSomething.yaml</span>
+<span class="na">component</span><span class="pi">:</span> <span class="s">ProcessSomething</span>
+<span class="na">label</span><span class="pi">:</span> <span class="s">Process input and send some output</span>
+<span class="na">icon</span><span class="pi">:</span> <span class="s">ambulance</span>
+<span class="na">inports</span><span class="pi">:</span>
+  <span class="na">in</span><span class="pi">:</span>
+    <span class="na">queue</span><span class="pi">:</span> <span class="s">process/A/in</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">string</span>
+<span class="na">outports</span><span class="pi">:</span>
+  <span class="na">out</span><span class="pi">:</span>
+    <span class="na">queue</span><span class="pi">:</span> <span class="s">process/A/out</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">string</span>
+</code></pre></div></div>
 
 <p>And then run <code class="highlighter-rouge">msgflo-register</code> to publish the information</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-register --role A:./participants/ProcessSomething.yaml
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msgflo-register --role A:./participants/ProcessSomething.yaml
+</code></pre></div></div>
 
 <p>The <code class="highlighter-rouge">queue</code> key supports substituting <code class="highlighter-rouge">#ROLE</code>. This allows a single YAML file to declare a component
 which can be instantiated multiple times - each with a different role and queue name.</p>

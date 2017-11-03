@@ -74,45 +74,39 @@ ga('create', 'UA-46363984-7', 'auto');
     
     <p>Install MsgFlo and some participant libraries</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>npm install msgflo msgflo-nodejs
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>npm install msgflo msgflo-nodejs
 npm install noflo-runtime-msgflo noflo-core
 export PATH=./node_modules/.bin:$PATH
 export MSGFLO_BROKER=amqp://localhost # which broker to use. Can also be mqtt://
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Setup a Node.js participant using <a href="https://github.com/msgflo/msgflo-nodejs">msgflo-nodejs</a> (CoffeeScript)</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-nodejs --name repeater ./node_modules/msgflo-nodejs/examples/Repeat.coffee
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msgflo-nodejs --name repeater ./node_modules/msgflo-nodejs/examples/Repeat.coffee
+</code></pre></div></div>
 
 <p>Setup a NoFlo participant using <a href="https://github.com/noflo/noflo-runtime-msgflo">noflo-runtime-msgflo</a></p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>noflo-runtime-msgflo --name out --graph core/Output
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>noflo-runtime-msgflo --name out --graph core/Output
+</code></pre></div></div>
 
 <p>Define how the participants form a network (in <a href="https://github.com/flowbased/fbp#language-for-flow-based-programming">.FBP DSL</a>)</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code># FILE: myservice.fbp
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># FILE: myservice.fbp
 repeater(Repeat) OUT -&gt; IN out(Output)
-</code></pre>
-</div>
+</code></pre></div></div>
 
 <p>Setup the network</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-setup ./myservice.fbp
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msgflo-setup ./myservice.fbp
+</code></pre></div></div>
 
 <p>Send some data to input</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-send-message --queue repeater.IN --json '{ "foo": "bar" }'
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msgflo-send-message --queue repeater.IN --json '{ "foo": "bar" }'
 # Should now see output from 'out' participant
 # after having traveled through NoFlo and node.js participants
-</code></pre>
-</div>
+</code></pre></div></div>
 
   </article>
   <nav class="docs">

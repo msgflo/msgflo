@@ -78,9 +78,8 @@ ga('create', 'UA-46363984-7', 'auto');
 for running as a Heroku service, based on the MsgFlo graph and component information.
 This ensures that the production service runs in the same way as when using MsgFlo locally.</p>
 
-<div class="highlighter-rouge"><pre class="highlight"><code>msgflo-procfile graphs/myservice.fbp &gt; Procfile
-</code></pre>
-</div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>msgflo-procfile graphs/myservice.fbp &gt; Procfile
+</code></pre></div></div>
 
 <p>You can also selectively ignore certain roles in the graph, by using <code class="highlighter-rouge">--ignore role</code>.
 Or you can include additional process stanzas by using <code class="highlighter-rouge">--include="guv: node ./node_modules/.bin/guv"</code>.</p>
