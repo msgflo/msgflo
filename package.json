@@ -14,7 +14,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "bluebird": "^3.0.5",
-    "coffee-script": "^1.8.0",
+    "coffeescript": "^2.0.2",
     "commander": "^2.6.0",
     "debug": "^2.1.2",
     "fbp": "^1.1.4",
@@ -27,7 +27,8 @@
   "devDependencies": {
     "amqplib": "^0.5.1",
     "chai": "^4.1.0",
-    "coffeelint": "^1.14.2",
+    "coffee-script": "^1.12.7",
+    "coffeelint": "^2.0.0",
     "fbp-protocol": "^0.8.0",
     "fbp-spec": "^0.2.0",
     "grunt": "~1.0.1",

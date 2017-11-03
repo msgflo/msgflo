@@ -14,7 +14,9 @@ send = (connection, msg) ->
   connection.sendUTF JSON.stringify msg
 
 class WebSocketTransport extends EventEmitter
-  constructor: (@server) ->
+  constructor: (server) ->
+    super()
+    @server = server
     @connections = []
     ws = new WebSocketServer { httpServer: @server }
 
@@ -102,7 +104,7 @@ class Runtime
   start: (callback) ->
     @server = http.createServer()
     @transport = new WebSocketTransport @server
-    @protocol = protocol.Protocol @transport, @coordinator
+    @protocol = new protocol.Protocol @transport, @coordinator
 
     @server.on 'request', (request, response) =>
       @serveFrontpage request, response

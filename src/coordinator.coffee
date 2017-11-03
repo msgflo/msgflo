@@ -96,7 +96,10 @@ pingUrl = (address, method, callback) ->
   req.end()
 
 class Coordinator extends EventEmitter
-  constructor: (@broker, @options = {}) ->
+  constructor: (broker, options = {}) ->
+    super()
+    @broker = broker
+    @options = options
     @participants = {} # participantId -> Definition (from discovery)
     @connections = {} # connId -> { queue: opt String, handler: opt function }
     @iips = {} # iipId -> { metadata, data }
