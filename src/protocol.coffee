@@ -53,6 +53,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       type: 'msgflo'
       version: '0.4'
       capabilities: [
+        'protocol:runtime'
         'protocol:component'
         'protocol:graph'
         'protocol:network'
