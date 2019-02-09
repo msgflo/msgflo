@@ -51,7 +51,7 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     runtime =
       id: proto.coordinator.options.runtimeId
       type: 'msgflo'
-      version: '0.4'
+      version: '0.7'
       capabilities: [
         'protocol:runtime'
         'protocol:component'
