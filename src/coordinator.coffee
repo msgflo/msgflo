@@ -465,7 +465,7 @@ class Coordinator extends EventEmitter
 
       if direction.indexOf('out') == 0
         handler = (msg) =>
-          @emit 'exported-port-data', external, msg.data, graph
+          @emit 'exported-port-data', external, msg.data, @graphName
         @subscribeTo node, internal, handler, (err, readQueue) ->
           return callback err if err
           target[external].subscriber = handler
