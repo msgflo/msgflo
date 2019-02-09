@@ -104,9 +104,9 @@ describe 'FBP runtime protocol', () ->
         done()
     it 'type should be "msgflo"', ->
       chai.expect(info.type).to.equal "msgflo"
-    it 'protocol version should be "0.4"', ->
+    it 'protocol version should be "0.7"', ->
       chai.expect(info.version).to.be.a "string"
-      chai.expect(info.version).to.equal "0.4"
+      chai.expect(info.version).to.equal "0.7"
     describe 'capabilities', ->
       it 'should be an array', ->
         chai.expect(info.capabilities).to.be.an "array"
