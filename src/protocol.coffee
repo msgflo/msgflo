@@ -22,7 +22,7 @@ fbpComponentFromMsgflo = (name, component) ->
     info =
       name: name
       description: component.definition.label or component.cmd or ""
-      icon: component.definition.icon
+      icon: component.definition.icon or ''
       subgraph: false
       inPorts: component.definition.inports.map fbpPort
       outPorts: component.definition.outports.map fbpPort
@@ -31,7 +31,7 @@ fbpComponentFromMsgflo = (name, component) ->
     info =
       name: name
       description: component.cmd
-      icon: null
+      icon: ''
       subgraph: false
       inPorts: []
       outPorts: []
