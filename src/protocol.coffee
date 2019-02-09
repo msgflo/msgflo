@@ -70,7 +70,12 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
   else if sub == 'runtime' and cmd == 'packet'
     proto.coordinator.sendToExportedPort payload.port, payload.payload, (err) ->
       return proto.transport.send 'runtime', 'error', serializeErr(err), ctx if err
-      # No ACK in this case apparently, as it is interpreted as output
+      proto.transport.send 'runtime', 'packetsent',
+        port: payload.port
+        event: payload.event
+        graph: payload.graph
+        payload: payload.payload
+      , ctx
 
   # Component
   else if sub == 'component' and cmd == 'list'
