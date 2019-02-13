@@ -22,7 +22,7 @@ fbpComponentFromMsgflo = (name, component) ->
     info =
       name: name
       description: component.definition.label or component.cmd or ""
-      icon: component.definition.icon
+      icon: component.definition.icon or ''
       subgraph: false
       inPorts: component.definition.inports.map fbpPort
       outPorts: component.definition.outports.map fbpPort
@@ -31,7 +31,7 @@ fbpComponentFromMsgflo = (name, component) ->
     info =
       name: name
       description: component.cmd
-      icon: null
+      icon: ''
       subgraph: false
       inPorts: []
       outPorts: []
@@ -51,8 +51,9 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
     runtime =
       id: proto.coordinator.options.runtimeId
       type: 'msgflo'
-      version: '0.4'
+      version: '0.7'
       capabilities: [
+        'protocol:runtime'
         'protocol:component'
         'protocol:graph'
         'protocol:network'
@@ -69,7 +70,12 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
   else if sub == 'runtime' and cmd == 'packet'
     proto.coordinator.sendToExportedPort payload.port, payload.payload, (err) ->
       return proto.transport.send 'runtime', 'error', serializeErr(err), ctx if err
-      # No ACK in this case apparently, as it is interpreted as output
+      proto.transport.send 'runtime', 'packetsent',
+        port: payload.port
+        event: payload.event
+        graph: payload.graph
+        payload: payload.payload
+      , ctx
 
   # Component
   else if sub == 'component' and cmd == 'list'
