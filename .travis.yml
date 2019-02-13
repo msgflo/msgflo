@@ -27,7 +27,7 @@ script:
 after_script:
 - killall mosquitto
 after_deploy:
-- eval "$(ssh-agent -s)" #start the ssh agent
+- eval "$(ssh-agent -s)"
 - git config --global user.email bot+msgflo@flowhub.io
 - git config --global user.name "msgflo.org website bot"
 - chmod 600 travis/msgflo_deploy.pem
@@ -38,7 +38,7 @@ deploy:
   email: jononor@gmail.com
   skip_cleanup: true
   api_key:
-    secure: MaBahjfJntupij63O69PyjK4TMgWox1/NRmLl1nM59fZlvLa0TKjxwUksIxvjghLZzJxbrvQyMY3F6aV6FSW5lLbANWVKND6gGniucMBw8xxamF1Dvzkb8KT/2vpEogFHJLycL1dDsGK11nAaYs39NTVSOYY6YBLrc+2OxiKZqo=
+    secure: snMEjqXPvuC6jw0UFPY5FOUNKaP1X1U1SlzP8g5Tvs//KAb2JSpN7QYJbHhFkn/LsAlNkvQgRokyVq0s527pIi8t5WADGkevEHzxT+wkGm2M2Tn+Ub3yCOIpbSLVOLzAnOfc8bKNrRu3FrKoPzoMXHB6NQDPMKAFZOWQaDJxaMQ=
   on:
     tags: true
     repo: msgflo/msgflo
