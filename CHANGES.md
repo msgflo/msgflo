@@ -1,6 +1,26 @@
+## 0.12.0 | released 13.02.2019
+
+* Implements version 0.7 of FBP runtime protocol
+
+## 0.11.0 | released 03.11.2017
+
+Breaking changes
+
+* Reqires Node.js 6.0+ for JavaScript ES6 support.
+
+Internal changes
+
+* Update to CoffeeScript 2
+
 ## 0.10.23 | released 02.06.2017
 
 * Fix `getSource` for participants started by the runtime
+
+## 0.10.0 | released 01.02.2017
+
+Discovery protocol changes
+
+* Discovery messages should now be sent periodically by participants
 
 ## 0.8.0 | released 03.08.2016
 
