@@ -5,8 +5,20 @@
     <description>Distributed Flow-Based Programming via message queues</description>
     <link>https://msgflo.org/</link>
     <language>en</language>
-    <lastBuildDate>Fri, 03 Nov 2017 21:38:37 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 13 Feb 2019 14:40:21 +0000</lastBuildDate>
     
+    <item>
+      <title>Building c-base @ 35C3 with Flowhub</title>
+      <description>
+</description>
+      <pubDate>Sat, 09 Feb 2019 00:00:00 +0000</pubDate>
+      
+      <link>https://bergie.iki.fi/blog/cbase-35c3-flowhub/</link>
+      <guid isPermaLink="true">https://bergie.iki.fi/blog/cbase-35c3-flowhub/</guid>
+      
+      <author></author>
+    </item>
+  
     <item>
       <title>MsgFlo IoT workshop at Bitraf: sensors, access control, and more</title>
       <description>

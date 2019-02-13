@@ -24,8 +24,8 @@ progress { vertical-align: baseline; }
 template, [hidden] { display: none; }
 
 /* Links ========================================================================== */
-/** 1. Remove the gray background on active links in IE 10. 2. Remove gaps in links underline in iOS 8+ and Safari 8+. */
-a { background-color: transparent; /* 1 */ -webkit-text-decoration-skip: objects; /* 2 */ }
+/** Remove the gray background on active links in IE 10. */
+a { background-color: transparent; /* 1 */ }
 
 /** Remove the outline on focused links when they are also active or hovered in all browsers (opinionated). */
 a:active, a:hover { outline-width: 0; }
@@ -144,7 +144,10 @@ table { border-spacing: 0; border-collapse: collapse; }
 
 td, th { padding: 0; }
 
-button { cursor: pointer; }
+button { cursor: pointer; border-radius: 0; }
+
+details summary { cursor: pointer; }
+details:not([open]) > *:not(summary) { display: none !important; }
 
 h1, h2, h3, h4, h5, h6 { margin-top: 0; margin-bottom: 0; }
 
@@ -180,11 +183,18 @@ pre { margin-top: 0; margin-bottom: 0; font-family: "SFMono-Regular", Consolas, 
 
 .octicon { vertical-align: text-bottom; }
 
+/* Fade in an element */
 .anim-fade-in { animation-name: fade-in; animation-duration: 1s; animation-timing-function: ease-in-out; }
 .anim-fade-in.fast { animation-duration: 300ms; }
 
 @keyframes fade-in { 0% { opacity: 0; }
   100% { opacity: 1; } }
+/* Fade out an element */
+.anim-fade-out { animation-name: fade-out; animation-duration: 1s; animation-timing-function: ease-out; }
+.anim-fade-out.fast { animation-duration: 0.3s; }
+
+@keyframes fade-out { 0% { opacity: 1; }
+  100% { opacity: 0; } }
 /* Fade in and slide up an element */
 .anim-fade-up { opacity: 0; animation-name: fade-up; animation-duration: 0.3s; animation-fill-mode: forwards; animation-timing-function: ease-out; animation-delay: 1s; }
 
@@ -220,6 +230,10 @@ pre { margin-top: 0; margin-bottom: 0; font-family: "SFMono-Regular", Consolas, 
 @keyframes pulse-in { 0% { transform: scale3d(1, 1, 1); }
   50% { transform: scale3d(1.1, 1.1, 1.1); }
   100% { transform: scale3d(1, 1, 1); } }
+/* Increase scale of an element on hover */
+.hover-grow { transition: transform 0.3s; }
+.hover-grow:hover { transform: scale(1.025); }
+
 /* Add a gray border */
 .border { border: 1px #e1e4e8 solid !important; }
 
@@ -296,6 +310,9 @@ pre { margin-top: 0; margin-bottom: 0; font-family: "SFMono-Regular", Consolas, 
 
 /* Add a 2x border-radius to all corners */
 .rounded-2 { border-radius: 6px !important; }
+
+/* Add a 50% border-radius to make something into a circle */
+.circle { border-radius: 50% !important; }
 
 .box-shadow { box-shadow: 0 1px 1px rgba(27, 31, 35, 0.1) !important; }
 
@@ -620,6 +637,9 @@ pre { margin-top: 0; margin-bottom: 0; font-family: "SFMono-Regular", Consolas, 
 /* Vertical align to the bottom of the text */
 .v-align-text-bottom { vertical-align: text-bottom !important; }
 
+/* Vertical align to the parent's baseline */
+.v-align-baseline { vertical-align: baseline !important; }
+
 /* Set the overflow hidden */
 .overflow-hidden { overflow: hidden !important; }
 
@@ -672,29 +692,34 @@ pre { margin-top: 0; margin-bottom: 0; font-family: "SFMono-Regular", Consolas, 
 /* Set the width to 100% */
 .width-full { width: 100% !important; }
 
+/* Max height 100% */
+.height-fit { max-height: 100% !important; }
+
 /* Set the height to 100% */
 .height-full { height: 100% !important; }
 
 /* Remove min-width from element */
 .min-width-0 { min-width: 0 !important; }
 
+/* Set the direction to rtl */
 .direction-rtl { direction: rtl !important; }
 
+/* Set the direction to ltr */
 .direction-ltr { direction: ltr !important; }
 
-@media (min-width: 544px) { /* Set the direction to ltr at the sm breakpoint */
+@media (min-width: 544px) { /* Set the direction to rtl at the sm breakpoint */
   .direction-sm-rtl { direction: rtl !important; }
   /* Set the direction to ltr at the sm breakpoint */
   .direction-sm-ltr { direction: ltr !important; } }
-@media (min-width: 768px) { /* Set the direction to ltr at the md breakpoint */
+@media (min-width: 768px) { /* Set the direction to rtl at the md breakpoint */
   .direction-md-rtl { direction: rtl !important; }
   /* Set the direction to ltr at the md breakpoint */
   .direction-md-ltr { direction: ltr !important; } }
-@media (min-width: 1012px) { /* Set the direction to ltr at the lg breakpoint */
+@media (min-width: 1012px) { /* Set the direction to rtl at the lg breakpoint */
   .direction-lg-rtl { direction: rtl !important; }
   /* Set the direction to ltr at the lg breakpoint */
   .direction-lg-ltr { direction: ltr !important; } }
-@media (min-width: 1280px) { /* Set the direction to ltr at the xl breakpoint */
+@media (min-width: 1280px) { /* Set the direction to rtl at the xl breakpoint */
   .direction-xl-rtl { direction: rtl !important; }
   /* Set the direction to ltr at the xl breakpoint */
   .direction-xl-ltr { direction: ltr !important; } }
@@ -2566,6 +2591,7 @@ pre { margin-top: 0; margin-bottom: 0; font-family: "SFMono-Regular", Consolas, 
 .markdown-body ul, .markdown-body ol { padding-left: 2em; }
 .markdown-body ul.no-list, .markdown-body ol.no-list { padding: 0; list-style-type: none; }
 .markdown-body ul ul, .markdown-body ul ol, .markdown-body ol ol, .markdown-body ol ul { margin-top: 0; margin-bottom: 0; }
+.markdown-body li { word-wrap: break-all; }
 .markdown-body li > p { margin-top: 16px; }
 .markdown-body li + li { margin-top: 0.25em; }
 .markdown-body dl { padding: 0; }
@@ -2598,8 +2624,7 @@ pre { margin-top: 0; margin-bottom: 0; font-family: "SFMono-Regular", Consolas, 
 .markdown-body span.float-right { display: block; float: right; margin-left: 13px; overflow: hidden; }
 .markdown-body span.float-right > span { display: block; margin: 13px auto 0; overflow: hidden; text-align: right; }
 
-.markdown-body code, .markdown-body tt { padding: 0; padding-top: 0.2em; padding-bottom: 0.2em; margin: 0; font-size: 85%; background-color: rgba(27, 31, 35, 0.05); border-radius: 3px; }
-.markdown-body code::before, .markdown-body code::after, .markdown-body tt::before, .markdown-body tt::after { letter-spacing: -0.2em; content: "\00a0"; }
+.markdown-body code, .markdown-body tt { padding: 0.2em 0.4em; margin: 0; font-size: 85%; background-color: rgba(27, 31, 35, 0.05); border-radius: 3px; }
 .markdown-body code br, .markdown-body tt br { display: none; }
 .markdown-body del code { text-decoration: inherit; }
 .markdown-body pre { word-wrap: normal; }
@@ -2608,7 +2633,6 @@ pre { margin-top: 0; margin-bottom: 0; font-family: "SFMono-Regular", Consolas, 
 .markdown-body .highlight pre { margin-bottom: 0; word-break: normal; }
 .markdown-body .highlight pre, .markdown-body pre { padding: 16px; overflow: auto; font-size: 85%; line-height: 1.45; background-color: #f6f8fa; border-radius: 3px; }
 .markdown-body pre code, .markdown-body pre tt { display: inline; max-width: auto; padding: 0; margin: 0; overflow: visible; line-height: inherit; word-wrap: normal; background-color: transparent; border: 0; }
-.markdown-body pre code::before, .markdown-body pre code::after, .markdown-body pre tt::before, .markdown-body pre tt::after { content: normal; }
 
 .markdown-body .csv-data td, .markdown-body .csv-data th { padding: 5px; overflow: hidden; font-size: 12px; line-height: 1; text-align: left; white-space: nowrap; }
 .markdown-body .csv-data .blob-num { padding: 10px 8px 9px; text-align: right; background: #fff; border: 0; }
