@@ -5,8 +5,6 @@ node_js:
 - lts/*
 dist: trusty
 before_install:
-- openssl aes-256-cbc -K $encrypted_b32a35168522_key -iv $encrypted_b32a35168522_iv
-  -in travis/msgflo_deploy.enc -out travis/msgflo_deploy.pem -d
 - sudo apt-get update -qq
 - sudo apt-get install pkg-config cmake openssl libc-ares-dev
 - wget http://mosquitto.org/files/source/mosquitto-1.3.1.tar.gz
@@ -27,11 +25,6 @@ script:
 after_script:
 - killall mosquitto
 after_deploy:
-- eval "$(ssh-agent -s)"
-- git config --global user.email bot+msgflo@flowhub.io
-- git config --global user.name "msgflo.org website bot"
-- chmod 600 travis/msgflo_deploy.pem
-- ssh-add travis/msgflo_deploy.pem
 - grunt sitedeploy
 deploy:
   provider: npm
@@ -42,3 +35,6 @@ deploy:
   on:
     tags: true
     repo: msgflo/msgflo
+env:
+  global:
+    secure: cCPvtI4Teyb8c+CWWgxZkmmjDb/MCvYAiM+zvtdaZ/XimaG+FqA071gT8E/V3/AHpLxN3SN1I9dvQgy4TLNZoSMrSGPlkYKqP8WxQ8WHQk6HhCfCNKqKhv5vLZSKoFodZjHARyiFkSPgNV6Qu52YZqFnE22XCkYToLnt7G9FvS0=

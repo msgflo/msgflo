@@ -62,8 +62,8 @@ module.exports = ->
         base: 'dist/',
         clone: 'gh-pages'
         message: "Release #{pkg.name} #{process.env.TRAVIS_TAG}"
-        repo: 'git@github.com:msgflo/msgflo.git'
-        silent: false # Must be set to true if using GH_TOKEN
+        repo: 'https://' + process.env.GH_TOKEN + '@github.com/msgflo/msgflo.git'
+        silent: true # Must be set to true when using GH_TOKEN
       src: '**/*'
 
   # Grunt plugins used for building
