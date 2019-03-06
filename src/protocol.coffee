@@ -142,7 +142,6 @@ handleMessage = (proto, sub, cmd, payload, ctx) ->
       running: proto.coordinator.started
       started: proto.coordinator.started
       graph: payload.graph
-      time: new Date()
 
   else if sub == 'network' and cmd == 'edges'
     debug 'network:edges', payload.edges.length
