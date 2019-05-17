@@ -223,6 +223,24 @@ handleGraphMessage = (proto, cmd, payload, ctx) ->
       return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
       proto.transport.sendAll 'graph', 'addoutport', payload
 
+  # groups
+  else if cmd == 'addgroup'
+    proto.coordinator.addGroup payload.name, payload.nodes, payload.metadata, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'addgroup', payload
+  else if cmd == 'changegroup'
+    proto.coordinator.changeGroup payload.name, payload.nodes, payload.metadata, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'changegroup', payload
+  else if cmd == 'removegroup'
+    proto.coordinator.removeGroup payload.name, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'removegroup', payload
+  else if cmd == 'renamegroup'
+    proto.coordinator.renameGroup payload.from, payload.to, (err) ->
+      return proto.transport.send 'graph', 'error', serializeErr(err), ctx if err
+      proto.transport.sendAll 'graph', 'renamegroup', payload
+
   else
     debug 'Unhandled FBP protocol message: ', 'graph', cmd
 

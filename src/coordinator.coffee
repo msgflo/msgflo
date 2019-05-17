@@ -104,6 +104,7 @@ class Coordinator extends EventEmitter
     @connections = {} # connId -> { queue: opt String, handler: opt function }
     @iips = {} # iipId -> { metadata, data }
     @nodes = {} # role -> { metadata: {} }
+    @groups = {} # group -> { nodes: [], metadata: {} }
     @started = false
     @processes = {}
     libraryOptions =
@@ -483,6 +484,30 @@ class Coordinator extends EventEmitter
     return callback new Error "Cannot find exported port #{port}" if not internal
     @sendTo internal.role, internal.port, data, callback
 
+  addGroup: (name, nodes, metadata, callback) ->
+    return callback new Error "Group #{name} already exists" if @groups[name]
+    @groups[name] =
+      nodes: nodes
+      metadata: metadata
+    callback null
+
+  changeGroup: (name, nodes, metadata, callback) ->
+    return callback new Error "Group #{name} not found" unless @groups[name]
+    @groups[name].nodes = nodes if nodes
+    @groups[name].metadata = metadata if metadata
+    callback null
+
+  removeGroup: (name, callback) ->
+    return callback new Error "Group #{name} not found" unless @groups[name]
+    delete @groups[name]
+    callback null
+
+  renameGroup: (fromName, toName, callback) ->
+    return callback new Error "Group #{name} not found" unless @groups[fromName]
+    @groups[toName] = @groups[fromName]
+    delete @groups[fromName]
+    callback null
+
   startNetwork: (networkId, callback) ->
     # Don't have a concept of started/stopped so far, no-op
     setTimeout callback, 10
@@ -530,10 +555,11 @@ class Coordinator extends EventEmitter
         name: name
         environment:
           type: 'msgflo'
+      inports: {}
+      outports: {}
+      groups: []
       processes: {}
       connections: []
-      inports: []
-      outports: []
 
     nodeNames = Object.keys(@nodes).sort()
     for name in nodeNames
@@ -541,6 +567,12 @@ class Coordinator extends EventEmitter
       graph.processes[name] =
         component: node.component
         metadata: node.metadata or {}
+
+    for name, groupData of @groups
+      graph.groups.push
+        name: name
+        nodes: groupData.nodes
+        metadata: groupData.metadata or {}
 
     connectionIds = Object.keys(@connections).sort()
     for id in connectionIds
@@ -586,6 +618,13 @@ class Coordinator extends EventEmitter
     availableComponents = Object.keys @library.components
     common.readGraph options.graphfile, (err, graph) =>
       return callback err if err
+
+      if graph.groups?.length
+        for group in graph.groups
+          @groups[group.name] =
+            nodes: group.nodes or []
+            metadata: group.metadata or {}
+
       for role, process of graph.processes
         if process.component in availableComponents
           rolesWithComponent.push role
