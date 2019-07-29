@@ -24,7 +24,7 @@
     "websocket": "^1.0.17"
   },
   "devDependencies": {
-    "amqplib": "^0.5.1",
+    "amqplib": "0.5.3",
     "chai": "^4.1.0",
     "coffee-script": "^1.12.7",
     "coffeescript": "^2.0.2",
