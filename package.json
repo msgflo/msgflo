@@ -14,7 +14,7 @@
   "dependencies": {
     "async": "^2.1.4",
     "bluebird": "^3.0.5",
-    "commander": "^2.6.0",
+    "commander": "^3.0.1",
     "debug": "^3.0.0",
     "fbp": "^1.1.4",
     "js-yaml": "^3.4.2",
