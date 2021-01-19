@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-require('../bin/utils/send').main()
+require('../lib/utils/send').main()
