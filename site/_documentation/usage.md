@@ -21,6 +21,8 @@ Define how the participants form a network (in [.FBP DSL](https://github.com/flo
 
     # FILE: myservice.fbp
     repeater(Repeat) OUT -> IN out(Output)
+    # The noflo component also waits for an options IP
+    repeater(Repeat) OUT -> OPTIONS out(Output) 
 
 Setup the network
 
@@ -29,5 +31,6 @@ Setup the network
 Send some data to input
 
     msgflo-send-message --queue repeater.IN --json '{ "foo": "bar" }'
-    # Should now see output from 'out' participant
-    # after having traveled through NoFlo and node.js participants
+    # Should now see output from 'out' participant, after having traveled through NoFlo 
+    # and node.js participants (the message will be printed twice, once for the IN port, 
+    # once for OPTIONS port)
